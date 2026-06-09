@@ -1,0 +1,45 @@
+---
+---
+<form class="calc" id="afford-calc" novalidate>
+  <div class="calc__grid">
+    <label>Gross annual income ($)<input type="number" id="a-income" value="120000" min="0" step="1000" /></label>
+    <label>Down payment ($)<input type="number" id="a-down" value="100000" min="0" step="1000" /></label>
+    <label>Monthly debts ($)<input type="number" id="a-debts" value="500" min="0" step="50" /></label>
+    <label>Interest rate (%)<input type="number" id="a-rate" value="5.0" min="0" step="0.01" /></label>
+    <label>Amortization (years)<select id="a-amort"><option>25</option><option>30</option></select></label>
+    <label>Property tax ($/mo)<input type="number" id="a-tax" value="350" min="0" step="10" /></label>
+    <label>Condo fees ($/mo)<input type="number" id="a-condo" value="0" min="0" step="10" /></label>
+  </div>
+  <output class="calc__out" id="a-out" aria-live="polite"></output>
+  <p class="calc__note">Estimate only — not financial advice or a pre-approval. Uses Canadian GDS/TDS limits
+    qualified at the stress-test rate (greater of your rate + 2% or 5.25%). Heating estimated at $150/mo;
+    50% of condo fees counted.</p>
+</form>
+<script>
+  import { maxAffordability } from '../lib/mortgage-math.js';
+  const $ = (id) => document.getElementById(id);
+  const money = (n) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+  function recalc() {
+    const r = maxAffordability({
+      grossAnnualIncome: +$('a-income').value, downPayment: +$('a-down').value,
+      monthlyDebts: +$('a-debts').value, contractRate: (+$('a-rate').value) / 100,
+      amortYears: +$('a-amort').value, monthlyPropertyTax: +$('a-tax').value,
+      monthlyCondoFees: +$('a-condo').value,
+    });
+    $('a-out').innerHTML = `
+      You may afford up to <strong>${money(r.maxPrice)}</strong>
+      <div>Maximum mortgage: ${money(r.maxMortgage)}</div>
+      <div>Max monthly housing budget: ${money(r.maxMonthlyHousing)} (${r.bindingRatio}-limited)</div>
+      <div>Qualified at: ${(r.qualifyingRate * 100).toFixed(2)}% (stress test)</div>`;
+  }
+  document.getElementById('afford-calc').addEventListener('input', recalc);
+  recalc();
+</script>
+<style>
+  .calc__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
+  .calc label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; }
+  .calc input, .calc select { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
+  .calc__out { display: block; margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--color-line); border-radius: var(--radius); font-size: 1.1rem; }
+  .calc__out strong { font-size: 1.5rem; color: var(--color-fg); }
+  .calc__note { color: var(--color-muted); font-size: .85rem; margin-top: 1rem; }
+</style>
