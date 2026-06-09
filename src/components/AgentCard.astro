@@ -1,7 +1,8 @@
 ---
 import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 const { agent } = Astro.props;
-const images = import.meta.glob('../assets/profile/*.webp', { eager: true });
+const images = import.meta.glob<{ default: ImageMetadata }>('../assets/profile/*.webp', { eager: true });
 const img = images[`../assets/${agent.photo}`]?.default;
 ---
 <article class="agent-card">

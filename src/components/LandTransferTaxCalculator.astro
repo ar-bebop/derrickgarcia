@@ -12,8 +12,8 @@
 </form>
 <script>
   import { landTransferTax } from '../lib/mortgage-math.js';
-  const $ = (id) => document.getElementById(id);
-  const money = (n) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 2 });
+  const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+  const money = (n: number) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 2 });
   function recalc() {
     const r = landTransferTax({
       price: +$('l-price').value, inToronto: $('l-toronto').checked, firstTimeBuyer: $('l-ftb').checked,
@@ -24,7 +24,7 @@
       ${r.toronto ? `<div>Toronto municipal: ${money(r.toronto)}</div>` : ''}
       ${r.rebate ? `<div>First-time buyer rebate: −${money(r.rebate)}</div>` : ''}`;
   }
-  document.getElementById('ltt-calc').addEventListener('input', recalc);
+  $('ltt-calc').addEventListener('input', recalc);
   recalc();
 </script>
 <style>

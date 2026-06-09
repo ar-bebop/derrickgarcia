@@ -23,9 +23,9 @@
 </form>
 <script>
   import { paymentForFrequency, payment, cmhcPremium } from '../lib/mortgage-math.js';
-  const $ = (id) => document.getElementById(id);
-  const money = (n) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
-  const money2 = (n) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 2 });
+  const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+  const money = (n: number) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+  const money2 = (n: number) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 2 });
   function recalc() {
     const price = +$('m-price').value, down = +$('m-down').value;
     const rate = (+$('m-rate').value) / 100, amort = +$('m-amort').value, freq = $('m-freq').value;
@@ -41,7 +41,7 @@
       <div>Mortgage amount${premium ? ' (incl. CMHC)' : ''}: ${money(loan)}</div>
       ${premium ? `<div>CMHC premium: ${money(premium)}</div>` : ''}`;
   }
-  document.getElementById('mortgage-calc').addEventListener('input', recalc);
+  $('mortgage-calc').addEventListener('input', recalc);
   recalc();
 </script>
 <style>
