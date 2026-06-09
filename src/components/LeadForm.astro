@@ -1,0 +1,39 @@
+---
+import { CONFIG } from '../data/config.ts';
+import { SITE } from '../data/site.ts';
+const { subject = '🏠 New website lead — Contact', formName = 'Contact' } = Astro.props;
+const key = CONFIG.web3formsAccessKey;
+---
+{key ? (
+  <form action="https://api.web3forms.com/submit" method="POST" class="lead-form">
+    <input type="hidden" name="access_key" value={key} />
+    <input type="hidden" name="subject" value={subject} />
+    <input type="hidden" name="from_name" value={formName} />
+    <input type="hidden" name="redirect" value="https://derrickgarcia.ca/thanks" />
+    <input type="checkbox" name="botcheck" class="visually-hidden" tabindex="-1" autocomplete="off" />
+    <div class="lead-form__grid">
+      <label>Name<input type="text" name="name" required autocomplete="name" /></label>
+      <label>Email<input type="email" name="email" required autocomplete="email" /></label>
+      <label>Phone<input type="tel" name="phone" autocomplete="tel" /></label>
+    </div>
+    <label>How can we help?<textarea name="message" rows="4" required></textarea></label>
+    <label class="lead-form__consent">
+      <input type="checkbox" name="consent" required />
+      I agree to be contacted about my inquiry. See our <a href="/privacy">privacy policy</a>.
+    </label>
+    <button type="submit" class="btn">Send message</button>
+  </form>
+) : (
+  <div class="lead-form__fallback">
+    <p>Reach Derrick directly:</p>
+    <p><a class="btn" href={SITE.phoneHref}>Call {SITE.phoneDisplay}</a>
+       <a class="btn btn--ghost" href={`mailto:${SITE.email}`}>Email {SITE.email}</a></p>
+  </div>
+)}
+<style>
+  .lead-form__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
+  .lead-form label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; margin-bottom: 1rem; }
+  .lead-form input, .lead-form textarea { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
+  .lead-form__consent { flex-direction: row; align-items: flex-start; gap: .5rem; font-weight: 400; }
+  .lead-form__fallback .btn { margin-right: .5rem; }
+</style>
