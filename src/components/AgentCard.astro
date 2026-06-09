@@ -1,0 +1,22 @@
+---
+import { Image } from 'astro:assets';
+const { agent } = Astro.props;
+const images = import.meta.glob('../assets/profile/*.webp', { eager: true });
+const img = images[`../assets/${agent.photo}`]?.default;
+---
+<article class="agent-card">
+  {img && <Image src={img} alt={`${agent.name}, ${agent.title}`} width={300} height={300} />}
+  <h3>{agent.name}</h3>
+  <p class="agent-card__title">{agent.title}</p>
+  <p>{agent.bio}</p>
+  {agent.realtorCaUrl && (
+    <p class="agent-card__links">
+      <a href={agent.realtorCaUrl} target="_blank" rel="noopener noreferrer">Listings on realtor.ca ↗</a>
+    </p>
+  )}
+</article>
+<style>
+  .agent-card { border: 1px solid var(--color-line); border-radius: var(--radius); padding: 1rem; }
+  .agent-card img { border-radius: var(--radius); aspect-ratio: 1; object-fit: cover; }
+  .agent-card__title { color: var(--color-accent); font-weight: 600; margin: .2rem 0; }
+</style>
