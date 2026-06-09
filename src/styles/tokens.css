@@ -1,0 +1,13 @@
+:root {
+  --color-bg: #ffffff;
+  --color-fg: #191919;          /* --g-primary-color from old theme (headings/primary) */
+  --color-text: #505050;        /* --g-text-color (body) */
+  --color-muted: #a8a8a8;       /* --g-tip-color (secondary) */
+  --color-accent: #b08d57;      /* gold — sampled from Real Broker emblem */
+  --color-accent-ink: #191919;
+  --color-line: #e6e6e6;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --maxw: 1100px;
+  --space: 1rem;
+  --radius: 10px;
+}

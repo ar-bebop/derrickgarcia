@@ -1,0 +1,29 @@
+---
+import { SITE } from '../data/site.ts';
+---
+<footer class="site-footer">
+  <div class="container site-footer__grid">
+    <div>
+      <strong>{SITE.legalName}</strong>
+      <p>{SITE.address.street}<br />{SITE.address.city}, {SITE.address.region} {SITE.address.postalCode}</p>
+      <p><a href={SITE.phoneHref}>{SITE.phoneDisplay}</a><br /><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+    </div>
+    <nav aria-label="Footer">
+      <a href="/about">About</a><a href="/contact">Contact</a>
+      <a href="/privacy">Privacy</a><a href="/accessibility">Accessibility</a>
+    </nav>
+    <div class="site-footer__social">
+      <a href={SITE.social.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>
+      <a href={SITE.social.facebook} target="_blank" rel="noopener noreferrer">Facebook</a>
+    </div>
+  </div>
+  <p class="container site-footer__legal">© {new Date().getFullYear()} {SITE.legalName}. Not intended to solicit buyers or sellers currently under contract.</p>
+</footer>
+<style>
+  .site-footer { border-top: 1px solid var(--color-line); margin-top: 3rem; padding-block: 2rem; }
+  .site-footer__grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); }
+  .site-footer nav { display: flex; flex-direction: column; gap: .3rem; }
+  .site-footer nav a { text-decoration: none; }
+  .site-footer__social { display: flex; gap: 1rem; }
+  .site-footer__legal { color: var(--color-muted); font-size: .85rem; margin-top: 1.5rem; }
+</style>

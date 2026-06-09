@@ -1,0 +1,38 @@
+---
+import { SITE } from '../data/site.ts';
+const nav = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+  { href: SITE.listingsSearchUrl, label: 'Search Homes', external: true },
+  { href: '/mortgage-calculator', label: 'Mortgage' },
+  { href: '/affordability-calculator', label: 'Affordability' },
+  { href: '/land-transfer-tax', label: 'Land Transfer Tax' },
+  { href: '/contact', label: 'Contact' },
+];
+---
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a href="/" class="site-header__brand">{SITE.name}<span> · {SITE.brokerage}</span></a>
+    <nav aria-label="Primary">
+      <ul>
+        {nav.map((i) => (
+          <li>
+            <a href={i.href} {...(i.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+              {i.label}{i.external ? ' ↗' : ''}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+<style>
+  .site-header { border-bottom: 1px solid var(--color-line); }
+  .site-header__inner { display: flex; gap: 1rem; align-items: center; justify-content: space-between;
+    padding-block: .8rem; flex-wrap: wrap; }
+  .site-header__brand { font-weight: 700; text-decoration: none; color: var(--color-fg); }
+  .site-header__brand span { color: var(--color-muted); font-weight: 400; }
+  nav ul { display: flex; gap: 1rem; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+  nav a { text-decoration: none; color: var(--color-text); }
+  nav a:hover { color: var(--color-accent); }
+</style>
