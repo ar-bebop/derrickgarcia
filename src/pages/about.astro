@@ -1,10 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AgentCard from '../components/AgentCard.astro';
+import AgentSchema from '../components/AgentSchema.astro';
 import { AGENTS } from '../data/agents.ts';
 ---
 <BaseLayout title="About Our Team — Derrick Garcia, Real Broker Ontario"
   description="Meet Derrick Garcia and the team serving Toronto & the GTA with Real Broker Ontario.">
+  {AGENTS.map((agent) => <AgentSchema slot="head" agent={agent} />)}
   <h1>Our Team</h1>
   <p class="lede">We are committed to maintaining the standard for excellence and leadership. Our primary
     goal is to provide the highest level of service to our clients through integrity.</p>

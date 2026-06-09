@@ -1,0 +1,15 @@
+---
+import { SITE } from '../data/site.ts';
+const { agent } = Astro.props;
+const sameAs = [agent.realtorCaUrl, agent.realBrokerUrl].filter(Boolean);
+const data = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: agent.name,
+  jobTitle: agent.title,
+  worksFor: { '@type': 'Organization', name: SITE.brokerage },
+  url: `${SITE.url}/about`,
+  ...(sameAs.length ? { sameAs } : {}),
+};
+---
+<script type="application/ld+json" is:inline set:html={JSON.stringify(data)} />
