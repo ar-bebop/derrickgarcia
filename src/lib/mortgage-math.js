@@ -38,3 +38,20 @@ export function paymentForFrequency(principal, annualRate, amortYears, freqKey) 
   if (f.accelerated) return payment(principal, annualRate, amortYears, 12) / f.divisor;
   return payment(principal, annualRate, amortYears, f.periodsPerYear);
 }
+
+export function qualifyingRate(contractRate) {
+  return Math.max(contractRate + STRESS_TEST_BUFFER, MIN_QUALIFYING_RATE);
+}
+
+// CMHC default-insurance premium rate by loan-to-value. verify: CMHC premium schedule
+export function cmhcPremiumRate(ltv) {
+  if (ltv > 0.90) return 0.040;
+  if (ltv > 0.85) return 0.031;
+  if (ltv > 0.80) return 0.028;
+  return 0; // >= 20% down: conventional, not insured
+}
+
+// Premium in dollars (financed onto the principal).
+export function cmhcPremium(loan, price) {
+  return loan * cmhcPremiumRate(loan / price);
+}

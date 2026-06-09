@@ -35,3 +35,27 @@ describe('paymentForFrequency', () => {
     expect(() => paymentForFrequency(1, 0.05, 25, 'nope')).toThrow();
   });
 });
+
+import { qualifyingRate, cmhcPremiumRate, cmhcPremium } from './mortgage-math.js';
+
+describe('qualifyingRate (stress test)', () => {
+  it('uses contract + 2% when that exceeds the 5.25% floor', () => {
+    expect(qualifyingRate(0.05)).toBeCloseTo(0.07, 10);
+  });
+  it('uses the 5.25% floor when contract + 2% is lower', () => {
+    expect(qualifyingRate(0.02)).toBeCloseTo(0.0525, 10);
+  });
+});
+
+describe('cmhcPremiumRate by loan-to-value', () => {
+  it('5% down (95% LTV) → 4.00%', () => { expect(cmhcPremiumRate(0.95)).toBe(0.040); });
+  it('10% down (90% LTV) → 3.10%', () => { expect(cmhcPremiumRate(0.90)).toBe(0.031); });
+  it('15% down (85% LTV) → 2.80%', () => { expect(cmhcPremiumRate(0.85)).toBe(0.028); });
+  it('20% down (80% LTV) → 0%', () => { expect(cmhcPremiumRate(0.80)).toBe(0); });
+});
+
+describe('cmhcPremium', () => {
+  it('5% down on a $500k home → $19,000', () => {
+    expect(cmhcPremium(475000, 500000)).toBeCloseTo(19000, 2);
+  });
+});
