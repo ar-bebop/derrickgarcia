@@ -55,3 +55,33 @@ export function cmhcPremiumRate(ltv) {
 export function cmhcPremium(loan, price) {
   return loan * cmhcPremiumRate(loan / price);
 }
+
+export const GDS_LIMIT = 0.39;          // gross debt service (insured). verify: CMHC
+export const TDS_LIMIT = 0.44;          // total debt service (insured). verify: CMHC
+export const DEFAULT_HEATING_MONTHLY = 150;
+export const CONDO_FEE_INCLUSION = 0.5; // 50% of condo fees count toward GDS/TDS
+
+export function maxAffordability({
+  grossAnnualIncome, downPayment, monthlyDebts = 0, contractRate,
+  amortYears = 25, monthlyPropertyTax = 0,
+  monthlyHeating = DEFAULT_HEATING_MONTHLY, monthlyCondoFees = 0,
+}) {
+  const grossMonthly = grossAnnualIncome / 12;
+  const maxHousingGDS = GDS_LIMIT * grossMonthly;
+  const maxHousingTDS = TDS_LIMIT * grossMonthly - monthlyDebts;
+  const maxMonthlyHousing = Math.min(maxHousingGDS, maxHousingTDS);
+  const otherHousing = monthlyPropertyTax + monthlyHeating + CONDO_FEE_INCLUSION * monthlyCondoFees;
+  const maxMortgagePmt = Math.max(0, maxMonthlyHousing - otherHousing);
+
+  const qr = qualifyingRate(contractRate);
+  const i = periodicRate(qr, 12);
+  const n = amortYears * 12;
+  const maxMortgage = i === 0 ? maxMortgagePmt * n
+    : (maxMortgagePmt * (1 - Math.pow(1 + i, -n))) / i;
+
+  return {
+    grossMonthly, maxMonthlyHousing, maxMortgagePmt,
+    qualifyingRate: qr, maxMortgage, maxPrice: maxMortgage + downPayment,
+    bindingRatio: maxHousingGDS <= maxHousingTDS ? 'GDS' : 'TDS',
+  };
+}

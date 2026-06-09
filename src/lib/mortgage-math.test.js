@@ -59,3 +59,30 @@ describe('cmhcPremium', () => {
     expect(cmhcPremium(475000, 500000)).toBeCloseTo(19000, 2);
   });
 });
+
+import { maxAffordability, GDS_LIMIT, TDS_LIMIT } from './mortgage-math.js';
+
+describe('maxAffordability (Canadian GDS/TDS at the qualifying rate)', () => {
+  const base = {
+    grossAnnualIncome: 120000, downPayment: 100000, monthlyDebts: 500,
+    contractRate: 0.05, amortYears: 25, monthlyPropertyTax: 300,
+    monthlyHeating: 150, monthlyCondoFees: 0,
+  };
+  it('qualifies at contract + 2% (= 7%)', () => {
+    expect(maxAffordability(base).qualifyingRate).toBeCloseTo(0.07, 10);
+  });
+  it('caps monthly housing at min(GDS, TDS)', () => {
+    const r = maxAffordability(base), gm = 120000 / 12;
+    expect(r.maxMonthlyHousing).toBeLessThanOrEqual(GDS_LIMIT * gm + 1e-6);
+    expect(r.maxMonthlyHousing).toBeLessThanOrEqual(TDS_LIMIT * gm - 500 + 1e-6);
+  });
+  it('returns a plausible max mortgage (~$490k for these inputs)', () => {
+    const r = maxAffordability(base);
+    expect(r.maxMortgage).toBeGreaterThan(485000);
+    expect(r.maxMortgage).toBeLessThan(500000);
+  });
+  it('max price = max mortgage + down payment', () => {
+    const r = maxAffordability(base);
+    expect(r.maxPrice).toBeCloseTo(r.maxMortgage + 100000, 4);
+  });
+});
