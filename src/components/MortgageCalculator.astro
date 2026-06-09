@@ -1,0 +1,54 @@
+---
+---
+<form class="calc" id="mortgage-calc" novalidate>
+  <div class="calc__grid">
+    <label>Home price ($)<input type="number" id="m-price" value="800000" min="0" step="1000" /></label>
+    <label>Down payment ($)<input type="number" id="m-down" value="160000" min="0" step="1000" /></label>
+    <label>Interest rate (%)<input type="number" id="m-rate" value="5.0" min="0" step="0.01" /></label>
+    <label>Amortization (years)
+      <select id="m-amort"><option>25</option><option>30</option><option>20</option><option>15</option></select>
+    </label>
+    <label>Payment frequency
+      <select id="m-freq">
+        <option value="monthly">Monthly</option>
+        <option value="acceleratedBiweekly">Accelerated bi-weekly</option>
+        <option value="biweekly">Bi-weekly</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </label>
+  </div>
+  <output class="calc__out" id="m-out" aria-live="polite"></output>
+  <p class="calc__note">Estimate only — not financial advice or a mortgage pre-approval. Canadian fixed-rate
+    (semi-annual compounding). CMHC premium is added when the down payment is under 20%.</p>
+</form>
+<script>
+  import { paymentForFrequency, payment, cmhcPremium } from '../lib/mortgage-math.js';
+  const $ = (id) => document.getElementById(id);
+  const money = (n) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+  const money2 = (n) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 2 });
+  function recalc() {
+    const price = +$('m-price').value, down = +$('m-down').value;
+    const rate = (+$('m-rate').value) / 100, amort = +$('m-amort').value, freq = $('m-freq').value;
+    let loan = Math.max(0, price - down);
+    const ltv = price > 0 ? loan / price : 0;
+    const premium = ltv > 0.80 ? cmhcPremium(loan, price) : 0;
+    loan += premium;
+    const pay = paymentForFrequency(loan, rate, amort, freq);
+    const monthly = payment(loan, rate, amort, 12);
+    $('m-out').innerHTML = `
+      <strong>${money2(pay)}</strong> per payment (${freq.replace(/([A-Z])/g,' $1').toLowerCase()})
+      <div>Equivalent monthly: ${money2(monthly)}</div>
+      <div>Mortgage amount${premium ? ' (incl. CMHC)' : ''}: ${money(loan)}</div>
+      ${premium ? `<div>CMHC premium: ${money(premium)}</div>` : ''}`;
+  }
+  document.getElementById('mortgage-calc').addEventListener('input', recalc);
+  recalc();
+</script>
+<style>
+  .calc__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
+  .calc label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; }
+  .calc input, .calc select { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
+  .calc__out { display: block; margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--color-line); border-radius: var(--radius); font-size: 1.1rem; }
+  .calc__out strong { font-size: 1.5rem; color: var(--color-fg); }
+  .calc__note { color: var(--color-muted); font-size: .85rem; margin-top: 1rem; }
+</style>
