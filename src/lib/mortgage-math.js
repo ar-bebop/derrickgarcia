@@ -85,3 +85,41 @@ export function maxAffordability({
     bindingRatio: maxHousingGDS <= maxHousingTDS ? 'GDS' : 'TDS',
   };
 }
+
+// Marginal brackets {upTo, rate}. verify: ON Land Transfer Tax Act / City of Toronto MLTT schedule
+export const ONTARIO_LTT_BRACKETS = [
+  { upTo: 55000, rate: 0.005 }, { upTo: 250000, rate: 0.010 },
+  { upTo: 400000, rate: 0.015 }, { upTo: 2000000, rate: 0.020 },
+  { upTo: Infinity, rate: 0.025 },
+];
+// Toronto MLTT mirrors provincial for the common range + added luxury tiers >$3M.
+export const TORONTO_LTT_BRACKETS = [
+  { upTo: 55000, rate: 0.005 }, { upTo: 250000, rate: 0.010 },
+  { upTo: 400000, rate: 0.015 }, { upTo: 2000000, rate: 0.020 },
+  { upTo: 3000000, rate: 0.025 }, { upTo: 4000000, rate: 0.035 },
+  { upTo: 5000000, rate: 0.045 }, { upTo: 10000000, rate: 0.055 },
+  { upTo: 20000000, rate: 0.065 }, { upTo: Infinity, rate: 0.075 },
+];
+export const FTB_REBATE_ONTARIO = 4000;  // verify
+export const FTB_REBATE_TORONTO = 4475;  // verify
+
+export function bracketTax(price, brackets) {
+  let tax = 0, lower = 0;
+  for (const b of brackets) {
+    if (price <= lower) break;
+    tax += (Math.min(price, b.upTo) - lower) * b.rate;
+    lower = b.upTo;
+  }
+  return tax;
+}
+
+export function landTransferTax({ price, inToronto = false, firstTimeBuyer = false }) {
+  const ontario = bracketTax(price, ONTARIO_LTT_BRACKETS);
+  const toronto = inToronto ? bracketTax(price, TORONTO_LTT_BRACKETS) : 0;
+  let rebate = 0;
+  if (firstTimeBuyer) {
+    rebate += Math.min(FTB_REBATE_ONTARIO, ontario);
+    if (inToronto) rebate += Math.min(FTB_REBATE_TORONTO, toronto);
+  }
+  return { ontario, toronto, rebate, total: ontario + toronto - rebate };
+}

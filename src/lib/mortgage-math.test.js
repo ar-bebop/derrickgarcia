@@ -86,3 +86,26 @@ describe('maxAffordability (Canadian GDS/TDS at the qualifying rate)', () => {
     expect(r.maxPrice).toBeCloseTo(r.maxMortgage + 100000, 4);
   });
 });
+
+import { landTransferTax } from './mortgage-math.js';
+
+describe('landTransferTax', () => {
+  it('Ontario LTT on $500k = $6,475', () => {
+    expect(landTransferTax({ price: 500000 }).ontario).toBeCloseTo(6475, 2);
+  });
+  it('in Toronto, provincial + municipal on $500k = $12,950', () => {
+    const r = landTransferTax({ price: 500000, inToronto: true });
+    expect(r.toronto).toBeCloseTo(6475, 2);
+    expect(r.total).toBeCloseTo(12950, 2);
+  });
+  it('first-time buyer in Toronto gets both rebates (capped)', () => {
+    const r = landTransferTax({ price: 500000, inToronto: true, firstTimeBuyer: true });
+    expect(r.rebate).toBeCloseTo(4000 + 4475, 2);
+    expect(r.total).toBeCloseTo(12950 - 8475, 2);
+  });
+  it('rebate never exceeds tax owed (cheap home)', () => {
+    const r = landTransferTax({ price: 300000, firstTimeBuyer: true });
+    expect(r.rebate).toBeLessThanOrEqual(r.ontario + 1e-9);
+    expect(r.total).toBeGreaterThanOrEqual(0);
+  });
+});
