@@ -1,0 +1,38 @@
+---
+---
+<form class="calc" id="ltt-calc" novalidate>
+  <div class="calc__grid">
+    <label>Purchase price ($)<input type="number" id="l-price" value="800000" min="0" step="1000" /></label>
+    <label class="calc__check"><input type="checkbox" id="l-toronto" /> Property is in the City of Toronto</label>
+    <label class="calc__check"><input type="checkbox" id="l-ftb" /> First-time home buyer</label>
+  </div>
+  <output class="calc__out" id="l-out" aria-live="polite"></output>
+  <p class="calc__note">Estimate only — verify with your lawyer. Ontario charges land transfer tax; properties
+    in the City of Toronto pay an additional municipal land transfer tax. First-time buyer rebates applied where eligible.</p>
+</form>
+<script>
+  import { landTransferTax } from '../lib/mortgage-math.js';
+  const $ = (id) => document.getElementById(id);
+  const money = (n) => n.toLocaleString('en-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 2 });
+  function recalc() {
+    const r = landTransferTax({
+      price: +$('l-price').value, inToronto: $('l-toronto').checked, firstTimeBuyer: $('l-ftb').checked,
+    });
+    $('l-out').innerHTML = `
+      Total land transfer tax: <strong>${money(r.total)}</strong>
+      <div>Ontario: ${money(r.ontario)}</div>
+      ${r.toronto ? `<div>Toronto municipal: ${money(r.toronto)}</div>` : ''}
+      ${r.rebate ? `<div>First-time buyer rebate: −${money(r.rebate)}</div>` : ''}`;
+  }
+  document.getElementById('ltt-calc').addEventListener('input', recalc);
+  recalc();
+</script>
+<style>
+  .calc__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
+  .calc label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; }
+  .calc__check { flex-direction: row; align-items: center; gap: .5rem; }
+  .calc input[type=number] { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
+  .calc__out { display: block; margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--color-line); border-radius: var(--radius); font-size: 1.1rem; }
+  .calc__out strong { font-size: 1.5rem; color: var(--color-fg); }
+  .calc__note { color: var(--color-muted); font-size: .85rem; margin-top: 1rem; }
+</style>
