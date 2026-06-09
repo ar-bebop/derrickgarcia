@@ -17,16 +17,21 @@ depended on the Lofty CRM/IDX platform.
 
 ## Current status (2026-06-09)
 
-**Planning complete; implementation not started.** No application code exists yet — the next step is
-executing the Phase 1 plan. What's in the repo:
+**Phase 1 MVP built and green.** Plan Tasks 1–18 are implemented and committed:
+`pnpm build`, `pnpm test` (22 unit tests), and `pnpm check` (`astro check`, 0 errors) all pass.
+`extracted/` has been removed (Task 18; recoverable from git history). **What remains is Task 19 —
+the manual production go-live** (external keys + DNS cutover), captured in `TODO.md`.
 
 - `docs/superpowers/specs/2026-06-09-derrickgarcia-static-site-design.md` — the approved design
 - `docs/superpowers/specs/2026-06-09-brainstorm-research-appendix.md` — research detail, incl. the
   **Canadian mortgage math** the calculators need (semi-annual compounding, stress test, CMHC, GDS/TDS, LTT)
-- `docs/superpowers/plans/2026-06-09-derrickgarcia-static-site-phase1.md` — **the executable plan (19 tasks)**
-- `src/assets/` — real headshots + Real Broker logos (already committed)
-- `extracted/` — reference snapshot of the OLD Lofty site (24 pages, assets, CSS) + the scripts used to
-  capture it. **Plan Task 18 deletes this** once the build is green; nothing in `src/` depends on it.
+- `docs/superpowers/plans/2026-06-09-derrickgarcia-static-site-phase1.md` — the executed plan (19 tasks)
+- `TODO.md` — **remaining work**: external config keys, go-live runbook, optional polish, toolchain notes
+- `src/` — the implemented site (layout, pages, calculators, tested math module)
+
+**Toolchain note:** this environment has **pnpm, not npm** (`pnpm install|build|test|check`).
+`@astrojs/sitemap` is pinned to `3.2.1` (3.7.x needs Astro 5); `sharp` is an explicit dep (pnpm
+strict-linking); `pnpm-workspace.yaml` whitelists esbuild/sharp build scripts. See `TODO.md` §4.
 
 ## How to implement
 
