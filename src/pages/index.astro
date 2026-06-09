@@ -1,7 +1,42 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AgentCard from '../components/AgentCard.astro';
+import RealEstateAgentSchema from '../components/RealEstateAgentSchema.astro';
+import { AGENTS } from '../data/agents.ts';
+import { SITE } from '../data/site.ts';
 ---
-<BaseLayout title="Derrick Garcia — Toronto Real Estate Agent" description="Toronto & GTA real estate with Derrick Garcia, Real Broker Ontario.">
-  <h1>Derrick Garcia</h1>
-  <p>Layout smoke test.</p>
+<BaseLayout title="Derrick Garcia — Toronto & GTA Real Estate Agent | Real Broker Ontario"
+  description="Buy or sell with Derrick Garcia, a Toronto & GTA real estate broker with Real Broker Ontario. Search homes, estimate your mortgage, and get in touch.">
+  <RealEstateAgentSchema slot="head" />
+  <section class="hero">
+    <h1>Toronto & GTA real estate, done right</h1>
+    <p>Derrick Garcia · {SITE.brokerage}</p>
+    <div class="hero__cta">
+      <a class="btn" href="/contact">Get in touch</a>
+      <a class="btn btn--ghost" href={SITE.listingsSearchUrl} target="_blank" rel="noopener noreferrer">Search homes ↗</a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Plan your purchase</h2>
+    <ul class="tools">
+      <li><a href="/mortgage-calculator">Mortgage calculator →</a></li>
+      <li><a href="/affordability-calculator">Affordability calculator →</a></li>
+      <li><a href="/land-transfer-tax">Land transfer tax →</a></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Meet the team</h2>
+    <div class="team-grid">{AGENTS.map((agent) => <AgentCard agent={agent} />)}</div>
+    <p><a class="btn btn--ghost" href="/about">About our team</a></p>
+  </section>
 </BaseLayout>
+<style>
+  .hero { padding-block: 3rem 2rem; }
+  .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); margin-bottom: .3rem; }
+  .hero__cta { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .tools { list-style: none; padding: 0; display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); }
+  .tools a { display: block; padding: 1rem; border: 1px solid var(--color-line); border-radius: var(--radius); text-decoration: none; font-weight: 600; }
+  .team-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); }
+</style>
