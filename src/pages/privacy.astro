@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../data/site.ts';
+---
+<BaseLayout title="Privacy Policy — Derrick Garcia" description="How Derrick Garcia collects and uses information submitted through this website.">
+  <h1>Privacy Policy</h1>
+  <p>This website collects personal information only when you submit it through a form (name, email, phone,
+    and your message). We use it solely to respond to your inquiry. We do not sell your information.</p>
+  <h2>How forms are processed</h2>
+  <p>Form submissions are processed by Web3Forms and delivered to us by email. These services may process
+    data on servers outside Canada.</p>
+  <h2>Analytics</h2>
+  <p>We use privacy-friendly, cookieless analytics (Cloudflare Web Analytics) that measure aggregate page
+    visits only. No cookies are set and you are not individually tracked.</p>
+  <h2>Email (CASL)</h2>
+  <p>If you ask us to follow up, you consent to being contacted about your inquiry. You can ask us to stop at
+    any time by replying or emailing <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+  <h2>Access & questions</h2>
+  <p>To access, correct, or delete information you've submitted, contact <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+    or call <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a>.</p>
+</BaseLayout>

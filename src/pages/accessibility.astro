@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../data/site.ts';
+---
+<BaseLayout title="Accessibility — Derrick Garcia" description="Our commitment to an accessible website (WCAG 2.1 Level AA).">
+  <h1>Accessibility</h1>
+  <p>We actively work to maintain a website with content that is accessible to all visitors. This site is
+    updated on a regular basis in order for it to be as accessible as possible. To the extent possible, we aim
+    to meet the Level AA Success Criteria found in the Web Content Accessibility Guidelines 2.1 (WCAG 2.1).</p>
+  <p>If you are in need of assistance to navigate this website or access real estate information and property
+    data, please contact us using any of the options below and we will make every reasonable effort to assist
+    you. Please provide as much information as possible so that we can address your specific needs:</p>
+  <ul>
+    <li>Phone: <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a></li>
+    <li>Email: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+  </ul>
+</BaseLayout>
