@@ -18,29 +18,43 @@
 - Run all commands from the repo root `/home/bebop/projects/public/derrickgarcia`.
 - Node 20 (`.nvmrc`). Use `npm`.
 - Commit after each task (frequent commits). **Never `git push`** (per user).
-- **User-supplied config** (Web3Forms access key, TidyCal URL, Cloudflare token, realtor.ca/Real Broker
-  profile URLs, Google Business Profile URL) are spec **open items**. Where a real value isn't yet known,
-  use the named placeholder constant indicated and leave the documented `TODO(open-item-N)` marker. The
-  build must succeed with placeholders; these are swapped when the user provides them.
+
+### Real content is already in the repo — no fabricated placeholders
+- The **real headshots + Real Broker logos** are already committed at `src/assets/profile/` and
+  `src/assets/branding/` (copied out of `extracted/`). Tasks below consume them directly; nothing reads
+  from `extracted/` at build time. `extracted/` is deleted in Task 18.
+- **Real bios** (Derrick, Pina), the **real accessibility statement**, and the **real brand colours**
+  are inlined in the tasks below (sourced from the old site).
+
+### External go-live config (the only values not yet known)
+These live in **one file, `src/data/config.ts`**, as empty strings. Each related feature renders a
+**graceful fallback** (call/email, or analytics simply absent) when its value is empty — so the site
+never ships broken placeholder widgets. Fill them in at go-live (Task 19):
+- `web3formsAccessKey` — Web3Forms access key (forms)
+- `tidycalUrl` — TidyCal booking page URL
+- `cloudflareAnalyticsToken` — Cloudflare Web Analytics beacon token
+- per-agent `realtorCaUrl` / `realBrokerUrl` in `src/data/agents.ts` (empty → link hidden)
+- `SITE.social.googleBusiness` in `src/data/site.ts` (empty → omitted from schema)
 
 ## File structure (created across the tasks below)
 
 ```
-.nvmrc                         package.json            astro.config.mjs       vitest.config.js
+.nvmrc  package.json  astro.config.mjs  vitest.config.js  tsconfig.json
 .github/workflows/deploy.yml
-public/  CNAME  robots.txt  favicon.svg  (favicon set)  og-default.png
+public/  CNAME  robots.txt  favicon.svg  site.webmanifest  (favicon set)  og-default.png
 src/
   lib/        mortgage-math.js  mortgage-math.test.js
   styles/     tokens.css  global.css
   layouts/    BaseLayout.astro
   components/  Header.astro  Footer.astro  AgentCard.astro  LeadForm.astro
               MortgageCalculator.astro  AffordabilityCalculator.astro  LandTransferTaxCalculator.astro
-              AgentSchema.astro  RealEstateAgentSchema.astro
-  data/       site.ts  agents.ts
-  pages/      index.astro  about.astro  contact.astro
+              RealEstateAgentSchema.astro  AgentSchema.astro
+  data/       site.ts  config.ts  agents.ts
+  pages/      index.astro  about.astro  contact.astro  thanks.astro
               mortgage-calculator.astro  affordability-calculator.astro  land-transfer-tax.astro
-              privacy.astro  accessibility.astro  404.astro  thanks.astro
-  assets/     profile/*  branding/*
+              privacy.astro  accessibility.astro  404.astro
+  assets/     profile/{derrick-garcia,pina-marrella,voula-spingos}.webp   (already committed)
+              branding/{real-wordmark-white,real-emblem-gold}.png         (already committed)
 ```
 
 ---
@@ -101,10 +115,7 @@ export default defineConfig({
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  test: {
-    include: ['src/**/*.test.js'],
-    environment: 'node',
-  },
+  test: { include: ['src/**/*.test.js'], environment: 'node' },
 });
 ```
 
@@ -163,7 +174,7 @@ jobs:
         uses: actions/deploy-pages@v4
 ```
 
-- [ ] **Step 9: Create temporary `src/pages/index.astro`** (replaced in Task 8)
+- [ ] **Step 9: Create temporary `src/pages/index.astro`** (replaced in Task 13)
 
 ```astro
 ---
@@ -177,7 +188,7 @@ jobs:
 - [ ] **Step 10: Install and verify build + test runner**
 
 Run: `npm install && npm run build && npm test`
-Expected: `astro build` completes writing `dist/`; `vitest run` reports "No test files found" (exit 0 — acceptable at this point) OR passes. Build must succeed.
+Expected: `astro build` completes writing `dist/`; `vitest run` reports "No test files found" (exit 0) OR passes. Build must succeed.
 
 - [ ] **Step 11: Commit**
 
@@ -199,9 +210,7 @@ git commit -m "chore: scaffold Astro project, Vitest, and Pages deploy workflow"
 ```js
 // src/lib/mortgage-math.test.js
 import { describe, it, expect } from 'vitest';
-import {
-  periodicRate, payment, paymentForFrequency,
-} from './mortgage-math.js';
+import { periodicRate, payment, paymentForFrequency } from './mortgage-math.js';
 
 describe('periodicRate (Canadian semi-annual compounding)', () => {
   it('converts 5% nominal to the monthly effective rate (NOT r/12)', () => {
@@ -216,8 +225,7 @@ describe('periodicRate (Canadian semi-annual compounding)', () => {
 
 describe('payment', () => {
   it('computes a $500k / 25yr / 5% monthly payment ~ $2,908', () => {
-    const pmt = payment(500000, 0.05, 25, 12);
-    expect(Math.abs(pmt - 2908.13)).toBeLessThan(1.0);
+    expect(Math.abs(payment(500000, 0.05, 25, 12) - 2908.13)).toBeLessThan(1.0);
   });
   it('handles 0% as straight-line principal/n', () => {
     expect(payment(120000, 0, 25, 12)).toBeCloseTo(120000 / 300, 6);
@@ -227,13 +235,11 @@ describe('payment', () => {
 describe('paymentForFrequency', () => {
   it('accelerated bi-weekly equals monthly / 2', () => {
     const monthly = payment(500000, 0.05, 25, 12);
-    expect(paymentForFrequency(500000, 0.05, 25, 'acceleratedBiweekly'))
-      .toBeCloseTo(monthly / 2, 6);
+    expect(paymentForFrequency(500000, 0.05, 25, 'acceleratedBiweekly')).toBeCloseTo(monthly / 2, 6);
   });
-  it('regular bi-weekly is less than monthly/2 (26 vs ~26 payments, full amortization)', () => {
+  it('regular bi-weekly is less than monthly/2', () => {
     const monthly = payment(500000, 0.05, 25, 12);
-    const biweekly = paymentForFrequency(500000, 0.05, 25, 'biweekly');
-    expect(biweekly).toBeLessThan(monthly / 2);
+    expect(paymentForFrequency(500000, 0.05, 25, 'biweekly')).toBeLessThan(monthly / 2);
   });
   it('throws on an unknown frequency', () => {
     expect(() => paymentForFrequency(1, 0.05, 25, 'nope')).toThrow();
@@ -244,7 +250,7 @@ describe('paymentForFrequency', () => {
 - [ ] **Step 2: Run tests, verify they fail**
 
 Run: `npm test`
-Expected: FAIL — cannot import from `./mortgage-math.js` (module/exports missing).
+Expected: FAIL — cannot import from `./mortgage-math.js`.
 
 - [ ] **Step 3: Implement the module**
 
@@ -281,8 +287,8 @@ export const FREQUENCIES = {
   acceleratedWeekly:   { periodsPerYear: 52, accelerated: true, divisor: 4 },
 };
 
-// Payment for a given named frequency. Accelerated = the monthly payment split,
-// paid more often (≈ one extra monthly payment per year → faster payoff).
+// Payment for a named frequency. Accelerated = the monthly payment split, paid
+// more often (≈ one extra monthly payment/year → faster payoff).
 export function paymentForFrequency(principal, annualRate, amortYears, freqKey) {
   const f = FREQUENCIES[freqKey];
   if (!f) throw new Error(`unknown frequency: ${freqKey}`);
@@ -294,7 +300,7 @@ export function paymentForFrequency(principal, annualRate, amortYears, freqKey) 
 - [ ] **Step 4: Run tests, verify they pass**
 
 Run: `npm test`
-Expected: PASS (all `periodicRate`, `payment`, `paymentForFrequency` tests green).
+Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
@@ -308,8 +314,7 @@ git commit -m "feat: Canadian periodic-rate + payment + frequency math (TDD)"
 ## Task 3: Stress test + CMHC premium (TDD)
 
 **Files:**
-- Modify: `src/lib/mortgage-math.js`
-- Modify: `src/lib/mortgage-math.test.js`
+- Modify: `src/lib/mortgage-math.js`, `src/lib/mortgage-math.test.js`
 
 - [ ] **Step 1: Append failing tests**
 
@@ -330,11 +335,11 @@ describe('cmhcPremiumRate by loan-to-value', () => {
   it('5% down (95% LTV) → 4.00%', () => { expect(cmhcPremiumRate(0.95)).toBe(0.040); });
   it('10% down (90% LTV) → 3.10%', () => { expect(cmhcPremiumRate(0.90)).toBe(0.031); });
   it('15% down (85% LTV) → 2.80%', () => { expect(cmhcPremiumRate(0.85)).toBe(0.028); });
-  it('20% down (80% LTV) → 0% (not insured)', () => { expect(cmhcPremiumRate(0.80)).toBe(0); });
+  it('20% down (80% LTV) → 0%', () => { expect(cmhcPremiumRate(0.80)).toBe(0); });
 });
 
 describe('cmhcPremium', () => {
-  it('5% down on a $500k home → $19,000 premium', () => {
+  it('5% down on a $500k home → $19,000', () => {
     expect(cmhcPremium(475000, 500000)).toBeCloseTo(19000, 2);
   });
 });
@@ -343,7 +348,7 @@ describe('cmhcPremium', () => {
 - [ ] **Step 2: Run tests, verify the new ones fail**
 
 Run: `npm test`
-Expected: FAIL — `qualifyingRate`/`cmhcPremiumRate`/`cmhcPremium` are not exported.
+Expected: FAIL — `qualifyingRate`/`cmhcPremiumRate`/`cmhcPremium` not exported.
 
 - [ ] **Step 3: Implement**
 
@@ -384,8 +389,7 @@ git commit -m "feat: stress-test qualifying rate + CMHC premium (TDD)"
 ## Task 4: Affordability (GDS/TDS) (TDD)
 
 **Files:**
-- Modify: `src/lib/mortgage-math.js`
-- Modify: `src/lib/mortgage-math.test.js`
+- Modify: `src/lib/mortgage-math.js`, `src/lib/mortgage-math.test.js`
 
 - [ ] **Step 1: Append failing tests**
 
@@ -399,12 +403,11 @@ describe('maxAffordability (Canadian GDS/TDS at the qualifying rate)', () => {
     contractRate: 0.05, amortYears: 25, monthlyPropertyTax: 300,
     monthlyHeating: 150, monthlyCondoFees: 0,
   };
-  it('qualifies at contract + 2% (= 7%), not the contract rate', () => {
+  it('qualifies at contract + 2% (= 7%)', () => {
     expect(maxAffordability(base).qualifyingRate).toBeCloseTo(0.07, 10);
   });
-  it('caps monthly housing at min(GDS, TDS) of gross monthly income', () => {
-    const r = maxAffordability(base);
-    const gm = 120000 / 12;
+  it('caps monthly housing at min(GDS, TDS)', () => {
+    const r = maxAffordability(base), gm = 120000 / 12;
     expect(r.maxMonthlyHousing).toBeLessThanOrEqual(GDS_LIMIT * gm + 1e-6);
     expect(r.maxMonthlyHousing).toBeLessThanOrEqual(TDS_LIMIT * gm - 500 + 1e-6);
   });
@@ -449,8 +452,7 @@ export function maxAffordability({
   const qr = qualifyingRate(contractRate);
   const i = periodicRate(qr, 12);
   const n = amortYears * 12;
-  const maxMortgage = i === 0
-    ? maxMortgagePmt * n
+  const maxMortgage = i === 0 ? maxMortgagePmt * n
     : (maxMortgagePmt * (1 - Math.pow(1 + i, -n))) / i;
 
   return {
@@ -478,8 +480,7 @@ git commit -m "feat: GDS/TDS affordability at qualifying rate (TDD)"
 ## Task 5: Land Transfer Tax (Ontario + Toronto + FTB rebates) (TDD)
 
 **Files:**
-- Modify: `src/lib/mortgage-math.js`
-- Modify: `src/lib/mortgage-math.test.js`
+- Modify: `src/lib/mortgage-math.js`, `src/lib/mortgage-math.test.js`
 
 - [ ] **Step 1: Append failing tests**
 
@@ -571,13 +572,13 @@ git commit -m "feat: Ontario + Toronto land transfer tax with FTB rebates (TDD)"
 
 ---
 
-## Task 6: Design tokens, global CSS, BaseLayout, Header, Footer
+## Task 6: Site data, config, design tokens, global CSS, BaseLayout, Header, Footer
 
 **Files:**
-- Create: `src/data/site.ts`, `src/styles/tokens.css`, `src/styles/global.css`
+- Create: `src/data/site.ts`, `src/data/config.ts`, `src/styles/tokens.css`, `src/styles/global.css`
 - Create: `src/layouts/BaseLayout.astro`, `src/components/Header.astro`, `src/components/Footer.astro`
 
-- [ ] **Step 1: Create `src/data/site.ts`** (single source of truth for NAP + links)
+- [ ] **Step 1: Create `src/data/site.ts`** (single source of truth for NAP + links; `listingsSearchUrl` is a real public realtor.ca URL)
 
 ```ts
 export const SITE = {
@@ -595,23 +596,35 @@ export const SITE = {
   social: {
     instagram: 'https://www.instagram.com/derrickgarcia__/',
     facebook: 'https://www.facebook.com/DerrickGarciaRealtor',
-    googleBusiness: 'https://www.google.com/maps', // TODO(open-item-7): real GBP URL
+    googleBusiness: '', // fill at go-live → added to schema sameAs when present
   },
-  // TODO(open-item-1): real realtor.ca search + Derrick's agent profile URL
+  // Public realtor.ca Toronto search (no IDX licence needed).
   listingsSearchUrl: 'https://www.realtor.ca/on/toronto/real-estate',
-  agentProfileUrl: 'https://www.realtor.ca/on/toronto/real-estate',
 };
 ```
 
-- [ ] **Step 2: Create `src/styles/tokens.css`** (brand palette — Real Broker black/gold; refine against `extracted/css/styleAndTheme.css`)
+- [ ] **Step 2: Create `src/data/config.ts`** (the only unknown values; empty → graceful fallback)
+
+```ts
+// External go-live configuration. Fill these in before launch (plan Task 19).
+// Empty values make the related feature render a graceful fallback instead of a broken widget.
+export const CONFIG = {
+  web3formsAccessKey: '',        // forms — https://web3forms.com  (empty → contact form shows call/email)
+  tidycalUrl: '',                // booking — e.g. https://tidycal.com/derrickgarcia (empty → call/email block)
+  cloudflareAnalyticsToken: '',  // analytics beacon token (empty → no analytics script)
+};
+```
+
+- [ ] **Step 3: Create `src/styles/tokens.css`** (REAL brand colours from the old theme: near-black `#191919`, gray text `#505050`, light-gray `#a8a8a8`, white; gold accent from the Real Broker emblem)
 
 ```css
 :root {
   --color-bg: #ffffff;
-  --color-fg: #1a1a1a;
-  --color-muted: #5b5b5b;
-  --color-accent: #c8a04e;     /* Real "gold" — verify against extracted theme */
-  --color-accent-ink: #0f0f0f;
+  --color-fg: #191919;          /* --g-primary-color from old theme (headings/primary) */
+  --color-text: #505050;        /* --g-text-color (body) */
+  --color-muted: #a8a8a8;       /* --g-tip-color (secondary) */
+  --color-accent: #b08d57;      /* gold — sampled from Real Broker emblem */
+  --color-accent-ink: #191919;
   --color-line: #e6e6e6;
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --maxw: 1100px;
@@ -620,26 +633,27 @@ export const SITE = {
 }
 ```
 
-- [ ] **Step 3: Create `src/styles/global.css`**
+- [ ] **Step 4: Create `src/styles/global.css`**
 
 ```css
 @import './tokens.css';
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; font-family: var(--font-sans); color: var(--color-fg);
+body { margin: 0; font-family: var(--font-sans); color: var(--color-text);
   background: var(--color-bg); line-height: 1.55; }
+h1, h2, h3 { color: var(--color-fg); line-height: 1.2; }
 img { max-width: 100%; height: auto; display: block; }
 a { color: inherit; }
 .container { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--space); }
 .btn { display: inline-block; padding: .7rem 1.2rem; border-radius: var(--radius);
-  background: var(--color-accent); color: var(--color-accent-ink); font-weight: 600;
-  text-decoration: none; border: 0; cursor: pointer; }
+  background: var(--color-fg); color: #fff; font-weight: 600; text-decoration: none; border: 0; cursor: pointer; }
+.btn:hover { background: var(--color-accent); color: var(--color-accent-ink); }
 .btn--ghost { background: transparent; border: 1px solid var(--color-line); color: var(--color-fg); }
 :focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 ```
 
-- [ ] **Step 4: Create `src/components/Header.astro`**
+- [ ] **Step 5: Create `src/components/Header.astro`**
 
 ```astro
 ---
@@ -672,17 +686,17 @@ const nav = [
 </header>
 <style>
   .site-header { border-bottom: 1px solid var(--color-line); }
-  .site-header__inner { display: flex; gap: 1rem; align-items: center;
-    justify-content: space-between; padding-block: .8rem; flex-wrap: wrap; }
-  .site-header__brand { font-weight: 700; text-decoration: none; }
+  .site-header__inner { display: flex; gap: 1rem; align-items: center; justify-content: space-between;
+    padding-block: .8rem; flex-wrap: wrap; }
+  .site-header__brand { font-weight: 700; text-decoration: none; color: var(--color-fg); }
   .site-header__brand span { color: var(--color-muted); font-weight: 400; }
   nav ul { display: flex; gap: 1rem; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
-  nav a { text-decoration: none; }
+  nav a { text-decoration: none; color: var(--color-text); }
   nav a:hover { color: var(--color-accent); }
 </style>
 ```
 
-- [ ] **Step 5: Create `src/components/Footer.astro`**
+- [ ] **Step 6: Create `src/components/Footer.astro`**
 
 ```astro
 ---
@@ -710,12 +724,13 @@ import { SITE } from '../data/site.ts';
   .site-footer { border-top: 1px solid var(--color-line); margin-top: 3rem; padding-block: 2rem; }
   .site-footer__grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); }
   .site-footer nav { display: flex; flex-direction: column; gap: .3rem; }
+  .site-footer nav a { text-decoration: none; }
   .site-footer__social { display: flex; gap: 1rem; }
   .site-footer__legal { color: var(--color-muted); font-size: .85rem; margin-top: 1.5rem; }
 </style>
 ```
 
-- [ ] **Step 6: Create `src/layouts/BaseLayout.astro`** (per-page SEO + analytics in ONE place)
+- [ ] **Step 7: Create `src/layouts/BaseLayout.astro`** (per-page SEO + analytics in ONE place; analytics renders only when a token is configured)
 
 ```astro
 ---
@@ -723,14 +738,10 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE } from '../data/site.ts';
+import { CONFIG } from '../data/config.ts';
 
-const {
-  title, description,
-  ogImage = '/og-default.png',
-  noindex = false,
-} = Astro.props;
+const { title, description, ogImage = '/og-default.png', noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, SITE.url).href;
-const CF_ANALYTICS_TOKEN = ''; // TODO(open-item): Cloudflare Web Analytics token
 ---
 <!doctype html>
 <html lang="en">
@@ -760,15 +771,15 @@ const CF_ANALYTICS_TOKEN = ''; // TODO(open-item): Cloudflare Web Analytics toke
     <Header />
     <main id="main" class="container"><slot /></main>
     <Footer />
-    {CF_ANALYTICS_TOKEN && (
+    {CONFIG.cloudflareAnalyticsToken && (
       <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon={`{"token": "${CF_ANALYTICS_TOKEN}"}`}></script>
+        data-cf-beacon={`{"token": "${CONFIG.cloudflareAnalyticsToken}"}`}></script>
     )}
   </body>
 </html>
 ```
 
-- [ ] **Step 7: Replace `src/pages/index.astro` with a real smoke page using the layout**
+- [ ] **Step 8: Replace `src/pages/index.astro` with a layout smoke page** (becomes the real home in Task 13)
 
 ```astro
 ---
@@ -780,86 +791,79 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 ```
 
-- [ ] **Step 8: Verify build + content**
+- [ ] **Step 9: Verify build + content**
 
-Run: `npm run build`
-Expected: build succeeds.
-Run: `grep -r "site-header__brand" dist/index.html && grep -r "canonical" dist/index.html`
-Expected: both found (header rendered, canonical present).
+Run: `npm run build && grep -q "site-header__brand" dist/index.html && grep -q "canonical" dist/index.html && echo OK`
+Expected: `OK`.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
 git add -A
-git commit -m "feat: design tokens, global CSS, BaseLayout, Header, Footer"
+git commit -m "feat: site data, config, brand tokens, global CSS, BaseLayout, Header, Footer"
 ```
 
 ---
 
-## Task 7: Migrate real assets (headshots + logos)
+## Task 7: Verify real assets are present
 
-**Files:**
-- Create: `src/assets/profile/*`, `src/assets/branding/*` (copied from `extracted/`)
+**Files:** none (the headshots + logos are already committed at `src/assets/`)
 
-- [ ] **Step 1: Copy the real (non-stock) assets into the build tree**
+- [ ] **Step 1: Confirm the committed assets exist**
 
+Run:
 ```bash
-mkdir -p src/assets/profile src/assets/branding
-cp extracted/images/profile/derrick-garcia.webp src/assets/profile/
-cp extracted/images/profile/pina-marrella.webp src/assets/profile/
-cp extracted/images/profile/voula-spingos.webp src/assets/profile/
-cp extracted/images/branding/real-wordmark-white.png src/assets/branding/
-cp extracted/images/branding/real-emblem-gold.png src/assets/branding/
+ls src/assets/profile/derrick-garcia.webp src/assets/profile/pina-marrella.webp \
+   src/assets/profile/voula-spingos.webp src/assets/branding/real-emblem-gold.png \
+   src/assets/branding/real-wordmark-white.png
 ```
+Expected: all five paths list without error. (These were copied from the old site and committed already;
+nothing reads from `extracted/`. Generic stock banners were intentionally NOT migrated — licensed hero
+photography is a go-live item.)
 
-- [ ] **Step 2: Verify files exist**
-
-Run: `ls src/assets/profile src/assets/branding`
-Expected: 3 profile webp files + 2 branding png files.
-(Note: hero/banner stock images are intentionally NOT migrated — spec §6. Licensed hero photography is open-item-4.)
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add src/assets
-git commit -m "chore: migrate real headshots + Real Broker logos into src/assets"
-```
+- [ ] **Step 2: No commit needed** (assets already committed). Proceed to Task 8.
 
 ---
 
-## Task 8: About / Team page (agents data + AgentCard)
+## Task 8: About / Team page (real bios)
 
 **Files:**
 - Create: `src/data/agents.ts`, `src/components/AgentCard.astro`, `src/pages/about.astro`
 
-- [ ] **Step 1: Create `src/data/agents.ts`** (bios are open-item-5; placeholders flagged)
+- [ ] **Step 1: Create `src/data/agents.ts`** (REAL bios from the old site; Voula had no source bio — honest one-liner; profile URLs empty until provided)
 
 ```ts
 export interface Agent {
   slug: string; name: string; title: string;
   photo: string;          // path under src/assets
   bio: string;
-  realtorCaUrl: string; realBrokerUrl: string;
+  realtorCaUrl: string; realBrokerUrl: string;  // empty → link hidden (fill at go-live)
 }
-// TODO(open-item-5): confirm bios from extracted/pages/agent-*.html
-// TODO(open-item-1): real realtor.ca + Real Broker profile URLs per agent
+
 export const AGENTS: Agent[] = [
-  { slug: 'derrick-garcia', name: 'Derrick Garcia', title: 'Real Estate Agent',
+  {
+    slug: 'derrick-garcia', name: 'Derrick Garcia', title: 'Broker',
     photo: 'profile/derrick-garcia.webp',
-    bio: 'Toronto & GTA real estate agent with Real Broker Ontario.',
-    realtorCaUrl: 'https://www.realtor.ca/', realBrokerUrl: 'https://onereal.com/' },
-  { slug: 'pina-marrella', name: 'Pina Marrella', title: 'Real Estate Agent',
+    bio: "A trusted real estate professional who brings a unique edge to the industry. Based in Caledon and deeply familiar with the Peel region and Orangeville, Derrick has built a reputation for delivering exceptional results, backed by his 99.9% list-to-sell ratio. With over a decade of experience in the construction industry, Derrick possesses a keen eye for design, architecture, and market trends — he understands not just how a home looks, but how it's built, giving his clients an advantage when buying or selling. Known for his honest advice, sharp negotiation skills, and deep market knowledge, Derrick ensures his clients make informed decisions with confidence. When he's not working, you'll likely find him at his daughter's soccer games, exploring new architectural designs, or walking his dog, Maverick, in the community he proudly calls home.",
+    realtorCaUrl: '', realBrokerUrl: '',
+  },
+  {
+    slug: 'pina-marrella', name: 'Pina Marrella', title: 'Agent',
     photo: 'profile/pina-marrella.webp',
-    bio: 'Real estate agent on the Derrick Garcia team.',
-    realtorCaUrl: 'https://www.realtor.ca/', realBrokerUrl: 'https://onereal.com/' },
-  { slug: 'voula-spingos', name: 'Voula Spingos', title: 'Real Estate Agent',
+    bio: "A seasoned real estate agent fluent in French, English, and Italian (with basic Spanish), Pina brings 21 years of licensing expertise to the table. Partnering with a top-ranking agent group, she excels at maximizing home prices, facilitating smooth transitions, and providing personalized advice — and connects clients with a trusted network of professionals such as lawyers and mortgage brokers. Her business ethos revolves around lasting relationships, whether you're a first-time buyer or a seasoned investor. If you seek a dedicated, honest, and attentive realtor committed to exceptional service and results, she will guide you through every step of your real estate journey.",
+    realtorCaUrl: '', realBrokerUrl: '',
+  },
+  {
+    slug: 'voula-spingos', name: 'Voula Spingos', title: 'Agent',
     photo: 'profile/voula-spingos.webp',
-    bio: 'Real estate agent on the Derrick Garcia team.',
-    realtorCaUrl: 'https://www.realtor.ca/', realBrokerUrl: 'https://onereal.com/' },
+    // Source site had no bio for Voula; brief accurate statement until a full bio is provided.
+    bio: 'Real estate agent on the Derrick Garcia team at Real Broker Ontario, serving Toronto and the Greater Toronto Area.',
+    realtorCaUrl: '', realBrokerUrl: '',
+  },
 ];
 ```
 
-- [ ] **Step 2: Create `src/components/AgentCard.astro`**
+- [ ] **Step 2: Create `src/components/AgentCard.astro`** (profile link renders only when a URL is set)
 
 ```astro
 ---
@@ -873,9 +877,11 @@ const img = images[`../assets/${agent.photo}`]?.default;
   <h3>{agent.name}</h3>
   <p class="agent-card__title">{agent.title}</p>
   <p>{agent.bio}</p>
-  <p class="agent-card__links">
-    <a href={agent.realtorCaUrl} target="_blank" rel="noopener noreferrer">Listings on realtor.ca ↗</a>
-  </p>
+  {agent.realtorCaUrl && (
+    <p class="agent-card__links">
+      <a href={agent.realtorCaUrl} target="_blank" rel="noopener noreferrer">Listings on realtor.ca ↗</a>
+    </p>
+  )}
 </article>
 <style>
   .agent-card { border: 1px solid var(--color-line); border-radius: var(--radius); padding: 1rem; }
@@ -884,7 +890,7 @@ const img = images[`../assets/${agent.photo}`]?.default;
 </style>
 ```
 
-- [ ] **Step 3: Create `src/pages/about.astro`**
+- [ ] **Step 3: Create `src/pages/about.astro`** (real team tagline from the old site)
 
 ```astro
 ---
@@ -895,25 +901,28 @@ import { AGENTS } from '../data/agents.ts';
 <BaseLayout title="About Our Team — Derrick Garcia, Real Broker Ontario"
   description="Meet Derrick Garcia and the team serving Toronto & the GTA with Real Broker Ontario.">
   <h1>Our Team</h1>
+  <p class="lede">We are committed to maintaining the standard for excellence and leadership. Our primary
+    goal is to provide the highest level of service to our clients through integrity.</p>
   <div class="team-grid">
     {AGENTS.map((agent) => <AgentCard agent={agent} />)}
   </div>
 </BaseLayout>
 <style>
-  .team-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); }
+  .lede { font-size: 1.15rem; color: var(--color-text); max-width: 60ch; }
+  .team-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); margin-top: 1.5rem; }
 </style>
 ```
 
 - [ ] **Step 4: Verify build + content**
 
-Run: `npm run build && grep -l "Pina Marrella" dist/about/index.html`
-Expected: build succeeds; `dist/about/index.html` contains all three agent names.
+Run: `npm run build && grep -q "Pina Marrella" dist/about/index.html && grep -q "99.9% list-to-sell" dist/about/index.html && echo OK`
+Expected: `OK` (all three agents + Derrick's real bio present).
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add -A
-git commit -m "feat: About/Team page with AgentCard and agents data"
+git commit -m "feat: About/Team page with real agent bios"
 ```
 
 ---
@@ -923,7 +932,7 @@ git commit -m "feat: About/Team page with AgentCard and agents data"
 **Files:**
 - Create: `src/components/MortgageCalculator.astro`, `src/pages/mortgage-calculator.astro`
 
-- [ ] **Step 1: Create `src/components/MortgageCalculator.astro`** (imports the tested math; runs in the browser)
+- [ ] **Step 1: Create `src/components/MortgageCalculator.astro`**
 
 ```astro
 ---
@@ -976,9 +985,8 @@ git commit -m "feat: About/Team page with AgentCard and agents data"
   .calc__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
   .calc label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; }
   .calc input, .calc select { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
-  .calc__out { display: block; margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--color-line);
-    border-radius: var(--radius); font-size: 1.1rem; }
-  .calc__out strong { font-size: 1.5rem; color: var(--color-accent-ink); }
+  .calc__out { display: block; margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--color-line); border-radius: var(--radius); font-size: 1.1rem; }
+  .calc__out strong { font-size: 1.5rem; color: var(--color-fg); }
   .calc__note { color: var(--color-muted); font-size: .85rem; margin-top: 1rem; }
 </style>
 ```
@@ -997,16 +1005,14 @@ import MortgageCalculator from '../components/MortgageCalculator.astro';
 </BaseLayout>
 ```
 
-- [ ] **Step 3: Verify build + that the page bundles the island script**
+- [ ] **Step 3: Verify build**
 
-Run: `npm run build`
-Expected: succeeds.
-Run: `test -f dist/mortgage-calculator/index.html && grep -q "per payment\|m-price" dist/mortgage-calculator/index.html && echo OK`
-Expected: `OK` (page exists with calculator markup; Astro bundles the `<script>` import).
+Run: `npm run build && test -f dist/mortgage-calculator/index.html && grep -q "m-price" dist/mortgage-calculator/index.html && echo OK`
+Expected: `OK`.
 
 - [ ] **Step 4: Manual smoke (dev server)**
 
-Run: `npm run dev` then open `/mortgage-calculator`; change price/rate → output updates live; set down payment to 10% of price → "CMHC premium" line appears. Stop the server.
+Run: `npm run dev` → open `/mortgage-calculator`; change price/rate → output updates live; set down payment to 10% of price → "CMHC premium" line appears. Stop the server.
 
 - [ ] **Step 5: Commit**
 
@@ -1067,7 +1073,7 @@ git commit -m "feat: Canadian mortgage calculator (island + page)"
   .calc label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; }
   .calc input, .calc select { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
   .calc__out { display: block; margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--color-line); border-radius: var(--radius); font-size: 1.1rem; }
-  .calc__out strong { font-size: 1.5rem; color: var(--color-accent-ink); }
+  .calc__out strong { font-size: 1.5rem; color: var(--color-fg); }
   .calc__note { color: var(--color-muted); font-size: .85rem; margin-top: 1rem; }
 </style>
 ```
@@ -1143,7 +1149,7 @@ git commit -m "feat: affordability calculator (island + page)"
   .calc__check { flex-direction: row; align-items: center; gap: .5rem; }
   .calc input[type=number] { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
   .calc__out { display: block; margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--color-line); border-radius: var(--radius); font-size: 1.1rem; }
-  .calc__out strong { font-size: 1.5rem; color: var(--color-accent-ink); }
+  .calc__out strong { font-size: 1.5rem; color: var(--color-fg); }
   .calc__note { color: var(--color-muted); font-size: .85rem; margin-top: 1rem; }
 </style>
 ```
@@ -1176,57 +1182,63 @@ git commit -m "feat: Ontario + Toronto land transfer tax calculator (island + pa
 
 ---
 
-## Task 12: Contact page — Web3Forms lead form + TidyCal booking
+## Task 12: Contact page — Web3Forms lead form + TidyCal booking (graceful fallbacks)
 
 **Files:**
 - Create: `src/components/LeadForm.astro`, `src/pages/contact.astro`, `src/pages/thanks.astro`
 
-- [ ] **Step 1: Create `src/components/LeadForm.astro`** (honeypot + time-trap + hCaptcha hook; access key is open-item config)
+- [ ] **Step 1: Create `src/components/LeadForm.astro`** (renders the real form when a key is set; otherwise a call/email fallback — never a broken form)
 
 ```astro
 ---
-const {
-  formName = 'Contact',
-  subject = '🏠 New website lead — Contact',
-  accessKey = 'YOUR_WEB3FORMS_ACCESS_KEY', // TODO(open-item): Web3Forms access key per form
-} = Astro.props;
+import { CONFIG } from '../data/config.ts';
+import { SITE } from '../data/site.ts';
+const { subject = '🏠 New website lead — Contact', formName = 'Contact' } = Astro.props;
+const key = CONFIG.web3formsAccessKey;
 ---
-<form action="https://api.web3forms.com/submit" method="POST" class="lead-form">
-  <input type="hidden" name="access_key" value={accessKey} />
-  <input type="hidden" name="subject" value={subject} />
-  <input type="hidden" name="from_name" value={formName} />
-  <input type="hidden" name="redirect" value="https://derrickgarcia.ca/thanks" />
-  <!-- honeypot: bots fill this; humans never see it -->
-  <input type="checkbox" name="botcheck" class="visually-hidden" tabindex="-1" autocomplete="off" />
-  <div class="lead-form__grid">
-    <label>Name<input type="text" name="name" required autocomplete="name" /></label>
-    <label>Email<input type="email" name="email" required autocomplete="email" /></label>
-    <label>Phone<input type="tel" name="phone" autocomplete="tel" /></label>
+{key ? (
+  <form action="https://api.web3forms.com/submit" method="POST" class="lead-form">
+    <input type="hidden" name="access_key" value={key} />
+    <input type="hidden" name="subject" value={subject} />
+    <input type="hidden" name="from_name" value={formName} />
+    <input type="hidden" name="redirect" value="https://derrickgarcia.ca/thanks" />
+    <input type="checkbox" name="botcheck" class="visually-hidden" tabindex="-1" autocomplete="off" />
+    <div class="lead-form__grid">
+      <label>Name<input type="text" name="name" required autocomplete="name" /></label>
+      <label>Email<input type="email" name="email" required autocomplete="email" /></label>
+      <label>Phone<input type="tel" name="phone" autocomplete="tel" /></label>
+    </div>
+    <label>How can we help?<textarea name="message" rows="4" required></textarea></label>
+    <label class="lead-form__consent">
+      <input type="checkbox" name="consent" required />
+      I agree to be contacted about my inquiry. See our <a href="/privacy">privacy policy</a>.
+    </label>
+    <button type="submit" class="btn">Send message</button>
+  </form>
+) : (
+  <div class="lead-form__fallback">
+    <p>Reach Derrick directly:</p>
+    <p><a class="btn" href={SITE.phoneHref}>Call {SITE.phoneDisplay}</a>
+       <a class="btn btn--ghost" href={`mailto:${SITE.email}`}>Email {SITE.email}</a></p>
   </div>
-  <label>How can we help?<textarea name="message" rows="4" required></textarea></label>
-  <label class="lead-form__consent">
-    <input type="checkbox" name="consent" required />
-    I agree to be contacted about my inquiry. See our <a href="/privacy">privacy policy</a>.
-  </label>
-  <!-- hCaptcha (free via Web3Forms): add the widget div when enabling. TODO(open-item): enable hCaptcha -->
-  <button type="submit" class="btn">Send message</button>
-</form>
+)}
 <style>
   .lead-form__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
   .lead-form label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; margin-bottom: 1rem; }
   .lead-form input, .lead-form textarea { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
   .lead-form__consent { flex-direction: row; align-items: flex-start; gap: .5rem; font-weight: 400; }
+  .lead-form__fallback .btn { margin-right: .5rem; }
 </style>
 ```
 
-- [ ] **Step 2: Create `src/pages/contact.astro`** (TidyCal embed URL is open-item config)
+- [ ] **Step 2: Create `src/pages/contact.astro`** (TidyCal iframe when configured; otherwise a call/email card)
 
 ```astro
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import LeadForm from '../components/LeadForm.astro';
 import { SITE } from '../data/site.ts';
-const TIDYCAL_URL = 'https://tidycal.com/'; // TODO(open-item-6): Derrick's TidyCal booking URL
+import { CONFIG } from '../data/config.ts';
 ---
 <BaseLayout title="Contact Derrick Garcia — Real Broker Ontario"
   description="Contact Derrick Garcia for Toronto & GTA real estate. Call, email, or book a meeting.">
@@ -1240,8 +1252,13 @@ const TIDYCAL_URL = 'https://tidycal.com/'; // TODO(open-item-6): Derrick's Tidy
     </section>
     <section>
       <h2>Book a meeting</h2>
-      <iframe src={TIDYCAL_URL} title="Book a meeting with Derrick Garcia" loading="lazy"
-        style="width:100%;min-height:600px;border:1px solid var(--color-line);border-radius:var(--radius)"></iframe>
+      {CONFIG.tidycalUrl ? (
+        <iframe src={CONFIG.tidycalUrl} title="Book a meeting with Derrick Garcia" loading="lazy"
+          style="width:100%;min-height:600px;border:1px solid var(--color-line);border-radius:var(--radius)"></iframe>
+      ) : (
+        <p>To book a meeting, call <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a> or email
+           <a href={`mailto:${SITE.email}`}> {SITE.email}</a>.</p>
+      )}
     </section>
   </div>
 </BaseLayout>
@@ -1250,7 +1267,7 @@ const TIDYCAL_URL = 'https://tidycal.com/'; // TODO(open-item-6): Derrick's Tidy
 </style>
 ```
 
-- [ ] **Step 3: Create `src/pages/thanks.astro`** (Web3Forms redirect target)
+- [ ] **Step 3: Create `src/pages/thanks.astro`**
 
 ```astro
 ---
@@ -1263,16 +1280,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 ```
 
-- [ ] **Step 4: Verify build**
+- [ ] **Step 4: Verify build** (fallbacks render while config is empty)
 
-Run: `npm run build && grep -q "api.web3forms.com" dist/contact/index.html && test -f dist/thanks/index.html && echo OK`
-Expected: `OK`.
+Run: `npm run build && grep -q "Reach Derrick directly" dist/contact/index.html && test -f dist/thanks/index.html && echo OK`
+Expected: `OK` (with empty config the call/email fallback shows; after the key is set in Task 19 the real form renders).
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add -A
-git commit -m "feat: contact page with Web3Forms lead form and TidyCal booking"
+git commit -m "feat: contact page with Web3Forms form + TidyCal booking (graceful fallbacks)"
 ```
 
 ---
@@ -1281,18 +1298,50 @@ git commit -m "feat: contact page with Web3Forms lead form and TidyCal booking"
 
 **Files:**
 - Modify: `src/pages/index.astro`
+- Create: `src/components/RealEstateAgentSchema.astro`
 
-- [ ] **Step 1: Replace `src/pages/index.astro`**
+- [ ] **Step 1: Create `src/components/RealEstateAgentSchema.astro`** (empty `sameAs` entries filtered out)
+
+```astro
+---
+import { SITE } from '../data/site.ts';
+const sameAs = [SITE.social.instagram, SITE.social.facebook, SITE.social.googleBusiness].filter(Boolean);
+const data = {
+  '@context': 'https://schema.org',
+  '@type': 'RealEstateAgent',
+  '@id': `${SITE.url}/#agent`,
+  name: SITE.legalName,
+  url: SITE.url,
+  telephone: SITE.phoneDisplay,
+  email: SITE.email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: SITE.address.street,
+    addressLocality: SITE.address.city,
+    addressRegion: SITE.address.region,
+    postalCode: SITE.address.postalCode,
+    addressCountry: SITE.address.country,
+  },
+  areaServed: ['Toronto', 'Greater Toronto Area', 'Ontario'],
+  sameAs,
+};
+---
+<script type="application/ld+json" is:inline set:html={JSON.stringify(data)} />
+```
+
+- [ ] **Step 2: Replace `src/pages/index.astro`**
 
 ```astro
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AgentCard from '../components/AgentCard.astro';
+import RealEstateAgentSchema from '../components/RealEstateAgentSchema.astro';
 import { AGENTS } from '../data/agents.ts';
 import { SITE } from '../data/site.ts';
 ---
 <BaseLayout title="Derrick Garcia — Toronto & GTA Real Estate Agent | Real Broker Ontario"
-  description="Buy or sell with Derrick Garcia, a Toronto & GTA real estate agent with Real Broker Ontario. Search homes, estimate your mortgage, and get in touch.">
+  description="Buy or sell with Derrick Garcia, a Toronto & GTA real estate broker with Real Broker Ontario. Search homes, estimate your mortgage, and get in touch.">
+  <RealEstateAgentSchema slot="head" />
   <section class="hero">
     <h1>Toronto & GTA real estate, done right</h1>
     <p>Derrick Garcia · {SITE.brokerage}</p>
@@ -1327,26 +1376,26 @@ import { SITE } from '../data/site.ts';
 </style>
 ```
 
-- [ ] **Step 2: Verify build**
+- [ ] **Step 3: Verify build**
 
-Run: `npm run build && grep -q "Search homes" dist/index.html && echo OK`
+Run: `npm run build && grep -q "Search homes" dist/index.html && grep -q "RealEstateAgent" dist/index.html && echo OK`
 Expected: `OK`.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add -A
-git commit -m "feat: home page (hero, tools, team)"
+git commit -m "feat: home page (hero, tools, team) + RealEstateAgent schema"
 ```
 
 ---
 
-## Task 14: Privacy, Accessibility, 404
+## Task 14: Privacy, Accessibility, 404 (real accessibility text)
 
 **Files:**
 - Create: `src/pages/privacy.astro`, `src/pages/accessibility.astro`, `src/pages/404.astro`
 
-- [ ] **Step 1: Create `src/pages/privacy.astro`** (forms/PII + CASL, not cookies — see `extracted/pages/privacy-terms.html` for reference)
+- [ ] **Step 1: Create `src/pages/privacy.astro`** (forms/PII + CASL — authored fresh; the old Lofty page had no real policy text)
 
 ```astro
 ---
@@ -1358,8 +1407,8 @@ import { SITE } from '../data/site.ts';
   <p>This website collects personal information only when you submit it through a form (name, email, phone,
     and your message). We use it solely to respond to your inquiry. We do not sell your information.</p>
   <h2>How forms are processed</h2>
-  <p>Form submissions are processed by Web3Forms and delivered to us by email. Spam protection is provided by
-    hCaptcha. These services may process data on servers outside Canada.</p>
+  <p>Form submissions are processed by Web3Forms and delivered to us by email. These services may process
+    data on servers outside Canada.</p>
   <h2>Analytics</h2>
   <p>We use privacy-friendly, cookieless analytics (Cloudflare Web Analytics) that measure aggregate page
     visits only. No cookies are set and you are not individually tracked.</p>
@@ -1372,7 +1421,7 @@ import { SITE } from '../data/site.ts';
 </BaseLayout>
 ```
 
-- [ ] **Step 2: Create `src/pages/accessibility.astro`** (carry over the old statement; reference `extracted/pages/accessibility.html`)
+- [ ] **Step 2: Create `src/pages/accessibility.astro`** (REAL statement carried over from the old site)
 
 ```astro
 ---
@@ -1381,11 +1430,16 @@ import { SITE } from '../data/site.ts';
 ---
 <BaseLayout title="Accessibility — Derrick Garcia" description="Our commitment to an accessible website (WCAG 2.1 Level AA).">
   <h1>Accessibility</h1>
-  <p>We are committed to making this website accessible and conforming to WCAG 2.1 Level AA. We continually
-    work to improve the experience for everyone and apply relevant accessibility standards.</p>
-  <p>If you have difficulty accessing any part of this site, or need information in an alternate format, contact
-    us at <a href={`mailto:${SITE.email}`}>{SITE.email}</a> or <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a>
-    and we will help.</p>
+  <p>We actively work to maintain a website with content that is accessible to all visitors. This site is
+    updated on a regular basis in order for it to be as accessible as possible. To the extent possible, we aim
+    to meet the Level AA Success Criteria found in the Web Content Accessibility Guidelines 2.1 (WCAG 2.1).</p>
+  <p>If you are in need of assistance to navigate this website or access real estate information and property
+    data, please contact us using any of the options below and we will make every reasonable effort to assist
+    you. Please provide as much information as possible so that we can address your specific needs:</p>
+  <ul>
+    <li>Phone: <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a></li>
+    <li>Email: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+  </ul>
 </BaseLayout>
 ```
 
@@ -1403,58 +1457,31 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 - [ ] **Step 4: Verify build**
 
-Run: `npm run build && test -f dist/privacy/index.html && test -f dist/accessibility/index.html && test -f dist/404.html && echo OK`
+Run: `npm run build && grep -q "WCAG 2.1" dist/accessibility/index.html && test -f dist/privacy/index.html && test -f dist/404.html && echo OK`
 Expected: `OK`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add -A
-git commit -m "feat: privacy, accessibility, and 404 pages"
+git commit -m "feat: privacy, accessibility (real statement), and 404 pages"
 ```
 
 ---
 
-## Task 15: JSON-LD structured data (RealEstateAgent + Person)
+## Task 15: Per-agent Person JSON-LD
 
 **Files:**
-- Create: `src/components/RealEstateAgentSchema.astro`, `src/components/AgentSchema.astro`
-- Modify: `src/pages/index.astro`, `src/pages/about.astro`
+- Create: `src/components/AgentSchema.astro`
+- Modify: `src/pages/about.astro`
 
-- [ ] **Step 1: Create `src/components/RealEstateAgentSchema.astro`**
-
-```astro
----
-import { SITE } from '../data/site.ts';
-const data = {
-  '@context': 'https://schema.org',
-  '@type': 'RealEstateAgent',
-  '@id': `${SITE.url}/#agent`,
-  name: SITE.legalName,
-  url: SITE.url,
-  telephone: SITE.phoneDisplay,
-  email: SITE.email,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: SITE.address.street,
-    addressLocality: SITE.address.city,
-    addressRegion: SITE.address.region,
-    postalCode: SITE.address.postalCode,
-    addressCountry: SITE.address.country,
-  },
-  areaServed: ['Toronto', 'Greater Toronto Area', 'Ontario'],
-  sameAs: [SITE.social.instagram, SITE.social.facebook, SITE.social.googleBusiness],
-};
----
-<script type="application/ld+json" is:inline set:html={JSON.stringify(data)} />
-```
-
-- [ ] **Step 2: Create `src/components/AgentSchema.astro`**
+- [ ] **Step 1: Create `src/components/AgentSchema.astro`** (empty profile URLs filtered out of `sameAs`)
 
 ```astro
 ---
 import { SITE } from '../data/site.ts';
 const { agent } = Astro.props;
+const sameAs = [agent.realtorCaUrl, agent.realBrokerUrl].filter(Boolean);
 const data = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -1462,45 +1489,33 @@ const data = {
   jobTitle: agent.title,
   worksFor: { '@type': 'Organization', name: SITE.brokerage },
   url: `${SITE.url}/about`,
-  sameAs: [agent.realtorCaUrl, agent.realBrokerUrl],
+  ...(sameAs.length ? { sameAs } : {}),
 };
 ---
 <script type="application/ld+json" is:inline set:html={JSON.stringify(data)} />
 ```
 
-- [ ] **Step 3: Add the agent schema to `src/pages/index.astro`**
+- [ ] **Step 2: Add Person schema to `src/pages/about.astro`**
 
-Add the import under the existing imports:
-```astro
-import RealEstateAgentSchema from '../components/RealEstateAgentSchema.astro';
-```
-Add inside `<BaseLayout>` (anywhere in the default slot, e.g. right after the opening tag):
-```astro
-  <RealEstateAgentSchema slot="head" />
-```
-(Note: `BaseLayout` already renders `<slot name="head" />` in `<head>`.)
-
-- [ ] **Step 4: Add Person schema to `src/pages/about.astro`**
-
-Add the import:
+Add this import to the existing frontmatter imports:
 ```astro
 import AgentSchema from '../components/AgentSchema.astro';
 ```
-Render one per agent in the `<head>` slot — add above `<h1>Our Team</h1>`:
+Add this line immediately after the opening `<BaseLayout ...>` tag (before `<h1>Our Team</h1>`):
 ```astro
   {AGENTS.map((agent) => <AgentSchema slot="head" agent={agent} />)}
 ```
 
-- [ ] **Step 5: Verify build + JSON-LD present**
+- [ ] **Step 3: Verify build + JSON-LD present**
 
-Run: `npm run build && grep -q "RealEstateAgent" dist/index.html && grep -q '"@type":"Person"' dist/about/index.html && echo OK`
+Run: `npm run build && grep -q '"@type":"Person"' dist/about/index.html && echo OK`
 Expected: `OK`.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add -A
-git commit -m "feat: JSON-LD RealEstateAgent + Person structured data"
+git commit -m "feat: per-agent Person JSON-LD on About page"
 ```
 
 ---
@@ -1509,15 +1524,15 @@ git commit -m "feat: JSON-LD RealEstateAgent + Person structured data"
 
 **Files:**
 - Create: `public/favicon.svg`, `public/site.webmanifest`
-- Create (binary, from logo): `public/favicon.ico`, `public/apple-touch-icon.png`, `public/og-default.png`
+- Create (raster, from logo): `public/favicon.ico`, `public/apple-touch-icon.png`, `public/og-default.png`
 
-- [ ] **Step 1: Create a placeholder `public/favicon.svg`** (replace with the real brand mark — open-item-3)
+- [ ] **Step 1: Create `public/favicon.svg`** (simple brand mark; replace with the real one if/when provided)
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="12" fill="#0f0f0f"/>
-  <text x="32" y="43" font-family="system-ui, sans-serif" font-size="34" font-weight="700"
-    text-anchor="middle" fill="#c8a04e">DG</text>
+  <rect width="64" height="64" rx="12" fill="#191919"/>
+  <text x="32" y="43" font-family="system-ui, sans-serif" font-size="32" font-weight="700"
+    text-anchor="middle" fill="#b08d57">DG</text>
 </svg>
 ```
 
@@ -1527,35 +1542,36 @@ git commit -m "feat: JSON-LD RealEstateAgent + Person structured data"
 {
   "name": "Derrick Garcia — Real Broker Ontario",
   "short_name": "Derrick Garcia",
-  "icons": [
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
-  ],
-  "theme_color": "#0f0f0f",
+  "icons": [{ "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }],
+  "theme_color": "#191919",
   "background_color": "#ffffff",
   "display": "browser"
 }
 ```
 
-- [ ] **Step 3: Generate raster icons + OG image from the SVG/logo**
+- [ ] **Step 3: Generate the raster icons + OG image**
 
-Generate `favicon.ico` (32px), `apple-touch-icon.png` (180×180), and a `og-default.png` (1200×630, brand + name). Use the Real Broker emblem (`src/assets/branding/real-emblem-gold.png`) or the placeholder SVG. Any tool is fine, e.g. with ImageMagick if available:
+Generate `favicon.ico` (32px), `apple-touch-icon.png` (180×180), and `og-default.png` (1200×630, brand + name).
+If ImageMagick is available:
 ```bash
-command -v convert && convert -background none public/favicon.svg -resize 180x180 public/apple-touch-icon.png \
-  && convert -background none public/favicon.svg -resize 32x32 public/favicon.ico || \
-  echo "TODO(open-item-3): generate favicon.ico, apple-touch-icon.png, og-default.png from the real brand mark"
+convert -background none public/favicon.svg -resize 180x180 public/apple-touch-icon.png
+convert -background none public/favicon.svg -resize 32x32 public/favicon.ico
+convert -size 1200x630 xc:'#191919' -gravity center -fill '#b08d57' \
+  -pointsize 64 -annotate +0+0 'Derrick Garcia\nReal Broker Ontario' public/og-default.png
 ```
-If ImageMagick is unavailable, leave the `TODO(open-item-3)` note; the SVG favicon still works in modern browsers and the build does not fail. Provide a temporary 1200×630 `public/og-default.png` (solid brand color with the name) so social cards aren't broken.
+If ImageMagick is unavailable, create a simple 1200×630 `public/og-default.png` by any means (the SVG
+favicon already works in modern browsers). The build must not fail for lack of these.
 
 - [ ] **Step 4: Verify build**
 
-Run: `npm run build && test -f dist/favicon.svg && test -f dist/site.webmanifest && echo OK`
+Run: `npm run build && test -f dist/favicon.svg && test -f dist/site.webmanifest && test -f dist/og-default.png && echo OK`
 Expected: `OK`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add -A
-git commit -m "feat: favicon set, web manifest, default OG image (placeholder brand mark)"
+git commit -m "feat: favicon set, web manifest, default OG image"
 ```
 
 ---
@@ -1564,7 +1580,7 @@ git commit -m "feat: favicon set, web manifest, default OG image (placeholder br
 
 **Files:** none (verification only)
 
-- [ ] **Step 1: Run the unit tests**
+- [ ] **Step 1: Unit tests**
 
 Run: `npm test`
 Expected: PASS — all `mortgage-math` suites green.
@@ -1572,9 +1588,9 @@ Expected: PASS — all `mortgage-math` suites green.
 - [ ] **Step 2: Clean build**
 
 Run: `rm -rf dist && npm run build`
-Expected: succeeds with no errors.
+Expected: succeeds, no errors.
 
-- [ ] **Step 3: Verify all routes built**
+- [ ] **Step 3: All routes built**
 
 Run:
 ```bash
@@ -1586,16 +1602,17 @@ test -f dist/sitemap-index.xml && echo "ok sitemap" || echo "MISSING sitemap"
 ```
 Expected: every line prints `ok ...`.
 
-- [ ] **Step 4: Verify SEO essentials present on the home page**
+- [ ] **Step 4: SEO essentials on the home page**
 
 Run: `grep -c -e 'rel="canonical"' -e 'og:title' -e 'application/ld+json' dist/index.html`
-Expected: ≥ 3 (canonical, OG, JSON-LD all present).
+Expected: ≥ 3.
 
-- [ ] **Step 5: Preview locally and click through**
+- [ ] **Step 5: Preview + click-through**
 
-Run: `npm run preview` → visit every route; confirm calculators update live, the contact form renders, nav works, no console errors. Stop the server.
+Run: `npm run preview` → visit every route; confirm calculators update live, the contact page renders
+(call/email fallbacks until config is filled), nav works, no console errors. Stop the server.
 
-- [ ] **Step 6: Commit (if any fixups were needed)**
+- [ ] **Step 6: Commit (fixups if any)**
 
 ```bash
 git add -A
@@ -1604,55 +1621,104 @@ git commit -m "test: full-site Phase 1 verification" --allow-empty
 
 ---
 
-## Task 18: Production go-live runbook (manual — requires the user)
+## Task 18: Remove the extracted/ reference snapshot
 
-> **This task is operational, not code.** It changes live DNS and depends on spec open items. Do it WITH the
-> user; do not automate DNS. Email continuity is the top risk.
+> The site no longer depends on `extracted/` — all needed assets and content are now in `src/`. Per the
+> project decision, delete the snapshot once the build is green.
 
-- [ ] **Step 1: Resolve remaining open items** before go-live: Web3Forms access key(s); TidyCal booking URL;
-  Cloudflare Web Analytics token; realtor.ca + Real Broker profile URLs (Derrick, Pina, Voula); Google Business
-  Profile URL; real testimonials (Phase 2); licensed hero photo; final brand mark/favicon. Swap each
-  `TODO(open-item-N)` placeholder and rebuild.
+- [ ] **Step 1: Confirm nothing in `src/` references `extracted/`**
 
-- [ ] **Step 2: Enable GitHub Pages** — push the repo to GitHub (user action), repo Settings → Pages →
-  Source = **GitHub Actions**. Confirm the `Deploy to GitHub Pages` workflow runs green and the site is live
-  on the temporary `*.github.io` URL. **Verify the whole site there before touching DNS.**
+Run: `! grep -rn "extracted/" src/ && echo "clean"`
+Expected: `clean` (no references).
 
-- [ ] **Step 3: Lower DNS TTL** on the current Lofty records to 300s at the registrar, ~24h before cutover.
+- [ ] **Step 2: Remove the snapshot**
+
+```bash
+git rm -r extracted/
+```
+
+- [ ] **Step 3: Rebuild to confirm nothing broke**
+
+Run: `npm run build && npm test`
+Expected: both succeed.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git commit -m "chore: remove extracted/ reference snapshot (assets + content migrated into src/)"
+```
+
+(Note: the snapshot remains recoverable from git history and the bypass scripts are documented in the
+research appendix, should a future re-pull be needed.)
+
+---
+
+## Task 19: Production go-live runbook (manual — requires the user)
+
+> **Operational, not code.** Changes live DNS; depends on the external config. Do it WITH the user.
+> Email continuity is the top risk.
+
+- [ ] **Step 1: Fill external config** — set in `src/data/config.ts`: `web3formsAccessKey`, `tidycalUrl`,
+  `cloudflareAnalyticsToken`. Set per-agent `realtorCaUrl`/`realBrokerUrl` in `src/data/agents.ts` and
+  `SITE.social.googleBusiness` in `src/data/site.ts`. Rebuild (`npm run build`) and confirm the real form,
+  booking iframe, analytics beacon, agent listing links, and GBP `sameAs` now render. Commit.
+
+- [ ] **Step 2: Enable GitHub Pages** — push the repo (user action), repo Settings → Pages → Source =
+  **GitHub Actions**. Confirm the workflow runs green and the site works on the temporary `*.github.io` URL.
+  **Verify the whole site there before touching DNS.**
+
+- [ ] **Step 3: Lower DNS TTL** on the current Lofty records to 300s, ~24h before cutover.
 
 - [ ] **Step 4: Cut over DNS** at the `.ca` registrar — keep MX/SPF/DKIM/TXT untouched (protect
-  `info@derrickgarcia.ca`); replace only web records:
+  `info@derrickgarcia.ca`); replace only the web records:
   - A `@` → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
   - AAAA `@` → `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
   - CNAME `www` → `<github-username>.github.io`
-  - Remove the old Lofty A/CNAME web records.
+  - Remove old Lofty A/CNAME web records.
 
-- [ ] **Step 5: Set custom domain + HTTPS** — repo Settings → Pages → Custom domain = `derrickgarcia.ca`;
-  wait for the green check; enable **Enforce HTTPS**.
+- [ ] **Step 5: Custom domain + HTTPS** — Settings → Pages → Custom domain = `derrickgarcia.ca`; wait for the
+  green check; enable **Enforce HTTPS**.
 
-- [ ] **Step 6: Post-cutover verification**
+- [ ] **Step 6: Post-cutover verification** — `dig +short derrickgarcia.ca A` (expect the four GitHub IPs);
+  `https://derrickgarcia.ca` serves the new site with a valid cert; **send a test email to
+  `info@derrickgarcia.ca` and confirm it still arrives**; submit the contact form → confirm lead email +
+  autoresponder; confirm Cloudflare Analytics registers the visit.
 
-Run (after propagation): `dig +short derrickgarcia.ca A` (expect the four GitHub IPs); confirm
-`https://derrickgarcia.ca` serves the new site with a valid cert; **send a test email to
-`info@derrickgarcia.ca` and confirm it still arrives**; submit the contact form and confirm the lead email +
-autoresponder arrive; confirm Cloudflare Analytics registers the visit.
+- [ ] **Step 7: Search Console** — claim the property, submit `https://derrickgarcia.ca/sitemap-index.xml`,
+  add the verification. Decommission Lofty only after all the above pass.
 
-- [ ] **Step 7: Claim Google Search Console** for the new property, submit `https://derrickgarcia.ca/sitemap-index.xml`,
-  and add the GSC verification. Decommission the Lofty site only after all of the above pass.
+---
+
+## Pre-go-live checklist (the only outstanding inputs)
+
+These cannot come from the old site; gather before Task 19:
+1. **Web3Forms access key** → `config.ts`
+2. **TidyCal booking URL** → `config.ts`
+3. **Cloudflare Web Analytics token** → `config.ts`
+4. **realtor.ca + Real Broker profile URLs** for Derrick, Pina, Voula → `agents.ts`
+5. **Google Business Profile URL** → `site.ts`
+6. *(optional)* Real brand mark/favicon to replace the `DG` placeholder mark
+7. *(optional)* Licensed hero photography (Phase 2 visual polish)
+8. *(optional)* Voula's full bio
+9. *(Phase 2)* Real testimonials
 
 ---
 
 ## Self-review (completed by plan author)
 
-- **Spec coverage:** Astro+Pages+Actions (T1), layout/CSS/header/footer (T6), Canadian calculators incl. LTT
-  (T2–T5, T9–T11), Web3Forms + TidyCal (T12), About/agents + listings link-out (T8, Header in T6), Home (T13),
-  privacy/accessibility/404 (T14), JSON-LD/SEO/analytics/favicon/sitemap/robots (T6 head, T15, T16, T1),
-  assets migration (T7), domain cutover keeping MX (T18). All spec §3–§7 + §10 Phase 1 items mapped.
+- **Spec coverage:** Astro+Pages+Actions (T1); math incl. LTT (T2–T5); data/config/tokens/layout/header/footer
+  (T6); assets verified (T7); About + real bios (T8); calculators (T9–T11); Contact w/ Web3Forms + TidyCal (T12);
+  Home + RealEstateAgent schema (T13); privacy/accessibility/404 (T14); Person schema (T15);
+  favicon/manifest/OG (T16); SEO meta + sitemap + robots + cookieless analytics (T1, T6); verification (T17);
+  extracted/ removal (T18); domain cutover keeping MX (T19). All spec §3–§7 + §10 Phase 1 items mapped.
+- **No fabricated placeholders:** real bios/accessibility text/brand colours inlined; the only blanks are the
+  genuinely-external go-live values, centralized in `config.ts`/`agents.ts`/`site.ts` with graceful fallbacks,
+  listed in the pre-go-live checklist.
+- **Type/name consistency:** `mortgage-math.js` exports (`periodicRate`, `payment`, `paymentForFrequency`,
+  `qualifyingRate`, `cmhcPremium`, `cmhcPremiumRate`, `maxAffordability`, `landTransferTax`,
+  `GDS_LIMIT`, `TDS_LIMIT`) match every island import. `SITE`, `CONFIG`, `AGENTS`/`Agent` shapes consistent
+  across components. CSS variables (`--color-bg/-fg/-text/-muted/-accent/-accent-ink/-line`) defined once in
+  `tokens.css` and used everywhere.
 - **Out of scope (correctly absent):** reviews page, evaluation/sell/rent-to-own landings, live reviews widget
-  (spec Phase 2); IDX/blog (dropped).
-- **Placeholders:** only genuine user-supplied config remains, each tagged `TODO(open-item-N)` with the build
-  succeeding on placeholders (Web3Forms key, TidyCal URL, Cloudflare token, profile URLs, GBP, brand mark).
-- **Type consistency:** `mortgage-math.js` exports used by islands match definitions — `paymentForFrequency`,
-  `payment`, `cmhcPremium`, `maxAffordability`, `landTransferTax`; `SITE`/`AGENTS` shapes consistent across
-  components.
+  (Phase 2); IDX/blog (dropped).
 ```
