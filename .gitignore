@@ -1,0 +1,8 @@
+# Node / Astro build artifacts (added when the site is scaffolded)
+node_modules/
+dist/
+.astro/
+
+# OS / editor
+.DS_Store
+*.log
