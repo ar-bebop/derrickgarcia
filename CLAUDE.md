@@ -17,17 +17,23 @@ depended on the Lofty CRM/IDX platform.
 
 ## Current status (2026-06-09)
 
-**Phase 1 MVP built and green.** Plan Tasks 1–18 are implemented and committed:
+**Phase 1 MVP + Phase 2 "Midnight Estate" redesign built and green.**
 `pnpm build`, `pnpm test` (22 unit tests), and `pnpm check` (`astro check`, 0 errors) all pass.
-`extracted/` has been removed (Task 18; recoverable from git history). **What remains is Task 19 —
-the manual production go-live** (external keys + DNS cutover), captured in `TODO.md`.
+Phase 2 delivered the dark visual system (Marcellus/Source Sans 3 self-hosted, gold #b08d57,
+AA-verified tokens), Sell / Home-Valuation / Rent-to-Own / Reviews pages, a Guides content
+collection (4 evergreen articles), legacy-URL redirects, and verified free-license Toronto
+photography (`src/assets/photos/CREDITS.md`). `extracted/` was removed (recoverable from git
+history at `7ff5c76^`). **What remains: the manual production go-live** (external keys + DNS
+cutover) plus content inputs from Derrick — all captured in `TODO.md`.
 
-- `docs/superpowers/specs/2026-06-09-derrickgarcia-static-site-design.md` — the approved design
+- `docs/superpowers/specs/2026-06-09-derrickgarcia-static-site-design.md` — Phase 1 design (hosting/forms/booking/analytics still authoritative)
+- `docs/superpowers/specs/2026-06-09-midnight-estate-redesign-design.md` — Phase 2 redesign spec (visual system, parity pages, guides; alternates B/C archived for client)
 - `docs/superpowers/specs/2026-06-09-brainstorm-research-appendix.md` — research detail, incl. the
   **Canadian mortgage math** the calculators need (semi-annual compounding, stress test, CMHC, GDS/TDS, LTT)
-- `docs/superpowers/plans/2026-06-09-derrickgarcia-static-site-phase1.md` — the executed plan (19 tasks)
-- `TODO.md` — **remaining work**: external config keys, go-live runbook, optional polish, toolchain notes
-- `src/` — the implemented site (layout, pages, calculators, tested math module)
+- `docs/superpowers/plans/2026-06-09-derrickgarcia-static-site-phase1.md` — executed Phase 1 plan
+- `docs/superpowers/plans/2026-06-09-midnight-estate-redesign.md` — executed Phase 2 plan (17 tasks)
+- `TODO.md` — **remaining work**: external config keys, go-live runbook, Derrick's content inputs, deferred DDF listings
+- `src/` — the implemented site (layout, pages, calculators, tested math module, guides collection)
 
 **Toolchain note:** this environment has **pnpm, not npm** (`pnpm install|build|test|check`).
 `@astrojs/sitemap` is pinned to `3.2.1` (3.7.x needs Astro 5); `sharp` is an explicit dep (pnpm
@@ -53,9 +59,10 @@ Once Task 1 runs, the toolchain exists:
 - **Forms:** Web3Forms (free; honeypot + hCaptcha). **Booking:** TidyCal (free; two-way **iCloud** sync —
   Derrick uses Apple Calendar). **Analytics:** Cloudflare Web Analytics (free, **cookieless → no cookie banner**).
 - **Budget:** free-first; upgrade only when a free tier is outgrown.
-- **MVP pages (Phase 1):** Home · About/Team · Contact · Mortgage / Affordability / Land-Transfer-Tax
-  calculators · Privacy · Accessibility · 404. **Phase 2 (later, separate plan):** Reviews, Home-Evaluation,
-  Sell, Rent-to-Own landings; optional live Google-reviews widget.
+- **Pages (Phases 1+2, built):** Home · About/Team · Contact · 3 calculators · Sell · Home-Valuation ·
+  Rent-to-Own · Reviews (config-driven, ships with honest empty state) · Guides (4 articles) ·
+  Privacy · Accessibility · 404 · legacy-URL redirect stubs. **Deferred (own plan):** DDF/MLS
+  listings integration; optional live Google-reviews widget.
 
 ## Conventions & gotchas
 

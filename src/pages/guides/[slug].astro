@@ -24,7 +24,7 @@ const jsonLd = {
 };
 ---
 <BaseLayout title={`${guide.data.title} | Derrick Garcia`} description={guide.data.description}>
-  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="head" />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="head" />
   <article class="container article">
     <header>
       <p class="kicker"><a href="/guides">Guides</a> · {guide.data.readTime}</p>

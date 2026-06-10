@@ -1,6 +1,9 @@
 # TODO — derrickgarcia.ca
 
-Phase 1 MVP is **built and green** (`pnpm build`, `pnpm test`, `pnpm check` all pass).
+Phase 1 MVP **and the Phase 2 "Midnight Estate" redesign** are built and green
+(`pnpm build`, `pnpm test`, `pnpm check` all pass). Phase 2 added the dark visual system,
+Sell / Home Valuation / Rent to Own / Reviews pages, the Guides hub, and legacy-URL redirects
+(spec: `docs/superpowers/specs/2026-06-09-midnight-estate-redesign-design.md`).
 What remains is external configuration + the production go-live, plus optional polish.
 Nothing below blocks local development or the build — the site ships today with graceful
 call/email fallbacks wherever an external service is not yet configured.
@@ -11,7 +14,7 @@ All centralized; empty values render a graceful fallback (never a broken widget)
 
 | Value | File | Empty-state behavior |
 |-------|------|----------------------|
-| `web3formsAccessKey` | `src/data/config.ts` | Contact form → call/email card |
+| `web3formsAccessKey` | `src/data/config.ts` | Contact + Home-Valuation forms → call/email card |
 | `tidycalUrl` | `src/data/config.ts` | Booking → call/email block |
 | `cloudflareAnalyticsToken` | `src/data/config.ts` | No analytics script emitted |
 | per-agent `realtorCaUrl` / `realBrokerUrl` | `src/data/agents.ts` | "Listings on realtor.ca" link hidden |
@@ -40,14 +43,28 @@ agent links, and GBP `sameAs` now render.
 7. Search Console: claim property, submit `https://derrickgarcia.ca/sitemap-index.xml`.
    Decommission Lofty only after all the above pass.
 
-## 3. Optional / Phase 2
+## 3. Content inputs from Derrick (Phase 2 built the slots; he supplies the substance)
 
-- Replace the `DG` placeholder favicon + OG image with a real brand mark (currently
-  generated from a simple SVG in `public/`).
-- Licensed hero photography (old site's banners were generic stock — not migrated).
+- **Guide content review before go-live** — regulatory figures (MQR, CMHC, GDS/TDS, LTT
+  brackets/rebates, FHSA/HBP) and the Oliver's RTO program facts in `src/content/guides/`.
+- **Real testimonials** → `TESTIMONIALS` in `src/data/config.ts` (Reviews page + Home teaser
+  render automatically; ships with honest Google link-out empty state).
+- **Stats review** — Home value strip uses bio-sourced figures (99.9% list-to-sell, 21 yrs
+  licensed, 3 languages) in `src/data/site.ts`; confirm or replace with Derrick's preferred numbers.
+- **Deposit / Lending nav links** — old site had these nav items; targets unknown. Need URLs.
 - Voula Spingos' full bio (source site had none — currently a brief honest one-liner).
-- Real testimonials → Reviews page; Home-Evaluation / Sell / Rent-to-Own landings;
-  optional live Google-reviews widget. (Separate Phase 2 plan.)
+
+## 3b. Optional / later
+
+- Replace the `DG` placeholder favicon with a real brand mark (OG image now dark-brand,
+  regenerate via `node scripts/og-image.mjs`).
+- Licensed hero photography if Derrick buys any (current heroes are verified, credited
+  free-license Toronto photos — see `src/assets/photos/CREDITS.md`).
+- **Listings/DDF integration** (deferred, own plan): CREA REALTOR.ca DDF® feed is free for
+  members — Derrick applies via CREA → feed credentials → nightly GitHub Action bakes a
+  featured-listings page (compliance: "Powered by REALTOR.ca" logo + link-back). Paid
+  alternative: Repliers API for true live search.
+- Optional live Google-reviews widget.
 - Verify the dated regulatory constants in `src/lib/mortgage-math.js` against source before
   relying on calculator output in production (CMHC rates, LTT brackets, FTB rebates, MQR).
 
