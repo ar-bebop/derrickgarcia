@@ -1,7 +1,7 @@
 ---
 import { SITE } from '../data/site.ts';
 const { agent } = Astro.props;
-const sameAs = [agent.realtorCaUrl, agent.realBrokerUrl].filter(Boolean);
+const sameAs = [agent.realtorCaUrl, agent.realBrokerUrl, ...(agent.sameAs ?? [])].filter(Boolean);
 const data = {
   '@context': 'https://schema.org',
   '@type': 'Person',
