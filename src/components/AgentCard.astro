@@ -6,18 +6,25 @@ const images = import.meta.glob<{ default: ImageMetadata }>('../assets/profile/*
 const img = images[`../assets/${agent.photo}`]?.default;
 ---
 <article class="agent-card">
-  {img && <Image src={img} alt={`${agent.name}, ${agent.title}`} width={300} height={300} />}
-  <h3>{agent.name}</h3>
-  <p class="agent-card__title">{agent.title}</p>
-  <p>{agent.bio}</p>
-  {agent.realtorCaUrl && (
-    <p class="agent-card__links">
-      <a href={agent.realtorCaUrl} target="_blank" rel="noopener noreferrer">Listings on realtor.ca ↗</a>
-    </p>
-  )}
+  {img && <Image src={img} alt={`${agent.name}, ${agent.title}`} width={500} height={550} />}
+  <div class="agent-card__body">
+    <h3>{agent.name}</h3>
+    <p class="agent-card__title">{agent.title}</p>
+    <p class="agent-card__bio">{agent.bio}</p>
+    {agent.realtorCaUrl && (
+      <p class="agent-card__links">
+        <a href={agent.realtorCaUrl} target="_blank" rel="noopener noreferrer">Listings on realtor.ca ↗</a>
+      </p>
+    )}
+  </div>
 </article>
 <style>
-  .agent-card { border: 1px solid var(--color-line); border-radius: var(--radius); padding: 1rem; }
-  .agent-card img { border-radius: var(--radius); aspect-ratio: 1; object-fit: cover; }
-  .agent-card__title { color: var(--color-accent); font-weight: 600; margin: .2rem 0; }
+  .agent-card { border: 1px solid var(--color-line); transition: border-color .2s ease; }
+  .agent-card:hover { border-color: var(--color-accent); }
+  .agent-card img { width: 100%; height: auto; object-fit: cover; filter: saturate(.88); }
+  .agent-card__body { padding: 1.2rem 1.4rem 1.4rem; }
+  .agent-card h3 { margin: 0; font-size: 1.2rem; }
+  .agent-card__title { color: var(--color-accent); font-size: .7rem; letter-spacing: .16em;
+    text-transform: uppercase; font-weight: 600; margin: .25rem 0 .8rem; }
+  .agent-card__bio { color: var(--color-text); font-size: .92rem; margin: 0; }
 </style>

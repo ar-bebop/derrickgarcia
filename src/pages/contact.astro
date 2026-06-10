@@ -6,15 +6,19 @@ import { CONFIG } from '../data/config.ts';
 ---
 <BaseLayout title="Contact Derrick Garcia — Real Broker Ontario"
   description="Contact Derrick Garcia for Toronto & GTA real estate. Call, email, or book a meeting.">
-  <h1>Contact</h1>
-  <div class="contact-grid">
-    <section>
+  <section class="head container">
+    <p class="kicker">Contact</p>
+    <h1>Let's talk about your move.</h1>
+  </section>
+  <div class="container contact-grid">
+    <section class="card">
       <h2>Send a message</h2>
       <LeadForm />
-      <p><strong>Call:</strong> <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a><br />
-         <strong>Email:</strong> <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      <p class="nap"><strong>Call:</strong> <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a><br />
+         <strong>Email:</strong> <a href={`mailto:${SITE.email}`}>{SITE.email}</a><br />
+         <strong>Office:</strong> {SITE.address.street}, {SITE.address.city}, {SITE.address.region} {SITE.address.postalCode}</p>
     </section>
-    <section>
+    <section class="card">
       <h2>Book a meeting</h2>
       {CONFIG.tidycalUrl ? (
         <iframe src={CONFIG.tidycalUrl} title="Book a meeting with Derrick Garcia" loading="lazy"
@@ -27,5 +31,10 @@ import { CONFIG } from '../data/config.ts';
   </div>
 </BaseLayout>
 <style>
-  .contact-grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(320px,1fr)); }
+  .head { padding-block: clamp(2.5rem, 7vw, 4rem) 1.5rem; }
+  .contact-grid { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    padding-bottom: var(--section-pad); align-items: start; }
+  .contact-grid h2 { font-size: 1.3rem; margin-top: 0; }
+  .nap { border-top: 1px solid var(--color-line); padding-top: 1rem; margin-top: 1.5rem;
+    font-size: .92rem; line-height: 1.9; }
 </style>
