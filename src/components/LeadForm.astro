@@ -1,7 +1,7 @@
 ---
 import { CONFIG } from '../data/config.ts';
 import { SITE } from '../data/site.ts';
-const { subject = '🏠 New website lead — Contact', formName = 'Contact' } = Astro.props;
+const { subject = '🏠 New website lead — Contact', formName = 'Contact', valuation = false } = Astro.props;
 const key = CONFIG.web3formsAccessKey;
 ---
 {key ? (
@@ -11,17 +11,39 @@ const key = CONFIG.web3formsAccessKey;
     <input type="hidden" name="from_name" value={formName} />
     <input type="hidden" name="redirect" value="https://derrickgarcia.ca/thanks" />
     <input type="checkbox" name="botcheck" class="visually-hidden" tabindex="-1" autocomplete="off" />
+    {valuation && (
+      <>
+        <label>Property address<input type="text" name="address" required autocomplete="street-address" /></label>
+        <div class="lead-form__grid">
+          <label>Property type
+            <select name="property_type">
+              <option>Detached</option><option>Semi-detached</option><option>Townhouse</option>
+              <option>Condo apartment</option><option>Other</option>
+            </select>
+          </label>
+          <label>Bedrooms<input type="number" name="beds" min="0" max="20" /></label>
+          <label>Bathrooms<input type="number" name="baths" min="0" max="20" /></label>
+          <label>When do you plan to sell?
+            <select name="timeframe">
+              <option>As soon as possible</option><option>1–3 months</option>
+              <option>3–6 months</option><option>Just curious</option>
+            </select>
+          </label>
+        </div>
+      </>
+    )}
     <div class="lead-form__grid">
       <label>Name<input type="text" name="name" required autocomplete="name" /></label>
       <label>Email<input type="email" name="email" required autocomplete="email" /></label>
       <label>Phone<input type="tel" name="phone" autocomplete="tel" /></label>
     </div>
-    <label>How can we help?<textarea name="message" rows="4" required></textarea></label>
+    <label>{valuation ? 'Anything else we should know? (optional)' : 'How can we help?'}
+      <textarea name="message" rows="4" required={!valuation}></textarea></label>
     <label class="lead-form__consent">
       <input type="checkbox" name="consent" required />
       I agree to be contacted about my inquiry. See our <a href="/privacy">privacy policy</a>.
     </label>
-    <button type="submit" class="btn">Send message</button>
+    <button type="submit" class="btn">{valuation ? 'Request my valuation' : 'Send message'}</button>
   </form>
 ) : (
   <div class="lead-form__fallback">
@@ -33,7 +55,7 @@ const key = CONFIG.web3formsAccessKey;
 <style>
   .lead-form__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
   .lead-form label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; margin-bottom: 1rem; }
-  .lead-form input, .lead-form textarea { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
+  .lead-form input, .lead-form textarea, .lead-form select { padding: .55rem; }
   .lead-form__consent { flex-direction: row; align-items: flex-start; gap: .5rem; font-weight: 400; }
   .lead-form__fallback .btn { margin-right: .5rem; }
 </style>
