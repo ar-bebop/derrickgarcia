@@ -1,7 +1,7 @@
 ---
 title: "Bolton real estate"
 description: "Caledon's commuter village: the Humber valley core, the hill subdivisions, and what the Highway 427 extension changed about getting to work."
-teaser: "Caledon's largest community and its true commuter base — a historic village core in the Humber valley, family subdivisions on the hills, and Vaughan and Pearson within practical reach."
+teaser: "Caledon's largest community and its true commuter base. A historic village core in the Humber valley, family subdivisions on the surrounding hills, and Vaughan and Pearson within practical reach."
 town: "Bolton"
 region: "Peel Region"
 order: 2
@@ -35,6 +35,6 @@ Vaughan, Woodbridge, or around the airport, Bolton's case gets strong.
 ## Bolton or the rest of Caledon?
 
 The trade is straightforward: Bolton gives you services, neighbours, and a five-minute
-grocery run; rural Caledon gives you land and quiet, with [well-and-septic due
-diligence](/areas/caledon) as part of the deal. We work both daily — if you are torn,
+grocery run; rural Caledon gives you land and quiet, with
+[well-and-septic due diligence](/areas/caledon) as part of the deal. We work both daily — if you are torn,
 [talk it through with us](/contact) before you anchor on either.
