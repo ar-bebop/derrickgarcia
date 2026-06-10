@@ -31,8 +31,9 @@
   .calc__grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); }
   .calc label { display: flex; flex-direction: column; gap: .3rem; font-weight: 600; }
   .calc__check { flex-direction: row; align-items: center; gap: .5rem; }
-  .calc input[type=number] { padding: .55rem; border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit; }
-  .calc__out { display: block; margin-top: 1.5rem; padding: 1rem; border: 1px solid var(--color-line); border-radius: var(--radius); font-size: 1.1rem; }
-  .calc__out strong { font-size: 1.5rem; color: var(--color-fg); }
+  .calc input[type=number] { padding: .55rem; }
+  .calc__out { display: block; margin-top: 1.5rem; padding: 1.2rem; border: 1px solid var(--color-line);
+    border-radius: var(--radius); background: var(--color-panel); font-size: 1.1rem; }
+  .calc__out strong { font-family: var(--font-display); font-size: 1.5rem; color: var(--color-accent); }
   .calc__note { color: var(--color-muted); font-size: .85rem; margin-top: 1rem; }
 </style>

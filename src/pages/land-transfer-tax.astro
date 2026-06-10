@@ -4,6 +4,21 @@ import LandTransferTaxCalculator from '../components/LandTransferTaxCalculator.a
 ---
 <BaseLayout title="Ontario + Toronto Land Transfer Tax Calculator — Derrick Garcia"
   description="Estimate your Ontario and Toronto municipal land transfer tax, including first-time buyer rebates.">
-  <h1>Land Transfer Tax Calculator</h1>
-  <LandTransferTaxCalculator />
+  <section class="head container">
+    <p class="kicker">Tools</p>
+    <h1>Land Transfer Tax Calculator</h1>
+    <p class="dek">Ontario's provincial tax — and Toronto's second, municipal one — with
+      first-time buyer rebates applied.</p>
+  </section>
+  <div class="container calc-wrap">
+    <LandTransferTaxCalculator />
+    <p class="more">Why does Toronto charge it twice?
+      Read <a href="/guides/toronto-land-transfer-tax">the double land transfer tax guide</a>.</p>
+  </div>
 </BaseLayout>
+<style>
+  .head { padding-block: clamp(2.5rem, 7vw, 4rem) 1rem; }
+  .dek { max-width: 56ch; font-size: 1.05rem; }
+  .calc-wrap { max-width: 820px; padding-bottom: var(--section-pad); }
+  .more { color: var(--color-muted); margin-top: 2rem; }
+</style>

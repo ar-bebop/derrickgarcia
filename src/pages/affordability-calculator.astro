@@ -4,6 +4,21 @@ import AffordabilityCalculator from '../components/AffordabilityCalculator.astro
 ---
 <BaseLayout title="Home Affordability Calculator (Canadian) — Derrick Garcia"
   description="See how much home you can afford in Ontario using Canadian GDS/TDS ratios and the mortgage stress test.">
-  <h1>Affordability Calculator</h1>
-  <AffordabilityCalculator />
+  <section class="head container">
+    <p class="kicker">Tools</p>
+    <h1>Affordability Calculator</h1>
+    <p class="dek">Your true ceiling under the rules lenders actually enforce — the
+      stress-test qualifying rate plus GDS/TDS debt-service limits.</p>
+  </section>
+  <div class="container calc-wrap">
+    <AffordabilityCalculator />
+    <p class="more">First home? Start with the
+      <a href="/guides/first-time-buyer-toronto">first-time buyer guide</a>.</p>
+  </div>
 </BaseLayout>
+<style>
+  .head { padding-block: clamp(2.5rem, 7vw, 4rem) 1rem; }
+  .dek { max-width: 56ch; font-size: 1.05rem; }
+  .calc-wrap { max-width: 820px; padding-bottom: var(--section-pad); }
+  .more { color: var(--color-muted); margin-top: 2rem; }
+</style>

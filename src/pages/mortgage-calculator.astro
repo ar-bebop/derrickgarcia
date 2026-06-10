@@ -4,6 +4,21 @@ import MortgageCalculator from '../components/MortgageCalculator.astro';
 ---
 <BaseLayout title="Mortgage Calculator (Canadian) — Derrick Garcia"
   description="Estimate Canadian mortgage payments with correct semi-annual compounding, accelerated payment options, and CMHC insurance.">
-  <h1>Mortgage Calculator</h1>
-  <MortgageCalculator />
+  <section class="head container">
+    <p class="kicker">Tools</p>
+    <h1>Mortgage Calculator</h1>
+    <p class="dek">Canadian fixed-rate math done properly — semi-annual compounding,
+      accelerated payment options, CMHC insurance when your down payment is under 20%.</p>
+  </section>
+  <div class="container calc-wrap">
+    <MortgageCalculator />
+    <p class="more">Curious why you qualify at a higher rate than you'll pay?
+      Read <a href="/guides/mortgage-stress-test">the stress test, explained</a>.</p>
+  </div>
 </BaseLayout>
+<style>
+  .head { padding-block: clamp(2.5rem, 7vw, 4rem) 1rem; }
+  .dek { max-width: 56ch; font-size: 1.05rem; }
+  .calc-wrap { max-width: 820px; padding-bottom: var(--section-pad); }
+  .more { color: var(--color-muted); margin-top: 2rem; }
+</style>
