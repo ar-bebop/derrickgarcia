@@ -14,7 +14,7 @@ All centralized; empty values render a graceful fallback (never a broken widget)
 
 | Value | File | Empty-state behavior |
 |-------|------|----------------------|
-| `web3formsAccessKey` | `src/data/config.ts` | Contact + Home-Valuation forms → call/email card |
+| ~~`web3formsAccessKey`~~ ✅ filled | `src/data/config.ts` | **Go-live:** key delivers to aribeir4@gmail.com (testing); relink to `info@derrickgarcia.ca` first |
 | `tidycalUrl` | `src/data/config.ts` | Booking → call/email block |
 | `cloudflareAnalyticsToken` | `src/data/config.ts` | No analytics script emitted |
 | per-agent `realtorCaUrl` / `realBrokerUrl` | `src/data/agents.ts` | "Listings on realtor.ca" link hidden |
