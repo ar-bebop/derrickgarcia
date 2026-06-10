@@ -10,6 +10,14 @@ const dropdowns = [
     { href: '/affordability-calculator', label: 'Affordability Calculator' },
     { href: '/land-transfer-tax', label: 'Land Transfer Tax' },
   ]},
+  { label: 'Areas', items: [
+    { href: '/areas/caledon', label: 'Caledon' },
+    { href: '/areas/bolton', label: 'Bolton' },
+    { href: '/areas/orangeville', label: 'Orangeville' },
+    { href: '/areas/brampton', label: 'Brampton' },
+    { href: '/areas/mississauga', label: 'Mississauga' },
+    { href: '/areas', label: 'All Areas' },
+  ]},
   { label: 'About', items: [
     { href: '/about', label: 'Meet the Team' },
     { href: '/reviews', label: 'Reviews' },
@@ -46,9 +54,17 @@ const dropdowns = [
         <li><a href="/guides">Guides</a></li>
         <li>
           <details class="dd">
-            <summary>About</summary>
+            <summary>Areas</summary>
             <ul class="dd__menu">
               {dropdowns[2].items.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+            </ul>
+          </details>
+        </li>
+        <li>
+          <details class="dd">
+            <summary>About</summary>
+            <ul class="dd__menu">
+              {dropdowns[3].items.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
             </ul>
           </details>
         </li>
