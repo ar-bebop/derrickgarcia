@@ -18,7 +18,7 @@ All centralized; empty values render a graceful fallback (never a broken widget)
 | `tidycalUrl` | `src/data/config.ts` | Booking → call/email block |
 | `cloudflareAnalyticsToken` | `src/data/config.ts` | No analytics script emitted |
 | per-agent `realtorCaUrl` / `realBrokerUrl` | `src/data/agents.ts` | "Listings on realtor.ca" link hidden. Derrick's realtor.ca ✅; still need: Pina + Voula realtor.ca, all 3 Real Broker URLs |
-| `SITE.social.googleBusiness` | `src/data/site.ts` | Omitted from `sameAs` JSON-LD |
+| ~~`SITE.social.googleBusiness`~~ ✅ filled | `src/data/site.ts` | kgmid knowledge-panel URL. Derrick should still claim the GBP (panel showed "Suggest an edit") |
 
 After filling: `pnpm build` and confirm the real form, booking iframe, analytics beacon,
 agent links, and GBP `sameAs` now render.

@@ -13,7 +13,8 @@ export const SITE = {
   social: {
     instagram: 'https://www.instagram.com/derrickgarcia__/',
     facebook: 'https://www.facebook.com/DerrickGarciaRealtor',
-    googleBusiness: '', // fill at go-live → added to schema sameAs when present
+    // Knowledge-panel link (kgmid = stable Google entity ID; from share.google/e4fXmqBqiy8w7YdOX)
+    googleBusiness: 'https://www.google.com/search?kgmid=/g/11s8c4jmc7&q=Derrick+Garcia+Realtor&hl=en-CA',
   },
   // Public realtor.ca Toronto search (no IDX licence needed).
   listingsSearchUrl: 'https://www.realtor.ca/on/toronto/real-estate',
