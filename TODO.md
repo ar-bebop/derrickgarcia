@@ -51,7 +51,11 @@ agent links, and GBP `sameAs` now render.
   render automatically; ships with honest Google link-out empty state).
 - **Stats review** — Home value strip uses bio-sourced figures (99.9% list-to-sell, 21 yrs
   licensed, 3 languages) in `src/data/site.ts`; confirm or replace with Derrick's preferred numbers.
-- **Deposit / Lending nav links** — old site had these nav items; targets unknown. Need URLs.
+- **Deposit ✅ / Lending nav links** — Deposit built as `/deposit-lending` (on-site explainer →
+  money2close.com, per client). Ask Derrick: (a) relationship with Money2Close — if referral/paid,
+  add a disclosure line and `rel="sponsored"` on the outbound link; (b) confirm the "often a
+  five-figure sum" and strong-deposit framings; (c) the old site's separate **Lending** nav item —
+  target still unknown, need URL (same pattern would apply).
 - Voula Spingos' full bio (source site had none — currently a brief honest one-liner).
 - **Area pages fact review (Phase 3)** — the five `/areas/` pages ship evergreen,
   verifiable facts only; review flagged characterizations before go-live:

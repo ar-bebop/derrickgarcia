@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Deposit Lending — Bridge Your Deposit | Derrick Garcia"
+  description="In Ontario, the deposit is typically due within 24 hours of an accepted offer. What deposit lending is, when it helps, and how to bridge the gap.">
+  <section class="head container">
+    <p class="kicker">Deposit Lending</p>
+    <h1>The deposit is due before your money is free.</h1>
+    <p class="dek">In Ontario, the deposit on an accepted offer is typically due within
+      24 hours — often before the equity in your current home or your invested savings
+      can be released. Deposit lending exists to bridge exactly that gap.</p>
+  </section>
+
+  <section class="section container two-col">
+    <div class="reveal">
+      <h2>How deposits work in Ontario</h2>
+      <p>When your offer is accepted, the deposit is delivered to the listing brokerage and
+        held in trust until closing, where it counts toward your purchase price. It is not
+        an extra cost — but it is real money, due almost immediately, and in the GTA it is
+        often a five-figure sum.</p>
+      <p>A strong deposit also strengthens an offer: it tells the seller you are serious
+        and ready to perform.</p>
+    </div>
+    <div class="reveal">
+      <h2>When buyers come up short</h2>
+      <p>The most common reason is timing, not affordability: your money exists, but it is
+        locked in the equity of the home you are selling until its closing day, or sitting
+        in investments that take time to unwind. A short-term deposit loan bridges the days
+        or weeks between an accepted offer and your funds becoming available.</p>
+    </div>
+  </section>
+
+  <section class="section section--line container reveal">
+    <h2>Money2Close</h2>
+    <p>For deposit financing, our clients can look to <strong>Money2Close</strong> — an
+      Oakville-based company that has been lending Ontario buyers their deposit since 2007,
+      built for exactly the bridge described above.</p>
+    <p><a class="btn" href="https://www.money2close.com/" target="_blank" rel="noopener noreferrer">Visit Money2Close ↗</a>
+       <a class="btn btn--ghost" href="/contact">Talk to us first</a></p>
+    <p class="disclaimer">Money2Close is an independent third-party lender, not part of our team or
+      Real Broker Ontario LTD. Any lending decision and its terms are between you and the lender.
+      This information is provided for general purposes only — please do your own due diligence
+      and seek professional advice before borrowing.</p>
+  </section>
+</BaseLayout>
+<style>
+  .head { padding-block: clamp(2.5rem, 7vw, 4rem) 0; }
+  .dek { max-width: 60ch; font-size: 1.05rem; }
+  .two-col { display: grid; gap: 2.5rem; grid-template-columns: 1fr 1fr; align-items: start; }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+  .disclaimer { color: var(--color-muted); font-size: .8rem; max-width: 70ch; margin-top: 2rem; }
+  .btn { margin-right: .6rem; }
+</style>
