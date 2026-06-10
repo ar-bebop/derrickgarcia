@@ -1,0 +1,25 @@
+---
+import { SITE } from '../data/site.ts';
+const { area } = Astro.props;
+const data = {
+  '@context': 'https://schema.org',
+  '@type': 'RealEstateAgent',
+  name: SITE.name,
+  url: `${SITE.url}/areas/${area.slug}`,
+  telephone: SITE.phoneDisplay,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: SITE.address.street,
+    addressLocality: SITE.address.city,
+    addressRegion: SITE.address.region,
+    postalCode: SITE.address.postalCode,
+    addressCountry: SITE.address.country,
+  },
+  areaServed: {
+    '@type': 'Place',
+    name: `${area.data.town}, Ontario`,
+    geo: { '@type': 'GeoCoordinates', latitude: area.data.geo.lat, longitude: area.data.geo.lng },
+  },
+};
+---
+<script type="application/ld+json" is:inline set:html={JSON.stringify(data)} />
