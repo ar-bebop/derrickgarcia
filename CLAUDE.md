@@ -39,15 +39,21 @@ cutover) plus content inputs from Derrick — all captured in `TODO.md`.
 `@astrojs/sitemap` is pinned to `3.2.1` (3.7.x needs Astro 5); `sharp` is an explicit dep (pnpm
 strict-linking); `pnpm-workspace.yaml` whitelists esbuild/sharp build scripts. See `TODO.md` §4.
 
-## How to implement
+## Commands
 
-Read the spec, then execute the plan task-by-task with **superpowers:subagent-driven-development**
-(fresh agent per task, recommended) or **superpowers:executing-plans** (inline with checkpoints). The plan
-is self-contained: exact files, full code, TDD steps, and verify commands.
+```bash
+pnpm install                 # deps (pnpm-workspace.yaml whitelists esbuild/sharp build scripts)
+pnpm dev                     # dev server
+pnpm build                   # production build → dist/
+pnpm preview                 # serve dist/
+pnpm test                    # Vitest — 22 unit tests for src/lib/mortgage-math.js
+pnpm check                   # astro check (0 errors expected)
+node scripts/og-image.mjs    # regenerate the default OG image
+```
 
-Once Task 1 runs, the toolchain exists:
-- `npm run dev` · `npm run build` · `npm run preview`
-- `npm test` (Vitest — unit tests for `src/lib/mortgage-math.js`)
+Future feature work (e.g. the deferred DDF listings) follows the superpowers workflow: spec + plan
+in `docs/superpowers/`, then execute with **superpowers:subagent-driven-development** (fresh agent
+per task, recommended) or **superpowers:executing-plans** (inline with checkpoints).
 
 ## Architecture & decisions (locked)
 
@@ -67,7 +73,7 @@ Once Task 1 runs, the toolchain exists:
 ## Conventions & gotchas
 
 - **Commits:** allowed; **never `git push`** (user runs pushes). End commit messages with the
-  `Co-Authored-By: Claude Opus 4.8` trailer.
+  standard Claude Code `Co-Authored-By` trailer for whichever model is running.
 - **No fabricated placeholders.** Real content (bios, accessibility text, brand colours) is inlined. The only
   blanks are genuinely-external go-live values, centralized in `src/data/config.ts` (+ `agents.ts`, `site.ts`)
   with **graceful call/email fallbacks** so nothing ships broken.
@@ -79,11 +85,11 @@ Once Task 1 runs, the toolchain exists:
 - **Astro on Pages:** do NOT set `base` (apex domain serves from root); `CNAME` lives in `public/`.
 - **DNS cutover:** when repointing off Lofty, swap only A/AAAA/CNAME — **keep MX/SPF/DKIM** or
   `info@derrickgarcia.ca` email breaks. Lower TTL first; stage on `*.github.io` before touching DNS.
-- **Lofty anti-bot:** the old site sits behind a SHA-1 proof-of-work. To re-pull pages, use
-  `extracted/pow-solver.js` + `extracted/crawl.js` (until `extracted/` is deleted; then see the research appendix).
+- **Lofty anti-bot:** the old site sits behind a SHA-1 proof-of-work. The PoW solver + crawler
+  lived in `extracted/` (now deleted — recover from git history at `7ff5c76^`, or see the research appendix).
 
 ## Pre-go-live inputs still needed (not derivable from the old site)
 
 Web3Forms access key · TidyCal booking URL · Cloudflare Analytics token · realtor.ca + Real Broker profile
 URLs (per agent) · Google Business Profile URL. Optional: real brand favicon, licensed hero photo, Voula's
-full bio, real testimonials (Phase 2).
+full bio, real testimonials. `TODO.md` is the authoritative, detailed version of this list.
