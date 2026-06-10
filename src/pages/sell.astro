@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import sunset from '../assets/photos/toronto-skyline-sunset.jpg';
+const steps = [
+  ['Marketing Analysis & Pricing', 'We study recent comparable sales and current competition to price your home to sell — without leaving money on the table.'],
+  ['Home Preparation & Staging', 'Honest advice on what to fix, what to skip, and how to present every room so buyers see the value.'],
+  ['Marketing & Showings', 'Professional listing, broad exposure, and showings managed around your schedule.'],
+  ['Offers & Negotiation', 'Every offer reviewed together; sharp negotiation backed by a 99.9% list-to-sell track record.'],
+  ['Contract & Paperwork', 'Conditions, clauses, and deadlines handled precisely, so nothing surprises you later.'],
+  ['Closing & Beyond', 'From sold sign to key handover — and we stay reachable after closing.'],
+];
+---
+<BaseLayout title="Sell My Home — Derrick Garcia | Real Broker Ontario"
+  description="Sell your Toronto or GTA home with Derrick Garcia. A clear six-step plan: pricing, staging, marketing, negotiation, paperwork, closing.">
+  <section class="hero">
+    <Image src={sunset} alt="" class="hero__bg" widths={[800, 1600]} sizes="100vw" loading="eager" />
+    <div class="container hero__inner">
+      <p class="kicker">Sell My Home</p>
+      <h1>We love working with sellers.</h1>
+      <p class="hero__sub">Our team will be with you every step of the way — from preparing
+        your home for sale to handing the keys to the new buyer.</p>
+    </div>
+  </section>
+
+  <section class="section container">
+    <p class="kicker">The plan</p>
+    <h2>Six steps, no guesswork.</h2>
+    <ol class="steps">
+      {steps.map(([title, body], i) => (
+        <li class="card reveal">
+          <span class="steps__n">{String(i + 1).padStart(2, '0')}</span>
+          <h3>{title}</h3><p>{body}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="section section--line container ctas reveal">
+    <h2>Start with the number that matters.</h2>
+    <p>Find out what your home is worth today — free, no obligation.</p>
+    <p><a class="btn" href="/home-valuation">Get a Home Valuation</a>
+       <a class="btn btn--ghost" href="/contact">Talk to Derrick</a></p>
+  </section>
+</BaseLayout>
+<style>
+  .hero { position: relative; overflow: hidden; }
+  .hero__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
+  .hero::before { content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(12,12,14,.55), rgba(12,12,14,.9)); }
+  .hero__inner { position: relative; padding-block: clamp(3.5rem, 9vw, 5.5rem); }
+  .hero__sub { max-width: 52ch; font-size: 1.05rem; }
+  .steps { list-style: none; margin: 1.8rem 0 0; padding: 0; display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .steps__n { font-family: var(--font-display); color: var(--color-accent); font-size: 1.5rem; }
+  .steps h3 { font-size: 1.1rem; margin: .4rem 0 .4rem; }
+  .steps p { color: var(--color-muted); font-size: .9rem; margin: 0; }
+  .ctas .btn { margin-right: .6rem; }
+</style>
