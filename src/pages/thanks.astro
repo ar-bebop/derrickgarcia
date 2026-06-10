@@ -2,7 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 <BaseLayout title="Thank you — Derrick Garcia" description="Your message has been sent." noindex={true}>
-  <h1>Thank you</h1>
-  <p>Your message was sent — Derrick will be in touch soon.</p>
-  <p><a class="btn" href="/">Back to home</a></p>
+  <section class="container page">
+    <p class="kicker">Message sent</p>
+    <h1>Thank you.</h1>
+    <p>Your message was sent — Derrick or a team member will reply within one business day.</p>
+    <p><a class="btn" href="/">Back to home</a></p>
+  </section>
 </BaseLayout>
+<style>
+  .page { padding-block: clamp(3rem, 9vw, 5.5rem) var(--section-pad); }
+</style>

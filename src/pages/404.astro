@@ -1,7 +1,31 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../data/site.ts';
+import heroNight from '../assets/photos/toronto-skyline-night.jpg';
 ---
 <BaseLayout title="Page not found — Derrick Garcia" description="The page you were looking for could not be found." noindex={true}>
-  <h1>Page not found</h1>
-  <p>Sorry, that page doesn't exist. <a href="/">Return home</a> or <a href="/contact">contact us</a>.</p>
+  <section class="hero">
+    <Image src={heroNight} alt="" class="hero__bg" widths={[800, 1600]} sizes="100vw" loading="eager" />
+    <div class="container hero__inner">
+      <p class="kicker">404</p>
+      <h1>This page has moved on.</h1>
+      <p class="sub">Like a good listing, it didn't stay on the market. Try one of these instead:</p>
+      <p class="links">
+        <a class="btn" href="/">Home</a>
+        <a class="btn btn--ghost" href="/guides">Guides</a>
+        <a class="btn btn--ghost" href="/contact">Contact</a>
+        <a class="btn btn--ghost" href={SITE.listingsSearchUrl} target="_blank" rel="noopener noreferrer">Search Homes ↗</a>
+      </p>
+    </div>
+  </section>
 </BaseLayout>
+<style>
+  .hero { position: relative; overflow: hidden; }
+  .hero__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
+  .hero::before { content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(12,12,14,.6), rgba(12,12,14,.92)); }
+  .hero__inner { position: relative; padding-block: clamp(4rem, 12vw, 7rem); }
+  .sub { max-width: 46ch; margin: 0 0 1.6rem; }
+  .links { display: flex; gap: .7rem; flex-wrap: wrap; }
+</style>
