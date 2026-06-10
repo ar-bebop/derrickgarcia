@@ -61,7 +61,8 @@ per task, recommended) or **superpowers:executing-plans** (inline with checkpoin
   `BaseLayout` + `Header`/`Footer`. Calculators are client-side islands over a tested pure-function math module.
 - **Listings:** no IDX/MLS hosted (licensed feed). "Search Homes" / agent profiles **link out** to
   realtor.ca / Real Broker.
-- **Blog:** dropped.
+- **Blog:** dropped. **"My App" QR:** dropped — it was Lofty's white-label "Closely" app keyed to
+  Derrick's paid agent ID; attribution/leads die when the Lofty subscription ends.
 - **Forms:** Web3Forms (free; honeypot + hCaptcha). **Booking:** TidyCal (free; two-way **iCloud** sync —
   Derrick uses Apple Calendar). **Analytics:** Cloudflare Web Analytics (free, **cookieless → no cookie banner**).
 - **Budget:** free-first; upgrade only when a free tier is outgrown.
