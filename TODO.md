@@ -53,6 +53,22 @@ agent links, and GBP `sameAs` now render.
   licensed, 3 languages) in `src/data/site.ts`; confirm or replace with Derrick's preferred numbers.
 - **Deposit / Lending nav links** — old site had these nav items; targets unknown. Need URLs.
 - Voula Spingos' full bio (source site had none — currently a brief honest one-liner).
+- **Area pages fact review (Phase 3)** — the five `/areas/` pages ship evergreen,
+  verifiable facts only; review flagged characterizations before go-live:
+  - Caledon: Greenbelt scarcity "underpins long-term value" framing.
+  - Bolton: "walkable main-street amenities" in the village core.
+  - Orangeville: "Broadway is a working downtown" framing; GO-bus-to-Brampton service
+    (re-verify schedules at go-live); the $4,000 FTB rebate is a regulatory constant —
+    re-check periodically.
+  - Brampton: "one of Canada's largest and youngest big cities"; Mount Pleasant
+    "commuter-first"; Bramalea "renovators look for"; Springdale/Castlemore
+    "executive homes".
+  - Mississauga: condos "typically at a discount to comparable Toronto product";
+    the status-certificate/reserve-fund review workflow claim (confirm team practice);
+    Hazel McCallion LRT is described as **under construction** — update the copy when
+    it opens (2028–29 per Metrolinx).
+  - New towns later: one at a time, never templated batches (anti-doorway rules in
+    docs/superpowers/specs/2026-06-10-location-pages-design.md).
 
 ## 3b. Optional / later
 

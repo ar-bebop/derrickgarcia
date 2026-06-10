@@ -67,8 +67,10 @@ per task, recommended) or **superpowers:executing-plans** (inline with checkpoin
 - **Budget:** free-first; upgrade only when a free tier is outgrown.
 - **Pages (Phases 1+2, built):** Home · About/Team · Contact · 3 calculators · Sell · Home-Valuation ·
   Rent-to-Own · Reviews (config-driven, ships with honest empty state) · Guides (4 articles) ·
-  Privacy · Accessibility · 404 · legacy-URL redirect stubs. **Deferred (own plan):** DDF/MLS
-  listings integration; optional live Google-reviews widget.
+  Privacy · Accessibility · 404 · legacy-URL redirect stubs. **Phase 3 (built):** `/areas/` hub +
+  5 town pages (Caledon · Bolton · Orangeville · Brampton · Mississauga) — local-SEO content,
+  anti-doorway rules in the 2026-06-10 spec. **Deferred (own plan):** DDF/MLS listings
+  integration; optional live Google-reviews widget.
 
 ## Conventions & gotchas
 
