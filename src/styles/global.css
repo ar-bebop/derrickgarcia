@@ -1,15 +1,58 @@
 @import './tokens.css';
+
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; color-scheme: dark; }
 body { margin: 0; font-family: var(--font-sans); color: var(--color-text);
-  background: var(--color-bg); line-height: 1.55; }
-h1, h2, h3 { color: var(--color-fg); line-height: 1.2; }
+  background: var(--color-bg); line-height: 1.65; }
+
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 400;
+  color: var(--color-ink); line-height: 1.15; letter-spacing: .01em; }
+h1 { font-size: clamp(2.4rem, 5vw, 3.4rem); }
+h2 { font-size: clamp(1.6rem, 3vw, 2rem); }
+
 img { max-width: 100%; height: auto; display: block; }
-a { color: inherit; }
-.container { max-width: var(--maxw); margin-inline: auto; padding-inline: var(--space); }
-.btn { display: inline-block; padding: .7rem 1.2rem; border-radius: var(--radius);
-  background: var(--color-fg); color: #fff; font-weight: 600; text-decoration: none; border: 0; cursor: pointer; }
-.btn:hover { background: var(--color-accent); color: var(--color-accent-ink); }
-.btn--ghost { background: transparent; border: 1px solid var(--color-line); color: var(--color-fg); }
+a { color: var(--color-accent); text-underline-offset: 3px; }
+a:hover { color: #c8a76e; }
+
+.container { max-width: var(--maxw); margin-inline: auto; padding-inline: clamp(1rem, 4vw, 2rem); }
+.section { padding-block: var(--section-pad); }
+.section--line { border-top: 1px solid var(--color-line); }
+
+.kicker { color: var(--color-accent); font-size: .6875rem; font-weight: 600;
+  letter-spacing: .28em; text-transform: uppercase; margin: 0 0 .9rem; }
+
+.btn { display: inline-block; padding: .85rem 1.7rem; border-radius: var(--radius);
+  background: var(--color-accent); color: var(--color-accent-ink); font-weight: 600;
+  font-size: .8125rem; letter-spacing: .08em; text-transform: uppercase;
+  text-decoration: none; border: 0; cursor: pointer; font-family: var(--font-sans);
+  transition: background .2s ease, color .2s ease, border-color .2s ease; }
+.btn:hover { background: #c8a76e; color: var(--color-accent-ink); }
+.btn--ghost { background: transparent; border: 1px solid rgba(243, 239, 231, .45); color: var(--color-ink); }
+.btn--ghost:hover { background: transparent; border-color: var(--color-accent); color: var(--color-accent); }
+
+.card { border: 1px solid var(--color-line); border-radius: var(--radius);
+  padding: 1.5rem; background: transparent; transition: border-color .2s ease; }
+.card:hover { border-color: var(--color-accent); }
+
+input, select, textarea {
+  background: var(--color-panel); color: var(--color-text);
+  border: 1px solid var(--color-line); border-radius: var(--radius); font: inherit;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--color-accent); outline: none; }
+
+.prose { max-width: 70ch; }
+.prose h2 { margin-top: 2.5rem; }
+.prose li { margin-block: .4rem; }
+
 :focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.skip-link { position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--color-accent); color: var(--color-accent-ink); padding: .6rem 1rem; }
+.skip-link:focus { left: 0; }
+
+/* Scroll reveal — JS-gated (html.js) and motion-gated; no-JS users see everything */
+@media (prefers-reduced-motion: no-preference) {
+  html.js .reveal { opacity: 0; transform: translateY(12px);
+    transition: opacity .5s ease, transform .5s ease; }
+  html.js .reveal.is-in { opacity: 1; transform: none; }
+}

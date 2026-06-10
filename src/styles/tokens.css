@@ -1,13 +1,19 @@
 :root {
-  --color-bg: #ffffff;
-  --color-fg: #191919;          /* --g-primary-color from old theme (headings/primary) */
-  --color-text: #505050;        /* --g-text-color (body) */
-  --color-muted: #a8a8a8;       /* --g-tip-color (secondary) */
-  --color-accent: #b08d57;      /* gold — sampled from Real Broker emblem */
-  --color-accent-ink: #191919;
-  --color-line: #e6e6e6;
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Midnight Estate palette — all text tokens AA-verified on #121212 (see spec §2.1) */
+  --color-bg: #121212;
+  --color-panel: #1a1a1a;
+  --color-ink: #f3efe7;           /* headings  ~15.9:1 */
+  --color-fg: #f3efe7;            /* legacy alias used by existing components */
+  --color-text: #c9c3b8;          /* body      ~10.9:1 */
+  --color-muted: #9a9486;         /* secondary ~6.3:1 — do NOT go darker for text */
+  --color-accent: #b08d57;        /* gold (Real Broker emblem) ~6.2:1 */
+  --color-accent-ink: #15130f;    /* text on gold */
+  --color-line: rgba(176, 141, 87, .25);
+  --color-line-strong: rgba(176, 141, 87, .45);
+  --font-display: 'Marcellus', 'Times New Roman', serif;
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --maxw: 1100px;
   --space: 1rem;
-  --radius: 10px;
+  --radius: 2px;                  /* sharp corners — luxury direction */
+  --section-pad: clamp(3rem, 7vw, 5rem);
 }
