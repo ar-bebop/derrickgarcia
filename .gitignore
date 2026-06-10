@@ -6,3 +6,6 @@ dist/
 # OS / editor
 .DS_Store
 *.log
+
+# Brainstorming mockups (visual companion)
+.superpowers/
