@@ -34,7 +34,7 @@ at different prices; the common thread is land, which the condo market cannot of
 
 Two GO lines serve the city — Lakeshore West through Port Credit and Clarkson, and the
 Milton line through Cooksville, Erindale, Streetsville, Meadowvale, and Lisgar — and
-the Hazel McCallion LRT line runs along the Hurontario corridor. Proximity to any of
+the Hazel McCallion LRT is under construction along the Hurontario corridor. Proximity to any of
 these is priced in, and worth paying for if you commute: it holds value when you sell.
 
 ## Toronto or Mississauga?
