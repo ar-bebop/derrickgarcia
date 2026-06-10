@@ -1,7 +1,7 @@
 ---
 title: "Real estate in Mississauga"
 description: "Two markets in one city: the Square One condo cluster and the freehold villages — plus the GO lines and LRT that change the commute math."
-teaser: "A condo skyline around Square One and freehold villages like Port Credit and Streetsville. Two different markets sharing one city, tied together by two GO lines and the new LRT."
+teaser: "A condo skyline around Square One and freehold villages like Port Credit and Streetsville. Two different markets sharing one city, tied together by two GO lines and, soon, the new LRT."
 town: "Mississauga"
 region: "Peel Region"
 order: 5

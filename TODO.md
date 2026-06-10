@@ -67,6 +67,8 @@ agent links, and GBP `sameAs` now render.
     the status-certificate/reserve-fund review workflow claim (confirm team practice);
     Hazel McCallion LRT is described as **under construction** — update the copy when
     it opens (2028–29 per Metrolinx).
+  - About page: "We work where we live" lede line implies team-wide residency across the
+    five towns — only Derrick's Caledon base is bio-verifiable; confirm he's comfortable.
   - New towns later: one at a time, never templated batches (anti-doorway rules in
     docs/superpowers/specs/2026-06-10-location-pages-design.md).
 
