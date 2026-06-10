@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+const who = [
+  'Those with a consumer proposal or bankruptcy history',
+  'Individuals with poor payment records or excessive debt',
+  'Self-employed professionals and new Canadians seeking a fresh start',
+  'Divorced individuals and millennials facing a high cost of living',
+  "Anyone with limited job history that doesn't meet the banks' requirements",
+];
+---
+<BaseLayout title="Rent to Own — A Path to Your Dream Home | Derrick Garcia"
+  description="Oliver's Rent to Own program with RTO-certified realtor Derrick Garcia: who qualifies, income requirements, down payment, and how to start.">
+  <section class="head container">
+    <p class="kicker">Rent to Own</p>
+    <h1>A path to your dream home.</h1>
+    <p class="dek">Oliver's Rent to Own program has been helping families achieve their
+      homeownership dreams for over 12 years, alongside RTO-certified realtors like Derrick.
+      The mission is simple: assist families in securing a place they can call home.</p>
+  </section>
+
+  <section class="section container two-col">
+    <div class="reveal">
+      <h2>Who can benefit?</h2>
+      <p>Rent to Own is designed for individuals and families who might find it challenging
+        to obtain a mortgage through traditional means, such as banks. That includes:</p>
+      <ul>{who.map((w) => <li>{w}</li>)}</ul>
+    </div>
+    <div class="reveal">
+      <h2>Financial considerations</h2>
+      <dl class="facts">
+        <div><dt>Income requirements</dt>
+          <dd>Depending on your location, a combined household income of <strong>$200,000+</strong> (in
+          the GTA) or <strong>$80,000+</strong> (outside the GTA) is needed.</dd></div>
+        <div><dt>Down payment</dt>
+          <dd>A minimum of <strong>5%</strong> of the purchase price is recommended, typically used
+          as a deposit during the purchase offer process.</dd></div>
+        <div><dt>Budgeting</dt>
+          <dd>Aim for a purchase price of approximately <strong>4 to 4.5×</strong> your household
+          income as a maximum.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section--line container reveal">
+    <h2>Ready to take the first step toward homeownership?</h2>
+    <p>Contact Derrick today to learn whether Rent to Own fits your situation.</p>
+    <p><a class="btn" href="/contact">Contact Derrick</a>
+       <a class="btn btn--ghost" href="/guides/rent-to-own-explained">Read the guide</a></p>
+    <p class="disclaimer">This information is provided for general purposes only. Consumers are
+      strongly encouraged to conduct their own due diligence and seek professional advice before
+      entering any rent-to-own agreement.</p>
+  </section>
+</BaseLayout>
+<style>
+  .head { padding-block: clamp(2.5rem, 7vw, 4rem) 0; }
+  .dek { max-width: 60ch; font-size: 1.05rem; }
+  .two-col { display: grid; gap: 2.5rem; grid-template-columns: 1fr 1fr; align-items: start; }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+  .facts div { border-top: 1px solid var(--color-line); padding-block: .9rem; }
+  .facts dt { font-family: var(--font-display); color: var(--color-accent); margin-bottom: .25rem; }
+  .facts dd { margin: 0; }
+  .disclaimer { color: var(--color-muted); font-size: .8rem; max-width: 70ch; margin-top: 2rem; }
+  .btn { margin-right: .6rem; }
+</style>

@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { TESTIMONIALS } from '../data/config.ts';
+import { SITE } from '../data/site.ts';
+const gbp = SITE.social.googleBusiness;
+---
+<BaseLayout title="Reviews — Derrick Garcia | Real Broker Ontario"
+  description="What clients say about working with Derrick Garcia and the team across Toronto & the GTA.">
+  <section class="head container">
+    <p class="kicker">Reviews</p>
+    <h1>What clients say.</h1>
+  </section>
+  <section class="container body">
+    {TESTIMONIALS.length > 0 ? (
+      <div class="grid">
+        {TESTIMONIALS.map((t) => (
+          <figure class="card reveal">
+            <p class="stars" aria-hidden="true">★★★★★</p>
+            <blockquote>“{t.quote}”</blockquote>
+            <figcaption>{t.name}{t.location ? ` · ${t.location}` : ''} <span>via {t.source}</span></figcaption>
+          </figure>
+        ))}
+      </div>
+    ) : (
+      <p class="empty">Our reviews live on Google — read what past clients say, straight from
+        the source.</p>
+    )}
+    <p class="ctas">
+      {gbp && <a class="btn" href={gbp} target="_blank" rel="noopener noreferrer">Read our Google reviews ↗</a>}
+      {gbp && <a class="btn btn--ghost" href={gbp} target="_blank" rel="noopener noreferrer">Leave a review ↗</a>}
+      {!gbp && <a class="btn" href={SITE.phoneHref}>Call {SITE.phoneDisplay}</a>}
+      {!gbp && <a class="btn btn--ghost" href={`mailto:${SITE.email}`}>Email us</a>}
+    </p>
+  </section>
+</BaseLayout>
+<style>
+  .head { padding-block: clamp(2.5rem, 7vw, 4rem) 1rem; }
+  .body { padding-bottom: var(--section-pad); }
+  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  figure { margin: 0; }
+  .stars { color: var(--color-accent); letter-spacing: 5px; margin: 0 0 .6rem; }
+  blockquote { font-family: var(--font-display); color: var(--color-ink); font-size: 1.1rem;
+    line-height: 1.5; margin: 0 0 .8rem; }
+  figcaption { color: var(--color-muted); font-size: .85rem; }
+  .empty { max-width: 56ch; font-size: 1.05rem; }
+  .ctas { margin-top: 1.6rem; }
+  .ctas .btn { margin-right: .6rem; }
+</style>
