@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+const areas = (await getCollection('areas')).sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout title="Areas We Serve — Caledon, Bolton, Orangeville, Brampton, Mississauga | Derrick Garcia"
+  description="Where the Derrick Garcia team actually works: Caledon, Bolton, Orangeville, Brampton, and Mississauga — with a local page on what matters in each market.">
+  <section class="head container">
+    <p class="kicker">Areas</p>
+    <h1>Where we work.</h1>
+    <p class="dek">We don't claim every postal code in Ontario. These are the markets we know
+      street by street — each page covers what actually decides a purchase or sale there.</p>
+  </section>
+  <section class="container list">
+    {areas.map((a) => (
+      <a class="row reveal" href={`/areas/${a.slug}`}>
+        <div>
+          <h2>{a.data.town}</h2>
+          <p>{a.data.teaser}</p>
+        </div>
+        <span class="meta">{a.data.region} →</span>
+      </a>
+    ))}
+  </section>
+</BaseLayout>
+<style>
+  .head { padding-block: clamp(2.5rem, 7vw, 4rem) 1.5rem; }
+  .dek { max-width: 58ch; font-size: 1.05rem; }
+  .list { padding-bottom: var(--section-pad); }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 2rem;
+    border-top: 1px solid var(--color-line); padding-block: 1.5rem; text-decoration: none; }
+  .row:last-child { border-bottom: 1px solid var(--color-line); }
+  .row h2 { font-size: 1.3rem; margin: 0 0 .4rem; }
+  .row:hover h2 { color: var(--color-accent); }
+  .row p { color: var(--color-muted); margin: 0; font-size: .95rem; max-width: 64ch; }
+  .meta { color: var(--color-accent); font-size: .8rem; letter-spacing: .1em;
+    text-transform: uppercase; white-space: nowrap; }
+</style>
