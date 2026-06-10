@@ -1,29 +1,65 @@
 ---
+import { Image } from 'astro:assets';
 import { SITE } from '../data/site.ts';
+import realWordmark from '../assets/branding/real-wordmark-white.png';
 ---
 <footer class="site-footer">
-  <div class="container site-footer__grid">
-    <div>
-      <strong>{SITE.legalName}</strong>
-      <p>{SITE.address.street}<br />{SITE.address.city}, {SITE.address.region} {SITE.address.postalCode}</p>
-      <p><a href={SITE.phoneHref}>{SITE.phoneDisplay}</a><br /><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+  <div class="container">
+    <div class="grid">
+      <div>
+        <p class="brand">DERRICK <span>GARCIA</span></p>
+        <p class="nap">{SITE.brokerage}<br />{SITE.address.street}<br />
+          {SITE.address.city}, {SITE.address.region} {SITE.address.postalCode}</p>
+        <p class="nap"><a href={SITE.phoneHref}>{SITE.phoneDisplay}</a><br />
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+        <Image src={realWordmark} alt="Real Broker" width={90} class="wordmark" />
+      </div>
+      <nav aria-label="Explore">
+        <h2>Explore</h2>
+        <a href="/sell">Sell My Home</a>
+        <a href="/home-valuation">Home Valuation</a>
+        <a href="/rent-to-own">Rent to Own</a>
+        <a href="/reviews">Reviews</a>
+        <a href={SITE.listingsSearchUrl} target="_blank" rel="noopener noreferrer">Search Homes ↗</a>
+      </nav>
+      <nav aria-label="Tools">
+        <h2>Tools</h2>
+        <a href="/mortgage-calculator">Mortgage Calculator</a>
+        <a href="/affordability-calculator">Affordability Calculator</a>
+        <a href="/land-transfer-tax">Land Transfer Tax</a>
+        <a href="/guides">Guides</a>
+      </nav>
+      <nav aria-label="Connect">
+        <h2>Connect</h2>
+        <a href={SITE.social.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href={SITE.social.facebook} target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a href="/contact">Book a Call</a>
+        <a href="/contact">Contact</a>
+      </nav>
     </div>
-    <nav aria-label="Footer">
-      <a href="/about">About</a><a href="/contact">Contact</a>
-      <a href="/privacy">Privacy</a><a href="/accessibility">Accessibility</a>
-    </nav>
-    <div class="site-footer__social">
-      <a href={SITE.social.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>
-      <a href={SITE.social.facebook} target="_blank" rel="noopener noreferrer">Facebook</a>
+    <div class="legal">
+      <span>© {new Date().getFullYear()} {SITE.legalName}. Not intended to solicit buyers or sellers currently under contract.</span>
+      <span><a href="/privacy">Privacy</a> · <a href="/accessibility">Accessibility</a></span>
     </div>
   </div>
-  <p class="container site-footer__legal">© {new Date().getFullYear()} {SITE.legalName}. Not intended to solicit buyers or sellers currently under contract.</p>
 </footer>
 <style>
-  .site-footer { border-top: 1px solid var(--color-line); margin-top: 3rem; padding-block: 2rem; }
-  .site-footer__grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); }
-  .site-footer nav { display: flex; flex-direction: column; gap: .3rem; }
-  .site-footer nav a { text-decoration: none; }
-  .site-footer__social { display: flex; gap: 1rem; }
-  .site-footer__legal { color: var(--color-muted); font-size: .85rem; margin-top: 1.5rem; }
+  .site-footer { border-top: 1px solid var(--color-line); margin-top: var(--section-pad);
+    padding-block: 3rem 1.5rem; }
+  .grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .brand { font-family: var(--font-display); color: var(--color-ink); letter-spacing: .18em; margin: 0 0 .8rem; }
+  .brand span { color: var(--color-accent); }
+  .nap { font-size: .85rem; line-height: 1.9; margin: 0 0 .8rem; }
+  .nap a { color: var(--color-text); text-decoration: none; }
+  .nap a:hover { color: var(--color-accent); }
+  .wordmark { opacity: .6; margin-top: .4rem; }
+  .site-footer nav { display: flex; flex-direction: column; gap: .45rem; }
+  .site-footer nav h2 { font-family: var(--font-sans); color: var(--color-accent);
+    font-size: .6875rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; margin: 0 0 .5rem; }
+  .site-footer nav a { color: var(--color-text); text-decoration: none; font-size: .85rem; }
+  .site-footer nav a:hover { color: var(--color-accent); }
+  .legal { border-top: 1px solid var(--color-line); margin-top: 2.2rem; padding-top: 1.2rem;
+    display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    color: var(--color-muted); font-size: .78rem; }
+  .legal a { color: var(--color-muted); }
 </style>
