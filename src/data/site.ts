@@ -17,4 +17,10 @@ export const SITE = {
   },
   // Public realtor.ca Toronto search (no IDX licence needed).
   listingsSearchUrl: 'https://www.realtor.ca/on/toronto/real-estate',
+  // Real facts sourced from the team bios in agents.ts — never invent numbers here.
+  stats: [
+    { value: '99.9%', label: 'List-to-sell ratio' },        // Derrick's bio
+    { value: '21 yrs', label: 'Licensed experience' },      // Pina's bio
+    { value: '3', label: 'Languages spoken' },              // EN · FR · IT (Pina's bio)
+  ],
 };

@@ -5,3 +5,8 @@ export const CONFIG = {
   tidycalUrl: '',                // booking — e.g. https://tidycal.com/derrickgarcia (empty → call/email block)
   cloudflareAnalyticsToken: '',  // analytics beacon token (empty → no analytics script)
 };
+
+// Real client testimonials. Ships empty — old site had none. When Derrick supplies
+// reviews, add them here; the Reviews page and Home teaser render automatically.
+export interface Testimonial { quote: string; name: string; source: string; location?: string }
+export const TESTIMONIALS: Testimonial[] = [];
