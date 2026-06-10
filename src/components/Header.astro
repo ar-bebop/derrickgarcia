@@ -1,38 +1,122 @@
 ---
 import { SITE } from '../data/site.ts';
-const nav = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
-  { href: SITE.listingsSearchUrl, label: 'Search Homes', external: true },
-  { href: '/mortgage-calculator', label: 'Mortgage' },
-  { href: '/affordability-calculator', label: 'Affordability' },
-  { href: '/land-transfer-tax', label: 'Land Transfer Tax' },
-  { href: '/contact', label: 'Contact' },
+const dropdowns = [
+  { label: 'Sell', items: [
+    { href: '/sell', label: 'Sell My Home' },
+    { href: '/home-valuation', label: 'Home Valuation' },
+  ]},
+  { label: 'Tools', items: [
+    { href: '/mortgage-calculator', label: 'Mortgage Calculator' },
+    { href: '/affordability-calculator', label: 'Affordability Calculator' },
+    { href: '/land-transfer-tax', label: 'Land Transfer Tax' },
+  ]},
+  { label: 'About', items: [
+    { href: '/about', label: 'Meet the Team' },
+    { href: '/reviews', label: 'Reviews' },
+    { href: '/contact', label: 'Contact' },
+  ]},
 ];
 ---
 <header class="site-header">
   <div class="container site-header__inner">
-    <a href="/" class="site-header__brand">{SITE.name}<span> · {SITE.brokerage}</span></a>
-    <nav aria-label="Primary">
+    <a href="/" class="brand">DERRICK <span>GARCIA</span></a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">
+      <span class="visually-hidden">Menu</span>
+      <span class="nav-toggle__bar" aria-hidden="true"></span>
+    </button>
+    <nav class="site-nav" id="site-nav" aria-label="Primary">
       <ul>
-        {nav.map((i) => (
-          <li>
-            <a href={i.href} {...(i.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-              {i.label}{i.external ? ' ↗' : ''}
-            </a>
-          </li>
-        ))}
+        <li>
+          <details class="dd">
+            <summary>Sell</summary>
+            <ul class="dd__menu">
+              {dropdowns[0].items.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+            </ul>
+          </details>
+        </li>
+        <li><a href="/rent-to-own">Rent to Own</a></li>
+        <li>
+          <details class="dd">
+            <summary>Tools</summary>
+            <ul class="dd__menu">
+              {dropdowns[1].items.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+            </ul>
+          </details>
+        </li>
+        <li><a href="/guides">Guides</a></li>
+        <li>
+          <details class="dd">
+            <summary>About</summary>
+            <ul class="dd__menu">
+              {dropdowns[2].items.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+            </ul>
+          </details>
+        </li>
+        <li><a class="tel" href={SITE.phoneHref}>416-684-7370</a></li>
       </ul>
     </nav>
   </div>
 </header>
+<script>
+  const header = document.querySelector('.site-header')!;
+  const btn = header.querySelector('.nav-toggle') as HTMLButtonElement;
+  btn.addEventListener('click', () => {
+    const open = header.classList.toggle('nav-open');
+    btn.setAttribute('aria-expanded', String(open));
+  });
+  const allDetails = () => header.querySelectorAll<HTMLDetailsElement>('.site-nav details');
+  allDetails().forEach((d) => d.addEventListener('toggle', () => {
+    if (d.open) allDetails().forEach((o) => { if (o !== d) o.removeAttribute('open'); });
+  }));
+  document.addEventListener('click', (e) => {
+    allDetails().forEach((d) => { if (d.open && !d.contains(e.target as Node)) d.removeAttribute('open'); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      allDetails().forEach((d) => d.removeAttribute('open'));
+      header.classList.remove('nav-open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
 <style>
-  .site-header { border-bottom: 1px solid var(--color-line); }
-  .site-header__inner { display: flex; gap: 1rem; align-items: center; justify-content: space-between;
-    padding-block: .8rem; flex-wrap: wrap; }
-  .site-header__brand { font-weight: 700; text-decoration: none; color: var(--color-fg); }
-  .site-header__brand span { color: var(--color-muted); font-weight: 400; }
-  nav ul { display: flex; gap: 1rem; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
-  nav a { text-decoration: none; color: var(--color-text); }
-  nav a:hover { color: var(--color-accent); }
+  .site-header { border-bottom: 1px solid var(--color-line); background: var(--color-bg);
+    position: sticky; top: 0; z-index: 50; }
+  .site-header__inner { display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding-block: .9rem; }
+  .brand { font-family: var(--font-display); color: var(--color-ink); font-size: 1.05rem;
+    letter-spacing: .18em; text-decoration: none; white-space: nowrap; }
+  .brand span { color: var(--color-accent); }
+
+  .site-nav ul { display: flex; gap: 1.4rem; align-items: center; list-style: none; margin: 0; padding: 0; }
+  .site-nav a, .site-nav summary { color: var(--color-text); text-decoration: none;
+    font-size: .85rem; letter-spacing: .05em; cursor: pointer; }
+  .site-nav a:hover, .site-nav summary:hover { color: var(--color-accent); }
+  .site-nav .tel { color: var(--color-accent); font-weight: 600; }
+
+  .dd { position: relative; }
+  .dd summary { list-style: none; }
+  .dd summary::-webkit-details-marker { display: none; }
+  .dd summary::after { content: ' ▾'; color: var(--color-muted); font-size: .7em; }
+  .dd__menu { position: absolute; top: calc(100% + .9rem); left: -1rem; min-width: 13rem;
+    background: var(--color-panel); border: 1px solid var(--color-line-strong);
+    padding: .5rem 0; margin: 0; display: block; z-index: 60; }
+  .dd__menu li { list-style: none; }
+  .dd__menu a { display: block; padding: .55rem 1.1rem; }
+
+  .nav-toggle { display: none; background: none; border: 1px solid var(--color-line);
+    border-radius: var(--radius); padding: .55rem .65rem; cursor: pointer; }
+  .nav-toggle__bar { display: block; width: 1.2rem; height: 2px; background: var(--color-ink);
+    box-shadow: 0 -5px 0 var(--color-ink), 0 5px 0 var(--color-ink); }
+
+  @media (max-width: 860px) {
+    .nav-toggle { display: block; }
+    .site-nav { display: none; }
+    .nav-open .site-nav { display: block; position: fixed; inset: 3.4rem 0 0 0;
+      background: var(--color-bg); overflow-y: auto; padding: 1.5rem; z-index: 49; }
+    .nav-open .site-nav > ul { flex-direction: column; align-items: stretch; gap: 0; }
+    .nav-open .site-nav > ul > li { border-bottom: 1px solid var(--color-line); }
+    .nav-open .site-nav a, .nav-open .site-nav summary { display: block; padding: 1rem .2rem; font-size: 1.05rem; }
+    .nav-open .dd__menu { position: static; border: 0; padding: 0 0 .5rem 1rem; }
+  }
 </style>
