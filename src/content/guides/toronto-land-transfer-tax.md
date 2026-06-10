@@ -51,6 +51,8 @@ one. Run your exact scenario — city or suburbs, first-time or not — through 
 transfer tax calculator](/land-transfer-tax), then pressure-test the whole budget with the
 [affordability calculator](/affordability-calculator).
 
-Weighing a Toronto address against a 905 alternative? [Ask Derrick](/contact) — the tax
-difference is real money, and it should be part of the conversation, not a closing-day
-surprise.
+Weighing a Toronto address against a 905 alternative? Every community we serve —
+[Caledon](/areas/caledon), [Bolton](/areas/bolton), [Orangeville](/areas/orangeville),
+[Brampton](/areas/brampton), and [Mississauga](/areas/mississauga) — charges only the
+provincial tax. [Ask Derrick](/contact) — the difference is real money, and it should be
+part of the conversation, not a closing-day surprise.

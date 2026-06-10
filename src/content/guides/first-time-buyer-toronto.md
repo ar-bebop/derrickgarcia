@@ -63,4 +63,5 @@ guide](/guides/mortgage-stress-test) explains why the rules exist.
 
 Every situation has wrinkles — gifted down payments, variable income, condo fees. If you
 want a straight answer about yours, [contact Derrick](/contact). No pressure, no spam —
-just the numbers as they apply to you.
+just the numbers as they apply to you. And if the Toronto numbers will not work, look at
+[Orangeville](/areas/orangeville) — the same rebates stretch further there.
