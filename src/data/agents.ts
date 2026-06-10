@@ -10,7 +10,8 @@ export const AGENTS: Agent[] = [
     slug: 'derrick-garcia', name: 'Derrick Garcia', title: 'Broker',
     photo: 'profile/derrick-garcia.webp',
     bio: "A trusted real estate professional who brings a unique edge to the industry. Based in Caledon and deeply familiar with the Peel region and Orangeville, Derrick has built a reputation for delivering exceptional results, backed by his 99.9% list-to-sell ratio. With over a decade of experience in the construction industry, Derrick possesses a keen eye for design, architecture, and market trends — he understands not just how a home looks, but how it's built, giving his clients an advantage when buying or selling. Known for his honest advice, sharp negotiation skills, and deep market knowledge, Derrick ensures his clients make informed decisions with confidence. When he's not working, you'll likely find him at his daughter's soccer games, exploring new architectural designs, or walking his dog, Maverick, in the community he proudly calls home.",
-    realtorCaUrl: '', realBrokerUrl: '',
+    realtorCaUrl: 'https://www.realtor.ca/agent/2088980/derrick-vieira-garcia-130-king-st-w-unit-1900b-toronto-ontario-m5x1e3',
+    realBrokerUrl: '',
   },
   {
     slug: 'pina-marrella', name: 'Pina Marrella', title: 'Agent',

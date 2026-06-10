@@ -17,7 +17,7 @@ All centralized; empty values render a graceful fallback (never a broken widget)
 | ~~`web3formsAccessKey`~~ ✅ filled | `src/data/config.ts` | **Go-live:** key delivers to aribeir4@gmail.com (testing); relink to `info@derrickgarcia.ca` first |
 | `tidycalUrl` | `src/data/config.ts` | Booking → call/email block |
 | `cloudflareAnalyticsToken` | `src/data/config.ts` | No analytics script emitted |
-| per-agent `realtorCaUrl` / `realBrokerUrl` | `src/data/agents.ts` | "Listings on realtor.ca" link hidden |
+| per-agent `realtorCaUrl` / `realBrokerUrl` | `src/data/agents.ts` | "Listings on realtor.ca" link hidden. Derrick's realtor.ca ✅; still need: Pina + Voula realtor.ca, all 3 Real Broker URLs |
 | `SITE.social.googleBusiness` | `src/data/site.ts` | Omitted from `sameAs` JSON-LD |
 
 After filling: `pnpm build` and confirm the real form, booking iframe, analytics beacon,
