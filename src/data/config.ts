@@ -4,7 +4,9 @@ export const CONFIG = {
   web3formsAccessKey: '610ea3a2-77ef-4010-b294-4b68ef49aeec',  // forms — https://web3forms.com
   // ^ key currently delivers to aribeir4@gmail.com (testing). Before go-live: relink to
   //   info@derrickgarcia.ca in the Web3Forms dashboard, or swap in a key created under info@.
-  tidycalUrl: '',                // booking — e.g. https://tidycal.com/derrickgarcia (empty → call/email block)
+  tidycalUrl: 'https://tidycal.com/3ezo9wz/consult',  // booking — embedded as iframe on /contact
+  // ^ account slug is auto-generated; before go-live confirm the account is Derrick's
+  //   (primary calendar = his iCloud) and optionally set a custom username in TidyCal settings.
   cloudflareAnalyticsToken: '',  // analytics beacon token (empty → no analytics script)
 };
 

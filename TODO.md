@@ -15,7 +15,7 @@ All centralized; empty values render a graceful fallback (never a broken widget)
 | Value | File | Empty-state behavior |
 |-------|------|----------------------|
 | ~~`web3formsAccessKey`~~ ✅ filled | `src/data/config.ts` | **Go-live:** key delivers to aribeir4@gmail.com (testing); relink to `info@derrickgarcia.ca` first |
-| `tidycalUrl` | `src/data/config.ts` | Booking → call/email block |
+| ~~`tidycalUrl`~~ ✅ filled | `src/data/config.ts` | **Go-live:** confirm TidyCal account is Derrick's (primary cal = his iCloud, bookings land there); slug `3ezo9wz` is auto-generated — optional custom username |
 | `cloudflareAnalyticsToken` | `src/data/config.ts` | No analytics script emitted |
 | per-agent `realtorCaUrl` / `realBrokerUrl` | `src/data/agents.ts` | realtor.ca ✅ all 3 (+ socials/personal sites/GBPs in per-agent `sameAs` JSON-LD); still need: 3× Real Broker profile URLs |
 | ~~`SITE.social.googleBusiness`~~ ✅ filled | `src/data/site.ts` | kgmid knowledge-panel URL. Derrick should still claim the GBP (panel showed "Suggest an edit") |
