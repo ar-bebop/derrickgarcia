@@ -17,7 +17,7 @@ All centralized; empty values render a graceful fallback (never a broken widget)
 | ~~`web3formsAccessKey`~~ ✅ filled | `src/data/config.ts` | **Go-live:** key delivers to aribeir4@gmail.com (testing); relink to `info@derrickgarcia.ca` first |
 | ~~`tidycalUrl`~~ ✅ filled | `src/data/config.ts` | **Go-live:** confirm TidyCal account is Derrick's (primary cal = his iCloud, bookings land there); slug `3ezo9wz` is auto-generated — optional custom username |
 | ~~`cloudflareAnalyticsToken`~~ ✅ filled | `src/data/config.ts` | Dashboard registers data only post-cutover (beacon reports by hostname) |
-| per-agent `realtorCaUrl` / `realBrokerUrl` | `src/data/agents.ts` | realtor.ca ✅ all 3 (+ socials/personal sites/GBPs in per-agent `sameAs` JSON-LD); still need: 3× Real Broker profile URLs |
+| ~~per-agent `realtorCaUrl` / `realBrokerUrl`~~ ✅ all filled | `src/data/agents.ts` | realtor.ca + onereal.ca ×3; socials/personal sites/GBPs in per-agent `sameAs` JSON-LD |
 | ~~`SITE.social.googleBusiness`~~ ✅ filled | `src/data/site.ts` | kgmid knowledge-panel URL. Derrick should still claim the GBP (panel showed "Suggest an edit") |
 
 After filling: `pnpm build` and confirm the real form, booking iframe, analytics beacon,
