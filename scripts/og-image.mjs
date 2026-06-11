@@ -1,7 +1,12 @@
 import sharp from 'sharp';
-const svg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+import { readFileSync } from 'node:fs';
+
+const mark = readFileSync('src/assets/branding/dg-mark.png').toString('base64');
+const svg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
   <rect width="1200" height="630" fill="#121212"/>
   <rect x="0" y="0" width="1200" height="6" fill="#b08d57"/>
+  <image x="850" y="165" width="300" height="300" xlink:href="data:image/png;base64,${mark}"/>
   <text x="80" y="300" font-family="Georgia, 'Times New Roman', serif" font-size="72"
     fill="#f3efe7" letter-spacing="8">DERRICK GARCIA</text>
   <text x="80" y="370" font-family="Georgia, 'Times New Roman', serif" font-size="30"

@@ -67,8 +67,12 @@ agent links, and GBP `sameAs` now render.
 
 ## 3b. Optional / later
 
-- Replace the `DG` placeholder favicon with a real brand mark (OG image now dark-brand,
-  regenerate via `node scripts/og-image.mjs`).
+- ~~Replace the `DG` placeholder favicon with a real brand mark~~ ✅ done (2026-06-11): client
+  supplied the gold DG mark — now the favicon set (`public/favicon.{svg,ico}`,
+  `apple-touch-icon.png`), the header brand, and the OG image (regenerate via
+  `node scripts/og-image.mjs`). Master transparent mark: `src/assets/branding/dg-mark.png`;
+  light-background lockup (dark text — unusable on the dark site, kept for print/email):
+  `src/assets/branding/dg-logo-text-light.png`.
 - Licensed hero photography if Derrick buys any (current heroes are verified, credited
   free-license Toronto photos — see `src/assets/photos/CREDITS.md`).
 - **Listings/DDF integration** (deferred, own plan): CREA REALTOR.ca DDF® feed is free for
