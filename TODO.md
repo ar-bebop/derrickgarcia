@@ -49,13 +49,14 @@ agent links, and GBP `sameAs` now render.
   brackets/rebates, FHSA/HBP) and the Oliver's RTO program facts in `src/content/guides/`.
 - **Real testimonials** → `TESTIMONIALS` in `src/data/config.ts` (Reviews page + Home teaser
   render automatically; ships with honest Google link-out empty state).
-- **Stats review** — Home value strip uses bio-sourced figures (99.9% list-to-sell, 21 yrs
-  licensed, 3 languages) in `src/data/site.ts`; confirm or replace with Derrick's preferred numbers.
+- ~~**Stats review**~~ ✅ resolved (2026-06-11) — stats strip removed from the homepage entirely
+  per client; `SITE.stats` deleted.
 - ~~**Deposit Lending**~~ ✅ resolved (2026-06-11) — built as `/deposit-lending` (on-site explainer →
   money2close.com). Derrick confirmed: no referral relationship (current copy + plain link correct;
   do NOT add `rel="sponsored"`), framings approved, and the old site had a single "Deposit Lending"
   nav item (no separate Lending target exists).
-- Voula Spingos' full bio (source site had none — currently a brief honest one-liner).
+- ~~Voula Spingos' full bio~~ ✅ resolved (2026-06-11) — written from her Google Business bio
+  (EN/EL bilingual, realtor + stager); in `src/data/agents.ts`.
 - **Area pages fact review (Phase 3)** — the five `/areas/` pages ship evergreen,
   verifiable facts only; review flagged characterizations before go-live:
   - Caledon: Greenbelt scarcity "underpins long-term value" framing.

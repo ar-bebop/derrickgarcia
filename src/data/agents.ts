@@ -35,8 +35,8 @@ export const AGENTS: Agent[] = [
   {
     slug: 'voula-spingos', name: 'Voula Spingos', title: 'Agent',
     photo: 'profile/voula-spingos.webp',
-    // Source site had no bio for Voula; brief accurate statement until a full bio is provided.
-    bio: 'Real estate agent on the Derrick Garcia team at Real Broker Ontario, serving Toronto and the Greater Toronto Area.',
+    // Sourced from Voula's Google Business bio (2026-06-11): EN/EL bilingual, realtor + stager.
+    bio: "Fluent in English and Greek, Voula is a dedicated real estate professional who brings a blend of creativity and proficiency to every project. With a background as both a realtor and a home stager, she sees a property from two sides at once: finding the home that truly fits when you buy, and presenting yours at its absolute best when you sell. Committed to a seamless, stress-free experience from first showing to closing day, Voula serves clients across Toronto and the GTA as part of the Derrick Garcia team at Real Broker Ontario.",
     realtorCaUrl: 'https://www.realtor.ca/agent/2021291/voula-spingos-130-king-st-w-unit-1900b-toronto-ontario-m5x1e3',
     realBrokerUrl: 'https://onereal.ca/profile/voula-spingos',
     sameAs: [

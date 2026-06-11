@@ -35,15 +35,6 @@ const guides = [
     </div>
   </section>
 
-  <section class="stats" aria-label="Track record">
-    <div class="container stats__grid">
-      {SITE.stats.map((s) => (
-        <div class="stats__item reveal"><span class="stats__value">{s.value}</span>
-          <span class="stats__label">{s.label}</span></div>
-      ))}
-    </div>
-  </section>
-
   <section class="section container">
     <p class="kicker">Plan your purchase</p>
     <h2>Know your numbers before you offer.</h2>
@@ -136,17 +127,6 @@ const guides = [
   .hero h1 { max-width: 14ch; margin: 0 0 1rem; }
   .hero__sub { max-width: 46ch; font-size: 1.05rem; margin: 0 0 1.8rem; }
   .hero__ctas { display: flex; gap: .9rem; flex-wrap: wrap; }
-
-  .stats { border-block: 1px solid var(--color-line); }
-  .stats__grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-  .stats__item { padding: 1.4rem 1rem; border-right: 1px solid var(--color-line);
-    display: flex; flex-direction: column; gap: .15rem; }
-  .stats__item:last-child { border-right: 0; }
-  .stats__value { font-family: var(--font-display); color: var(--color-accent); font-size: 1.6rem; }
-  .stats__label { color: var(--color-muted); font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; }
-  @media (max-width: 640px) { .stats__grid { grid-template-columns: 1fr; }
-    .stats__item { border-right: 0; border-bottom: 1px solid var(--color-line); }
-    .stats__item:last-child { border-bottom: 0; } }
 
   .tools { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 1.8rem; }
   .tools .card { text-decoration: none; display: flex; flex-direction: column; gap: .5rem; }
