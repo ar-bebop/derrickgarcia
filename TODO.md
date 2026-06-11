@@ -75,7 +75,24 @@ agent links, and GBP `sameAs` now render.
   members — Derrick applies via CREA → feed credentials → nightly GitHub Action bakes a
   featured-listings page (compliance: "Powered by REALTOR.ca" logo + link-back). Paid
   alternative: Repliers API for true live search.
-- Optional live Google-reviews widget.
+- **Live Google-reviews widget** (researched 2026-06-11; client wants this — post-launch project).
+  Prerequisite for every viable route: **Derrick claims his GBP** (already a §1 note).
+  Rule regardless of route: bake reviews at build time via nightly GitHub Action → static
+  output; never client-side third-party JS (protects cookieless/no-banner + page speed).
+  - **Option A — official Places API (New):** reviews field = Place Details Pro SKU
+    ($17/1k, 5k calls/mo free → one nightly call is free forever). Hard cap: **5 reviews**,
+    Google-chosen, no pagination (decade-old limitation). Needs Google Cloud billing
+    account (card on file). Most durable; cap acceptable while reviews are few.
+  - **Option B — Google Business Profile API:** ALL reviews (100/page), free; but formal
+    access application (3–10+ business days, business justification), GBP verified 60+ days,
+    OAuth refresh-token plumbing in CI. The "right" route at scale; overkill at 2 reviews.
+  - **Option C — Featurable (freemium middleman over GBP API):** free, unlimited views,
+    all reviews; connect the Google account that owns the GBP; has a REST endpoint we can
+    call from the Action (avoids their JS embed). Zero Google paperwork; risk = reliance
+    on a startup's lifetime-free promise.
+  - **Rejected — Elfsight-style embeds:** free tier 200 views/mo then the widget shuts off,
+    branding, third-party JS on every page; paid tiers violate $0 budget.
+  - Interim (ships now): curated `TESTIMONIALS` + live "Read our Google reviews ↗" buttons.
 - Verify the dated regulatory constants in `src/lib/mortgage-math.js` against source before
   relying on calculator output in production (CMHC rates, LTT brackets, FTB rebates, MQR).
 
