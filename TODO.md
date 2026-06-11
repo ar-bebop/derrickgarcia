@@ -45,8 +45,7 @@ agent links, and GBP `sameAs` now render.
 
 ## 3. Content inputs from Derrick (Phase 2 built the slots; he supplies the substance)
 
-- **Guide content review before go-live** — regulatory figures (MQR, CMHC, GDS/TDS, LTT
-  brackets/rebates, FHSA/HBP) and the Oliver's RTO program facts in `src/content/guides/`.
+- ~~**Guide content review**~~ ✅ approved by client (2026-06-11).
 - **Real testimonials** → `TESTIMONIALS` in `src/data/config.ts` (Reviews page + Home teaser
   render automatically; ships with honest Google link-out empty state).
 - ~~**Stats review**~~ ✅ resolved (2026-06-11) — stats strip removed from the homepage entirely
@@ -57,22 +56,12 @@ agent links, and GBP `sameAs` now render.
   nav item (no separate Lending target exists).
 - ~~Voula Spingos' full bio~~ ✅ resolved (2026-06-11) — written from her Google Business bio
   (EN/EL bilingual, realtor + stager); in `src/data/agents.ts`.
-- **Area pages fact review (Phase 3)** — the five `/areas/` pages ship evergreen,
-  verifiable facts only; review flagged characterizations before go-live:
-  - Caledon: Greenbelt scarcity "underpins long-term value" framing.
-  - Bolton: "walkable main-street amenities" in the village core.
-  - Orangeville: "Broadway is a working downtown" framing; GO-bus-to-Brampton service
-    (re-verify schedules at go-live); the $4,000 FTB rebate is a regulatory constant —
-    re-check periodically.
-  - Brampton: "one of Canada's largest and youngest big cities"; Mount Pleasant
-    "commuter-first"; Bramalea "renovators look for"; Springdale/Castlemore
-    "executive homes".
-  - Mississauga: condos "typically at a discount to comparable Toronto product";
-    the status-certificate/reserve-fund review workflow claim (confirm team practice);
-    Hazel McCallion LRT is described as **under construction** — update the copy when
-    it opens (2028–29 per Metrolinx).
-  - About page: "We work where we live" lede line implies team-wide residency across the
-    five towns — only Derrick's Caledon base is bio-verifiable; confirm he's comfortable.
+- ~~**Area pages fact review (Phase 3)**~~ ✅ approved by client (2026-06-11). Standing
+  maintenance notes that survive the review:
+  - Mississauga: Hazel McCallion LRT is described as **under construction** — update the
+    copy when it opens (2028–29 per Metrolinx).
+  - The $4,000 FTB rebate (Orangeville page + guides) is a regulatory constant — re-check
+    periodically alongside the §3b mortgage-math constants.
   - New towns later: one at a time, never templated batches (anti-doorway rules in
     docs/superpowers/specs/2026-06-10-location-pages-design.md).
 
