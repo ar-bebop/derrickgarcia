@@ -7,7 +7,8 @@ export const CONFIG = {
   tidycalUrl: 'https://tidycal.com/3ezo9wz/consult',  // booking — embedded as iframe on /contact
   // ^ account slug is auto-generated; before go-live confirm the account is Derrick's
   //   (primary calendar = his iCloud) and optionally set a custom username in TidyCal settings.
-  cloudflareAnalyticsToken: '',  // analytics beacon token (empty → no analytics script)
+  cloudflareAnalyticsToken: '36e995726f60487d8720dab5e51b031c',  // beacon emitted by BaseLayout on every page
+  // ^ dashboard stays empty until derrickgarcia.ca is live (beacon reports by hostname).
 };
 
 // Real client testimonials. Ships empty — old site had none. When Derrick supplies
