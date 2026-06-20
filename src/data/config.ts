@@ -9,6 +9,7 @@ export const CONFIG = {
   //   (primary calendar = his iCloud) and optionally set a custom username in TidyCal settings.
   cloudflareAnalyticsToken: '36e995726f60487d8720dab5e51b031c',  // beacon emitted by BaseLayout on every page
   // ^ dashboard stays empty until derrickgarcia.ca is live (beacon reports by hostname).
+  creaAnalyticsKey: '',  // CREA DDF Analytics Web Service API (Rule 5c) — spec not yet public; empty = inert (see src/lib/crea-analytics.js).
 };
 
 // Real client testimonials. Ships empty — old site had none. When Derrick supplies
