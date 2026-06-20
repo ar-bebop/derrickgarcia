@@ -26,6 +26,11 @@ const dropdowns = [
     { href: '/reviews', label: 'Reviews' },
     { href: '/contact', label: 'Contact' },
   ]},
+  { label: 'Listings', items: [
+    { href: '/listings', label: 'All Listings' },
+    { href: '/listings/derrick', label: "Derrick's Listings" },
+    { href: SITE.listingsSearchUrl, label: 'Search realtor.ca ↗', external: true },
+  ]},
 ];
 ---
 <header class="site-header">
@@ -49,6 +54,18 @@ const dropdowns = [
           </details>
         </li>
         <li><a href="/rent-to-own">Rent to Own</a></li>
+        <li>
+          <details class="dd">
+            <summary>Listings</summary>
+            <ul class="dd__menu">
+              {dropdowns[4].items.map((i) => <li>
+                {'external' in i && i.external
+                  ? <a href={i.href} target="_blank" rel="noopener noreferrer">{i.label}</a>
+                  : <a href={i.href}>{i.label}</a>}
+              </li>)}
+            </ul>
+          </details>
+        </li>
         <li>
           <details class="dd">
             <summary>Tools</summary>

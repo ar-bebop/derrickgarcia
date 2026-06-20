@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ListingSchema from '../../components/ListingSchema.astro';
+import TrademarkStatement from '../../components/TrademarkStatement.astro';
+import PoweredByRealtor from '../../components/PoweredByRealtor.astro';
+import { DERRICK_LISTINGS } from '../../data/listings.ts';
+
+// Detail pages exist only for Derrick's own listings. With DERRICK_LISTINGS empty,
+// zero pages are built — consistent with the "no fabricated placeholders" rule.
+export async function getStaticPaths() {
+  return DERRICK_LISTINGS.map((listing) => ({ params: { id: listing.id }, props: { listing } }));
+}
+
+const { listing } = Astro.props;
+
+const place = [listing.address, listing.city].filter(Boolean).join(', ') || 'this home';
+const pageTitle = `${place} — Derrick Garcia | Real Broker Ontario`;
+const trimmed = (listing.description ?? '').trim();
+const description = trimmed
+  ? (trimmed.length > 155 ? `${trimmed.slice(0, 152).trimEnd()}…` : trimmed)
+  : `${place} — listed by Derrick Garcia. See photos, price, and details, and book a viewing.`;
+
+const metaParts = [
+  listing.beds != null ? `${listing.beds} bd` : null,
+  listing.baths != null ? `${listing.baths} ba` : null,
+  listing.propertyType,
+].filter(Boolean);
+
+const cityLine = [listing.city, listing.province, listing.postalCode].filter(Boolean).join(', ');
+---
+<BaseLayout title={pageTitle} description={description}>
+  <ListingSchema slot="head" listing={listing} />
+  <article class="container article" data-listing-id={listing.id}>
+    <header>
+      <p class="kicker"><a href="/listings/derrick">Listings</a> · {listing.city ?? listing.province}</p>
+      <h1>{listing.address}</h1>
+      {cityLine && <p class="dek">{cityLine}</p>}
+    </header>
+
+    {listing.photos.length > 0 && (
+      <div class="gallery">
+        {listing.photos.map((src, i) => (
+          <img class="gallery__img" src={src} alt={`Photo ${i + 1} of ${place}`}
+            loading="lazy" decoding="async" />
+        ))}
+      </div>
+    )}
+
+    <div class="facts">
+      <p class="price">{listing.priceFormatted ?? 'Price on request'}</p>
+      {metaParts.length > 0 && <p class="meta">{metaParts.join(' · ')}</p>}
+    </div>
+
+    {trimmed && <div class="prose"><p>{trimmed}</p></div>}
+
+    {listing.brokerage && <p class="broker">Listed by {listing.brokerage}</p>}
+
+    <p class="pbr"><PoweredByRealtor url={listing.url} /></p>
+    {listing.url && (
+      <p class="view">
+        <a class="btn" href={listing.url} target="_blank" rel="noopener noreferrer">View on REALTOR.ca ↗</a>
+      </p>
+    )}
+
+    <TrademarkStatement />
+
+    <section class="cta">
+      <h2>Interested in this home?</h2>
+      <p>Book a viewing or ask us anything — we'll get right back to you.</p>
+      <p><a class="btn" href="/contact">Get in Touch</a></p>
+    </section>
+  </article>
+</BaseLayout>
+<style>
+  .article { padding-block: clamp(2.5rem, 7vw, 4rem) var(--section-pad); max-width: 900px; }
+  .kicker a { color: inherit; text-decoration: none; }
+  .article h1 { max-width: 22ch; margin-bottom: .3rem; }
+  .dek { color: var(--color-muted); font-size: 1.05rem; margin: 0 0 .5rem; }
+  .gallery { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    margin: 1.5rem 0; }
+  /* No CSS filter on listing photos — they carry CREA's baked-in watermark and must not be modified. */
+  .gallery__img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius);
+    border: 1px solid var(--color-line); }
+  .gallery__img:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+  .facts { border-top: 1px solid var(--color-line); padding-top: 1.5rem; margin-top: 1rem; }
+  .price { font-family: var(--font-display); color: var(--color-ink);
+    font-size: clamp(2rem, 5vw, 2.8rem); margin: 0; }
+  .meta { color: var(--color-accent); font-size: .8rem; letter-spacing: .12em;
+    text-transform: uppercase; font-weight: 600; margin: .4rem 0 0; }
+  .prose { max-width: 64ch; margin-top: 1.5rem; line-height: 1.7; }
+  .broker { color: var(--color-muted); font-size: .85rem; margin-top: 1.2rem; }
+  .pbr { margin-top: 1.2rem; }
+  .view { margin-top: 1rem; }
+  .cta { border-top: 1px solid var(--color-line); margin-top: 2.5rem; padding-top: 2rem; }
+  .cta h2 { font-size: 1.4rem; }
+</style>
+<script>
+  // Gated CREA DDF Analytics (Rule 5c). Inert until CONFIG.creaAnalyticsKey is set.
+  import { reportListingView } from '../../lib/crea-analytics.js';
+  import { CONFIG } from '../../data/config.ts';
+  const el = document.querySelector<HTMLElement>('[data-listing-id]');
+  const id = el?.dataset.listingId;
+  if (id) reportListingView(id, { key: CONFIG.creaAnalyticsKey });
+</script>
