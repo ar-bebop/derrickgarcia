@@ -1,8 +1,25 @@
+# Deploy to GitHub Pages.
+#
+# This workflow uses EXPLICIT install/build steps instead of withastro/action@v3
+# so we can fetch MLS listings from the CREA DDF API *between* install and build.
+# (withastro/action runs install + build internally with no seam for a pre-build fetch.)
+#
+# Required GitHub Actions Secrets (Settings -> Secrets and variables -> Actions),
+# set to the same values as the local .env:
+#   CREA_DDF_CLIENT_ID
+#   CREA_DDF_CLIENT_SECRET
+#   CREA_DDF_SCOPE
+#   CREA_DDF_TOKEN_URL
+#   CREA_DDF_API_BASE
+# The fetch script degrades gracefully (writes empty datasets + exits 0), so a
+# missing or bad secret yields an empty listings grid rather than a broken deploy.
 name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '10 8 * * *' # nightly ~03:10 ET, off-peak, inside CREA's 24h refresh window (:10 avoids top-of-hour congestion)
 permissions:
   contents: read
   pages: write
@@ -15,9 +32,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: withastro/action@v3
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Fetch listings
+        run: pnpm fetch:listings:ci
+        env:
+          CREA_DDF_CLIENT_ID: ${{ secrets.CREA_DDF_CLIENT_ID }}
+          CREA_DDF_CLIENT_SECRET: ${{ secrets.CREA_DDF_CLIENT_SECRET }}
+          CREA_DDF_SCOPE: ${{ secrets.CREA_DDF_SCOPE }}
+          CREA_DDF_TOKEN_URL: ${{ secrets.CREA_DDF_TOKEN_URL }}
+          CREA_DDF_API_BASE: ${{ secrets.CREA_DDF_API_BASE }}
+      - run: pnpm build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
   deploy:
     needs: build
     runs-on: ubuntu-latest
