@@ -11,7 +11,7 @@ export interface Listing {
   mlsNumber: string;
   url: string | null;
   address: string;
-  city: string;
+  city: string | null;
   province: string;
   postalCode: string;
   price: number | null;
