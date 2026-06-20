@@ -194,15 +194,31 @@ describe('buildListingsUrl', () => {
   it('targets the Property endpoint', () => {
     expect(url.startsWith(`${API_BASE}/Property?`)).toBe(true);
   });
-  // URLSearchParams encodes spaces as '+', which decodeURIComponent leaves intact;
-  // normalize '+' → ' ' so we can assert on the human-readable filter.
-  const decoded = decodeURIComponent(url).replace(/\+/g, ' ');
-  it('includes the filter, $top and $count=true', () => {
+  // OData system query options MUST keep a literal '$' — assert on the RAW url so a
+  // regression to URLSearchParams (which encodes '$' -> '%24') is caught immediately.
+  it('uses LITERAL $-prefixed OData params (never %24)', () => {
+    expect(url).toContain('$filter=');
+    expect(url).toContain('$select=');
+    expect(url).toContain('$top=');
+    expect(url).toContain('$count=true');
+    expect(url).not.toContain('%24');
+  });
+  // The value side must still be percent-encoded: the filter has spaces (encodeURIComponent
+  // leaves "'" literal, which is valid in a query value). The '$' before 'filter' stays literal.
+  it('percent-encodes the $filter VALUE (literal $, encoded spaces)', () => {
+    expect(decodeURIComponent(url)).toContain("StandardStatus eq 'Active'");
+    expect(url).toContain("$filter=StandardStatus%20eq%20'Active'");
+    // the filter value must not contain raw spaces
+    expect(url).not.toMatch(/\$filter=[^&]*\s/);
+  });
+  it('includes the filter, $top and $count=true (decoded)', () => {
+    const decoded = decodeURIComponent(url);
     expect(decoded).toContain("StandardStatus eq 'Active'");
     expect(decoded).toContain('$top=100');
     expect(decoded).toContain('$count=true');
   });
-  it('includes every field in the $select list', () => {
+  it('includes every field in the $select list (decoded)', () => {
+    const decoded = decodeURIComponent(url);
     for (const field of SELECT_FIELDS) {
       expect(decoded).toContain(field);
     }
@@ -242,7 +258,7 @@ describe('getToken', () => {
     const fetchImpl = async () => ({ ok: false, status: 401, text: async () => 'bad creds' });
     await expect(getToken({
       tokenUrl: 't', clientId: 'c', clientSecret: 's', scope: 'DDFApi_Read', fetchImpl,
-    })).rejects.toThrow();
+    })).rejects.toThrow('DDF token request failed');
   });
 });
 
@@ -285,7 +301,7 @@ describe('fetchJsonWithRetry', () => {
     const fetchImpl = async () => { calls++; return { ok: false, status: 503, text: async () => 'down' }; };
     await expect(fetchJsonWithRetry('u', {
       token: 't', fetchImpl, maxRetries: 2, sleep: noSleep,
-    })).rejects.toThrow();
+    })).rejects.toThrow('DDF request failed');
     // initial try + 2 retries
     expect(calls).toBe(3);
   });
@@ -294,7 +310,7 @@ describe('fetchJsonWithRetry', () => {
     let calls = 0;
     const fetchImpl = async () => { calls++; return { ok: false, status: 400, text: async () => 'bad' }; };
     await expect(fetchJsonWithRetry('u', { token: 't', fetchImpl, sleep: noSleep }))
-      .rejects.toThrow();
+      .rejects.toThrow('DDF request failed');
     expect(calls).toBe(1);
   });
 });
@@ -323,6 +339,46 @@ describe('fetchAllListings', () => {
     expect(count).toBe(3);
     expect(records).toHaveLength(3);
     expect(records.map((r) => r.ListingKey)).toEqual(['28705430', '28705431', '28705999']);
+  });
+
+  it('threads the refreshed token into later pages (no stale re-401)', async () => {
+    const page2Url = `${API_BASE}/Property?$skiptoken=abc`;
+    const bearers = [];
+    let page1Calls = 0;
+    const fetchImpl = async (url, opts) => {
+      bearers.push(opts.headers.Authorization);
+      if (url.includes('$skiptoken')) {
+        // page 2: must already carry the FRESH bearer — no 401 needed here.
+        return { ok: true, json: async () => ({ value: [sample.otherAgent] }) };
+      }
+      // page 1: first hit 401 (triggers refresh), second hit succeeds.
+      page1Calls++;
+      if (page1Calls === 1) return { ok: false, status: 401, text: async () => 'expired' };
+      return {
+        ok: true,
+        json: async () => ({
+          '@odata.count': 2,
+          '@odata.nextLink': page2Url,
+          value: [sample.derrickListing],
+        }),
+      };
+    };
+    let refreshed = 0;
+    const refreshToken = async () => { refreshed++; return 'fresh-token'; };
+
+    const { records } = await fetchAllListings({
+      apiBase: API_BASE, filter: activeFilter(), select: SELECT_FIELDS,
+      token: 'stale-token', fetchImpl, refreshToken, sleep: noSleep,
+    });
+
+    expect(refreshed).toBe(1);
+    // page 1, attempt 1: stale → 401; attempt 2: fresh; page 2: fresh (NOT stale).
+    expect(bearers).toEqual([
+      'Bearer stale-token',
+      'Bearer fresh-token',
+      'Bearer fresh-token',
+    ]);
+    expect(records.map((r) => r.ListingKey)).toEqual(['28705430', '28705999']);
   });
 });
 

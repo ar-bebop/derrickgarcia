@@ -41,14 +41,16 @@ export function derrickFilter() {
   return `${activeFilter()} and (${agentClause})`;
 }
 
-// Full Property URL with $filter, $select, $top and $count=true, properly encoded.
+// Full Property URL with $filter, $select, $top and $count=true. OData system query
+// options must keep their LITERAL '$' prefix — URLSearchParams would percent-encode it
+// ('$filter' -> '%24filter') and CREA's endpoint rejects that. So build the key=value
+// pairs by hand with literal '$' and encode only the VALUES.
 export function buildListingsUrl({ apiBase, filter, select, top }) {
-  const params = new URLSearchParams();
-  params.set('$filter', filter);
-  params.set('$select', select.join(','));
-  params.set('$top', String(top));
-  params.set('$count', 'true');
-  return `${apiBase}/Property?${params.toString()}`;
+  return `${apiBase}/Property`
+    + `?$filter=${encodeURIComponent(filter)}`
+    + `&$select=${encodeURIComponent(select.join(','))}`
+    + `&$top=${encodeURIComponent(String(top))}`
+    + '&$count=true';
 }
 
 // CREA's ListingURL is a realtor.ca deep link WITHOUT a scheme — prefix https://.
@@ -198,8 +200,21 @@ export async function fetchAllListings({
   let url = buildListingsUrl({ apiBase, filter, select, top });
   let first = true;
 
+  // Thread the freshest bearer across pages: when fetchJsonWithRetry refreshes on a 401
+  // it does so locally, so capture the new token here and reuse it on subsequent pages —
+  // otherwise every page after expiry pays a wasted 401->refresh round-trip.
+  let currentToken = token;
+  const trackingRefresh = refreshToken
+    ? async () => {
+        currentToken = await refreshToken();
+        return currentToken;
+      }
+    : undefined;
+
   while (url) {
-    const page = await fetchJsonWithRetry(url, { token, fetchImpl, refreshToken, sleep });
+    const page = await fetchJsonWithRetry(url, {
+      token: currentToken, fetchImpl, refreshToken: trackingRefresh, sleep,
+    });
     if (first) {
       count = page['@odata.count'] ?? 0;
       first = false;
@@ -226,7 +241,7 @@ export async function buildDatasets({
     token, fetchImpl, refreshToken, sleep,
   });
 
-  const all = records.map(normalizeListing);
+  const all = records.filter(Boolean).map(normalizeListing);
   const derrick = all.filter((l) => l.isDerrick);
   return { all, derrick, count };
 }
