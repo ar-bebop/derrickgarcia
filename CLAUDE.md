@@ -59,8 +59,11 @@ per task, recommended) or **superpowers:executing-plans** (inline with checkpoin
 
 - **Stack:** Astro + vanilla CSS (custom properties) → GitHub Pages via GitHub Actions. One shared
   `BaseLayout` + `Header`/`Footer`. Calculators are client-side islands over a tested pure-function math module.
-- **Listings:** no IDX/MLS hosted (licensed feed). "Search Homes" / agent profiles **link out** to
-  realtor.ca / Real Broker.
+- **Listings:** hybrid. MLS listings come from a self-operated CREA **DDF** feed (nightly GitHub Action →
+  build-time render): `/listings` (GTA markets; cards link out to realtor.ca) + Derrick's own get on-site
+  `/listings/[id]` detail pages. "Search Homes" / agent profiles still **link out** to realtor.ca / Real Broker.
+  Required compliance furniture per listing/detail: "Powered by REALTOR.ca" badge + brokerage name (DDF Office
+  resource) + MLS®/REALTOR® trademark statement on listings pages.
 - **Blog:** dropped. **"My App" QR:** dropped — it was Lofty's white-label "Closely" app keyed to
   Derrick's paid agent ID; attribution/leads die when the Lofty subscription ends.
 - **Forms:** Web3Forms (free; honeypot + hCaptcha). **Booking:** TidyCal (free; two-way **iCloud** sync —
@@ -70,8 +73,9 @@ per task, recommended) or **superpowers:executing-plans** (inline with checkpoin
   Rent-to-Own · Reviews (config-driven, ships with honest empty state) · Guides (4 articles) ·
   Privacy · Accessibility · 404 · legacy-URL redirect stubs. **Phase 3 (built):** `/areas/` hub +
   5 town pages (Caledon · Bolton · Orangeville · Brampton · Mississauga) — local-SEO content,
-  anti-doorway rules in the 2026-06-10 spec. **Deferred (own plan):** DDF/MLS listings
-  integration; optional live Google-reviews widget.
+  anti-doorway rules in the 2026-06-10 spec. **DDF/MLS listings (built):** nightly DDF fetch + the three
+  `/listings` routes + compliance furniture — only the manual go-live inputs remain (`TODO.md`). **Still
+  deferred (own plan):** optional live Google-reviews widget.
 
 ## Conventions & gotchas
 
@@ -84,7 +88,9 @@ per task, recommended) or **superpowers:executing-plans** (inline with checkpoin
   (`(1+r/2)^(1/6)-1`, NOT `r/12`). Stress test = `max(rate+2%, 5.25%)`. Keep all regulatory constants named
   and date-commented (they change). The math module is unit-tested first (TDD).
 - **Assets:** only the 3 headshots + Real Broker logos are real/reusable. The old site's hero/banner images
-  are generic **stock** — do not reuse. MLS listing photos are licensed — do not host.
+  are generic **stock** — do not reuse. MLS listing photos are licensed — do not host/copy; under the DDF
+  license we **display** them by hotlinking the **unmodified, watermarked** `ddfcdn.realtor.ca` URLs
+  (no crop/overlay/recompress/filter).
 - **Astro on Pages:** do NOT set `base` (apex domain serves from root); `CNAME` lives in `public/`.
 - **DNS cutover:** when repointing off Lofty, swap only A/AAAA/CNAME — **keep MX/SPF/DKIM** or
   `info@derrickgarcia.ca` email breaks. Lower TTL first; stage on `*.github.io` before touching DNS.

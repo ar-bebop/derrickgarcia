@@ -75,10 +75,32 @@ agent links, and GBP `sameAs` now render.
   `src/assets/branding/dg-logo-text-light.png`.
 - Licensed hero photography if Derrick buys any (current heroes are verified, credited
   free-license Toronto photos — see `src/assets/photos/CREDITS.md`).
-- **Listings/DDF integration** (deferred, own plan): CREA REALTOR.ca DDF® feed is free for
-  members — Derrick applies via CREA → feed credentials → nightly GitHub Action bakes a
-  featured-listings page (compliance: "Powered by REALTOR.ca" logo + link-back). Paid
-  alternative: Repliers API for true live search.
+- **Listings/DDF integration** ✅ **built** (in progress to go-live): self-operated CREA DDF feed →
+  nightly GitHub Action bakes `/listings` (all GTA-market listings; cards link out to realtor.ca),
+  `/listings/derrick` (Derrick's own — honest empty state now), and `/listings/[id]` (on-site detail
+  pages, Derrick's own only). Photos hotlinked unmodified from `ddfcdn.realtor.ca`. Compliance furniture
+  in place (Powered-by-REALTOR.ca badge, brokerage name, MLS®/REALTOR® trademark statement). Go-live inputs:
+  - [ ] **Add the 5 GitHub Actions Secrets** `CREA_DDF_CLIENT_ID`, `CREA_DDF_CLIENT_SECRET`,
+    `CREA_DDF_SCOPE`, `CREA_DDF_TOKEN_URL`, `CREA_DDF_API_BASE` (Settings → Secrets and variables →
+    Actions; same values as local `.env`). **Blocks the nightly action** — until then the listings grid
+    builds empty (graceful).
+  - [ ] After adding secrets, run a **`workflow_dispatch` dry-run** to confirm fetch+build+deploy works
+    end-to-end; confirm the fetch step logs a listings count and Pages deploys green.
+  - [ ] Obtain **CREA's official "Powered by REALTOR.ca" logo asset** (+ dark-bg usage rules) → drop into
+    `src/assets/branding/` and replace the interim text badge in `src/components/PoweredByRealtor.astro`
+    (asset should be ≥90px wide, 1:1).
+  - [ ] Confirm the **exact current CREA MLS®/REALTOR® trademark statement wording** against CREA member
+    rules; update `src/components/TrademarkStatement.astro` if it differs.
+  - [ ] Obtain the **CREA Analytics Web Service API spec (DDF Rule 5c)** and implement it in the inert stub
+    `src/lib/crea-analytics.js` (currently gated by empty `CONFIG.creaAnalyticsKey`).
+  - [ ] **Data-quality flag (raise with CREA/client):** ~45 of ~805 active listings (incl. ~32 Toronto)
+    reference brokerage offices ABSENT from the DDF Office resource (9 office keys return no Office record),
+    so those cards show no brokerage name (we never invent one). Verify whether the Office feed is fully
+    provisioned, or whether those listings legitimately belong to offices outside this member feed.
+  - [ ] **Compliance review:** confirm whether the `/listings/derrick` empty-state page (which currently
+    omits the trademark statement since it shows no listings) needs the MLS®/REALTOR® statement under CREA
+    member website rules.
+  - Paid alternative (not pursued): Repliers API for true live search.
 - **Live Google-reviews widget** (researched 2026-06-11; client wants this — post-launch project).
   Prerequisite for every viable route: **Derrick claims his GBP** (already a §1 note).
   Rule regardless of route: bake reviews at build time via nightly GitHub Action → static
