@@ -7,6 +7,15 @@ dist/
 .DS_Store
 *.log
 
+# Secrets — NEVER commit (this is a public repo). Real values live in
+# GitHub Actions Secrets for production; .env is local-only for testing.
+.env
+.env.*
+!.env.example
+
+# Generated DDF/MLS datasets — CI-ephemeral, fetched at build time, never committed
+src/data/generated/
+
 # Drop zone for incoming files (organized into the repo, then cleaned)
 tmp/
 

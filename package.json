@@ -6,11 +6,15 @@
   "packageManager": "pnpm@11.3.0",
   "scripts": {
     "dev": "astro dev",
+    "predev": "node scripts/ensure-listings.mjs",
     "build": "astro build",
+    "prebuild": "node scripts/ensure-listings.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "fetch:listings": "node --env-file=.env scripts/fetch-listings.mjs",
+    "fetch:listings:ci": "node scripts/fetch-listings.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.2.1",
