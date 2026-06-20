@@ -11,14 +11,20 @@ export const DERRICK_AGENT_KEY = '2088980';
 const AGENT_KEY_FIELDS = ['ListAgentKey', 'CoListAgentKey', 'CoListAgentKey2', 'CoListAgentKey3'];
 
 // OData $select — request only the fields the site renders (keeps payloads small).
+// NOTE: ListOfficeName does NOT exist on the Property entity (probed live 2026-06-20);
+// including it 400s the WHOLE query → 0 listings. Brokerage comes from the separate
+// Office resource, joined on ListOfficeKey (see fetchOfficeNameMap / normalizeListing).
 export const SELECT_FIELDS = [
   'ListingKey', 'ListingId', 'ListingURL', 'UnparsedAddress', 'City',
   'StateOrProvince', 'PostalCode', 'ListPrice', 'BedroomsTotal',
   'BathroomsTotalInteger', 'PropertySubType', 'ListAgentKey',
   'CoListAgentKey', 'CoListAgentKey2', 'CoListAgentKey3', 'ListOfficeKey',
-  'ListOfficeName', 'StandardStatus', 'PublicRemarks', 'Media',
+  'StandardStatus', 'PublicRemarks', 'Media',
   'PhotosCount', 'ModificationTimestamp', 'Latitude', 'Longitude',
 ];
+
+// Fields requested from the separate Office resource (joined on ListOfficeKey → OfficeKey).
+export const OFFICE_SELECT_FIELDS = ['OfficeKey', 'OfficeName'];
 
 // HTTP statuses worth retrying with backoff (throttling + transient server errors).
 const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
@@ -68,10 +74,12 @@ export function formatPrice(n) {
   return CAD.format(n);
 }
 
-// Photo Media items only (CREA inlines Documents/etc. in the same array).
+// Photo Media items only (CREA inlines Documents/Office Logos/etc. in the same array).
+// MediaCategory is "Property Photo" on real photos (probed live 2026-06-20); older docs
+// say "Photo". Match either via /photo/i — this EXCLUDES "Office Logo", "Document", etc.
 function photoItems(media) {
   if (!Array.isArray(media)) return [];
-  return media.filter((m) => m && m.MediaCategory === 'Photo');
+  return media.filter((m) => m && /photo/i.test(m.MediaCategory));
 }
 
 // Primary photo: PreferredPhotoYN first, else lowest Order, else first. null if none.
@@ -97,8 +105,11 @@ export function isDerrickListing(raw) {
   return AGENT_KEY_FIELDS.some((f) => raw && raw[f] === DERRICK_AGENT_KEY);
 }
 
-// Map a raw DDF Property record to the site's render contract.
-export function normalizeListing(raw) {
+// Map a raw DDF Property record to the site's render contract. Brokerage is resolved
+// by joining raw.ListOfficeKey against the Office-name map (compliance-required); if the
+// key isn't in the map we emit null — never an invented name. The default {} keeps this
+// callable with a single argument (e.g. for the isDerrick-only tests).
+export function normalizeListing(raw, officeNameByKey = {}) {
   return {
     id: raw.ListingKey,
     mlsNumber: raw.ListingId,
@@ -116,7 +127,7 @@ export function normalizeListing(raw) {
     photos: sortedPhotoUrls(raw.Media),
     photosCount: raw.PhotosCount,
     description: raw.PublicRemarks,
-    brokerage: raw.ListOfficeName,
+    brokerage: officeNameByKey[raw.ListOfficeKey] ?? null,
     isDerrick: isDerrickListing(raw),
     lat: raw.Latitude,
     lng: raw.Longitude,
@@ -190,14 +201,16 @@ export async function fetchJsonWithRetry(url, {
   throw new Error(`DDF request failed after ${maxRetries} retries: ${url}`);
 }
 
-// Follow @odata.nextLink to exhaustion, concatenating value arrays.
-export async function fetchAllListings({
-  apiBase, filter, select, top = 100,
+// Follow @odata.nextLink to exhaustion from an initial URL, concatenating value arrays.
+// Returns { records, count } where count is the first page's @odata.count (0 if absent).
+// Generic over the resource (Property, Office, ...) — both fetchAllListings and
+// fetchOfficeNameMap build on it so the pagination + token-threading logic lives once.
+export async function fetchAllPages(initialUrl, {
   token, fetchImpl = fetch, refreshToken, sleep = defaultSleep,
 }) {
   const records = [];
   let count = 0;
-  let url = buildListingsUrl({ apiBase, filter, select, top });
+  let url = initialUrl;
   let first = true;
 
   // Thread the freshest bearer across pages: when fetchJsonWithRetry refreshes on a 401
@@ -225,6 +238,36 @@ export async function fetchAllListings({
   return { records, count };
 }
 
+// Follow @odata.nextLink to exhaustion, concatenating value arrays.
+export async function fetchAllListings({
+  apiBase, filter, select, top = 100,
+  token, fetchImpl = fetch, refreshToken, sleep = defaultSleep,
+}) {
+  const initialUrl = buildListingsUrl({ apiBase, filter, select, top });
+  return fetchAllPages(initialUrl, { token, fetchImpl, refreshToken, sleep });
+}
+
+// Fetch the Office resource and build an { [OfficeKey]: OfficeName } map. The Office set
+// is small but we paginate for safety. Brokerage names join to Property.ListOfficeKey.
+export async function fetchOfficeNameMap({
+  apiBase, token, fetchImpl = fetch, refreshToken, sleep = defaultSleep,
+}) {
+  const initialUrl = `${apiBase}/Office`
+    + `?$select=${encodeURIComponent(OFFICE_SELECT_FIELDS.join(','))}`
+    + '&$count=true'
+    + '&$top=100';
+  const { records } = await fetchAllPages(initialUrl, {
+    token, fetchImpl, refreshToken, sleep,
+  });
+  const map = {};
+  for (const office of records) {
+    if (office && office.OfficeKey != null) {
+      map[office.OfficeKey] = office.OfficeName;
+    }
+  }
+  return map;
+}
+
 // One active-filter paginated pass: normalize ALL records, derive Derrick's subset.
 export async function buildDatasets({
   tokenUrl, clientId, clientSecret, scope, apiBase,
@@ -236,12 +279,17 @@ export async function buildDatasets({
   };
   const { token } = await getToken({ tokenUrl, clientId, clientSecret, scope, fetchImpl });
 
+  // Resolve brokerage names once (compliance-required) before normalizing the listings.
+  const officeNameByKey = await fetchOfficeNameMap({
+    apiBase, token, fetchImpl, refreshToken, sleep,
+  });
+
   const { records, count } = await fetchAllListings({
     apiBase, filter: activeFilter(), select: SELECT_FIELDS,
     token, fetchImpl, refreshToken, sleep,
   });
 
-  const all = records.filter(Boolean).map(normalizeListing);
+  const all = records.filter(Boolean).map((r) => normalizeListing(r, officeNameByKey));
   const derrick = all.filter((l) => l.isDerrick);
   return { all, derrick, count };
 }

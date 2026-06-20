@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import {
   DERRICK_AGENT_KEY,
   SELECT_FIELDS,
+  OFFICE_SELECT_FIELDS,
   activeFilter,
   derrickFilter,
   buildListingsUrl,
@@ -15,6 +16,7 @@ import {
   getToken,
   fetchJsonWithRetry,
   fetchAllListings,
+  fetchOfficeNameMap,
   buildDatasets,
 } from './ddf.js';
 import sample from './__fixtures__/ddf-sample.json' with { type: 'json' };
@@ -31,9 +33,17 @@ describe('constants', () => {
       'StateOrProvince', 'PostalCode', 'ListPrice', 'BedroomsTotal',
       'BathroomsTotalInteger', 'PropertySubType', 'ListAgentKey',
       'CoListAgentKey', 'CoListAgentKey2', 'CoListAgentKey3', 'ListOfficeKey',
-      'ListOfficeName', 'StandardStatus', 'PublicRemarks', 'Media',
+      'StandardStatus', 'PublicRemarks', 'Media',
       'PhotosCount', 'ModificationTimestamp', 'Latitude', 'Longitude',
     ]);
+  });
+  it('SELECT_FIELDS keeps ListOfficeKey but NOT the nonexistent ListOfficeName', () => {
+    // ListOfficeName does not exist on Property; selecting it 400s the whole query.
+    expect(SELECT_FIELDS).toContain('ListOfficeKey');
+    expect(SELECT_FIELDS).not.toContain('ListOfficeName');
+  });
+  it('OFFICE_SELECT_FIELDS is the Office key + name join fields', () => {
+    expect(OFFICE_SELECT_FIELDS).toEqual(['OfficeKey', 'OfficeName']);
   });
 });
 
@@ -85,8 +95,8 @@ describe('primaryPhoto', () => {
   });
   it('falls back to lowest Order when none preferred', () => {
     const media = [
-      { MediaURL: 'b.jpg', Order: 2, PreferredPhotoYN: false, MediaCategory: 'Photo' },
-      { MediaURL: 'a.jpg', Order: 1, PreferredPhotoYN: false, MediaCategory: 'Photo' },
+      { MediaURL: 'b.jpg', Order: 2, PreferredPhotoYN: false, MediaCategory: 'Property Photo' },
+      { MediaURL: 'a.jpg', Order: 1, PreferredPhotoYN: false, MediaCategory: 'Property Photo' },
     ];
     expect(primaryPhoto(media)).toBe('a.jpg');
   });
@@ -95,10 +105,11 @@ describe('primaryPhoto', () => {
     expect(primaryPhoto([])).toBeNull();
     expect(primaryPhoto(undefined)).toBeNull();
   });
-  it('ignores non-Photo media when choosing the primary', () => {
+  it('ignores non-photo media (Office Logo / Document) when choosing the primary', () => {
     const media = [
+      { MediaURL: 'logo.png', Order: 0, PreferredPhotoYN: true, MediaCategory: 'Office Logo' },
       { MediaURL: 'doc.pdf', Order: 0, PreferredPhotoYN: true, MediaCategory: 'Document' },
-      { MediaURL: 'photo.jpg', Order: 5, PreferredPhotoYN: false, MediaCategory: 'Photo' },
+      { MediaURL: 'photo.jpg', Order: 5, PreferredPhotoYN: false, MediaCategory: 'Property Photo' },
     ];
     expect(primaryPhoto(media)).toBe('photo.jpg');
   });
@@ -112,10 +123,13 @@ describe('sortedPhotoUrls', () => {
       'https://ddfcdn.realtor.ca/listing/TSabc/highres/7/x12331537_pref.jpg',
     ]);
   });
-  it('excludes non-Photo media categories', () => {
-    // the Document item in the fixture must not appear
-    expect(sortedPhotoUrls(sample.derrickListing.Media))
-      .not.toContain('https://ddfcdn.realtor.ca/listing/TSabc/docs/floorplan.pdf');
+  it('excludes non-photo media categories (Office Logo, Document)', () => {
+    // the Office Logo + Document items in the fixture must not appear; /photo/i excludes them.
+    const urls = sortedPhotoUrls(sample.derrickListing.Media);
+    expect(urls).not.toContain('https://ddfcdn.realtor.ca/listing/TSabc/docs/floorplan.pdf');
+    expect(urls).not.toContain('https://ddfcdn.realtor.ca/listing/TSabc/logo/office-logo.png');
+    // only the three "Property Photo" items survive
+    expect(urls).toHaveLength(3);
   });
   it('returns [] for empty / no-photo / nullish media', () => {
     expect(sortedPhotoUrls([])).toEqual([]);
@@ -140,7 +154,12 @@ describe('isDerrickListing', () => {
 });
 
 describe('normalizeListing', () => {
-  const n = normalizeListing(sample.derrickListing);
+  // Office-name map joined on ListOfficeKey. otherAgent's office (770000) is intentionally
+  // ABSENT so its brokerage resolves to null (never an invented name).
+  const officeNameByKey = Object.fromEntries(
+    sample.offices.map((o) => [o.OfficeKey, o.OfficeName]),
+  );
+  const n = normalizeListing(sample.derrickListing, officeNameByKey);
   it('maps every render-contract field correctly', () => {
     expect(n).toEqual({
       id: '28705430',
@@ -163,7 +182,7 @@ describe('normalizeListing', () => {
       ],
       photosCount: 5,
       description: 'Spacious 6-bed family home in Northcrest.',
-      brokerage: 'REAL BROKER ONTARIO LTD',
+      brokerage: 'REAL BROKER ONTARIO LTD.',
       isDerrick: true,
       lat: 44.3091,
       lng: -78.3197,
@@ -176,11 +195,18 @@ describe('normalizeListing', () => {
   it('priceFormatted is CAD with no decimals', () => {
     expect(n.priceFormatted).toBe('$650,000');
   });
-  it('brokerage comes from ListOfficeName', () => {
-    expect(n.brokerage).toBe('REAL BROKER ONTARIO LTD');
+  it('brokerage resolves from the Office-name map via ListOfficeKey', () => {
+    expect(n.brokerage).toBe('REAL BROKER ONTARIO LTD.');
+  });
+  it('brokerage is null when ListOfficeKey is absent from the office map', () => {
+    // otherAgent.ListOfficeKey 770000 is not in officeNameByKey → null (no invented name).
+    expect(normalizeListing(sample.otherAgent, officeNameByKey).brokerage).toBeNull();
+  });
+  it('brokerage is null when called with no office map (default {})', () => {
+    expect(normalizeListing(sample.derrickListing).brokerage).toBeNull();
   });
   it('marks a non-Derrick listing isDerrick: false', () => {
-    expect(normalizeListing(sample.otherAgent).isDerrick).toBe(false);
+    expect(normalizeListing(sample.otherAgent, officeNameByKey).isDerrick).toBe(false);
   });
 });
 
@@ -222,6 +248,11 @@ describe('buildListingsUrl', () => {
     for (const field of SELECT_FIELDS) {
       expect(decoded).toContain(field);
     }
+  });
+  it('selects ListOfficeKey but never the nonexistent ListOfficeName', () => {
+    const decoded = decodeURIComponent(url);
+    expect(decoded).toContain('ListOfficeKey');
+    expect(decoded).not.toContain('ListOfficeName');
   });
 });
 
@@ -382,13 +413,61 @@ describe('fetchAllListings', () => {
   });
 });
 
+describe('fetchOfficeNameMap', () => {
+  const noSleep = async () => {};
+  it('builds { OfficeKey: OfficeName } and follows nextLink across pages', async () => {
+    const page2Url = `${API_BASE}/Office?$skiptoken=office2`;
+    const urls = [];
+    const fetchImpl = async (url) => {
+      urls.push(url);
+      if (url.includes('$skiptoken')) {
+        return {
+          ok: true,
+          json: async () => ({ value: [{ OfficeKey: '290358', OfficeName: 'ANOTHER REALTY GROUP INC.' }] }),
+        };
+      }
+      return {
+        ok: true,
+        json: async () => ({
+          '@odata.count': 2,
+          '@odata.nextLink': page2Url,
+          value: [{ OfficeKey: '551123', OfficeName: 'REAL BROKER ONTARIO LTD.' }],
+        }),
+      };
+    };
+    const map = await fetchOfficeNameMap({
+      apiBase: API_BASE, token: 't', fetchImpl, sleep: noSleep,
+    });
+    expect(map).toEqual({
+      '551123': 'REAL BROKER ONTARIO LTD.',
+      '290358': 'ANOTHER REALTY GROUP INC.',
+    });
+    // first page targets the Office resource with the OfficeKey,OfficeName $select
+    expect(urls[0].startsWith(`${API_BASE}/Office?`)).toBe(true);
+    expect(decodeURIComponent(urls[0])).toContain('OfficeKey,OfficeName');
+    // it followed the nextLink to page 2
+    expect(urls).toHaveLength(2);
+    expect(urls[1]).toBe(page2Url);
+  });
+});
+
 describe('buildDatasets', () => {
   const noSleep = async () => {};
-  it('normalizes all listings and derives Derrick\'s subset', async () => {
+  it('normalizes all listings, joins the Office brokerage, and derives Derrick\'s subset', async () => {
     const fetchImpl = async (url) => {
       // token POST
       if (url.includes('connect/token')) {
         return { ok: true, json: async () => ({ access_token: 'tok', token_type: 'Bearer', expires_in: 3600 }) };
+      }
+      // Office resource — single page
+      if (url.includes('/Office')) {
+        return {
+          ok: true,
+          json: async () => ({
+            '@odata.count': 1,
+            value: [{ OfficeKey: '551123', OfficeName: 'REAL BROKER ONTARIO LTD.' }],
+          }),
+        };
       }
       // single page of Property
       return {
@@ -409,6 +488,11 @@ describe('buildDatasets', () => {
     expect(derrick).toHaveLength(2);
     expect(derrick.every((l) => l.isDerrick)).toBe(true);
     expect(derrick.map((l) => l.id)).toEqual(['28705430', '28705431']);
+    // brokerage resolved via the Office join (ListOfficeKey 551123)
+    expect(all.find((l) => l.id === '28705430').brokerage).toBe('REAL BROKER ONTARIO LTD.');
+    expect(derrick.every((l) => l.brokerage === 'REAL BROKER ONTARIO LTD.')).toBe(true);
+    // otherAgent's office (770000) isn't in the map → null (no invented name)
+    expect(all.find((l) => l.id === '28705999').brokerage).toBeNull();
     // all entries are normalized (render contract), not raw
     expect(all[0]).toHaveProperty('priceFormatted');
     expect(all[0]).toHaveProperty('mlsNumber');

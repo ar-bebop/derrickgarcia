@@ -18,7 +18,6 @@
     "CoListAgentKey2": null,
     "CoListAgentKey3": null,
     "ListOfficeKey": "551123",
-    "ListOfficeName": "REAL BROKER ONTARIO LTD",
     "StandardStatus": "Active",
     "PublicRemarks": "Spacious 6-bed family home in Northcrest.",
     "PhotosCount": 5,
@@ -26,9 +25,10 @@
     "Latitude": 44.3091,
     "Longitude": -78.3197,
     "Media": [
-      { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSabc/highres/7/x12331537_2.jpg", "Order": 2, "PreferredPhotoYN": false, "MediaCategory": "Photo" },
-      { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSabc/highres/7/x12331537_pref.jpg", "Order": 3, "PreferredPhotoYN": true, "MediaCategory": "Photo" },
-      { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSabc/highres/7/x12331537_1.jpg", "Order": 1, "PreferredPhotoYN": false, "MediaCategory": "Photo" },
+      { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSabc/highres/7/x12331537_2.jpg", "Order": 2, "PreferredPhotoYN": false, "MediaCategory": "Property Photo" },
+      { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSabc/highres/7/x12331537_pref.jpg", "Order": 3, "PreferredPhotoYN": true, "MediaCategory": "Property Photo" },
+      { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSabc/highres/7/x12331537_1.jpg", "Order": 1, "PreferredPhotoYN": false, "MediaCategory": "Property Photo" },
+      { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSabc/logo/office-logo.png", "Order": 0, "PreferredPhotoYN": false, "MediaCategory": "Office Logo" },
       { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSabc/docs/floorplan.pdf", "Order": 0, "PreferredPhotoYN": false, "MediaCategory": "Document" }
     ]
   },
@@ -50,7 +50,6 @@
     "CoListAgentKey2": "2088980",
     "CoListAgentKey3": null,
     "ListOfficeKey": "551123",
-    "ListOfficeName": "REAL BROKER ONTARIO LTD",
     "StandardStatus": "Active",
     "PublicRemarks": "Downtown condo with Derrick as co-list agent #2.",
     "PhotosCount": 1,
@@ -58,7 +57,7 @@
     "Latitude": 43.6478,
     "Longitude": -79.3815,
     "Media": [
-      { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSdef/highres/7/x12331538_1.jpg", "Order": 1, "PreferredPhotoYN": false, "MediaCategory": "Photo" }
+      { "MediaURL": "https://ddfcdn.realtor.ca/listing/TSdef/highres/7/x12331538_1.jpg", "Order": 1, "PreferredPhotoYN": false, "MediaCategory": "Property Photo" }
     ]
   },
 
@@ -79,7 +78,6 @@
     "CoListAgentKey2": null,
     "CoListAgentKey3": null,
     "ListOfficeKey": "770000",
-    "ListOfficeName": "SOME OTHER BROKERAGE INC",
     "StandardStatus": "Active",
     "PublicRemarks": "Listed by a different agent entirely.",
     "PhotosCount": 0,
@@ -87,5 +85,11 @@
     "Latitude": 44.3894,
     "Longitude": -79.6903,
     "Media": []
-  }
+  },
+
+  "_offices_comment": "Office resource records. Brokerage names join Property.ListOfficeKey → Office.OfficeKey. Note key 770000 (otherAgent's office) is intentionally ABSENT to prove the unmapped-key → null path.",
+  "offices": [
+    { "OfficeKey": "551123", "OfficeName": "REAL BROKER ONTARIO LTD." },
+    { "OfficeKey": "290358", "OfficeName": "ANOTHER REALTY GROUP INC." }
+  ]
 }
