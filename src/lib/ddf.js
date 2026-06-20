@@ -130,7 +130,7 @@ export function normalizeListing(raw, officeNameByKey = {}) {
     isDerrick: isDerrickListing(raw),
     lat: raw.Latitude,
     lng: raw.Longitude,
-    updatedAt: raw.ModificationTimestamp,
+    updatedAt: raw.ModificationTimestamp ?? null,
   };
 }
 

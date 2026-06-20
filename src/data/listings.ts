@@ -27,7 +27,7 @@ export interface Listing {
   isDerrick: boolean;
   lat: number | null;
   lng: number | null;
-  updatedAt: string;
+  updatedAt: string | null;
 }
 
 // The empty-stub case infers `never[]` for `listings`, so cast through `unknown` to Listing[].

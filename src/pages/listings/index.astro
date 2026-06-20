@@ -30,8 +30,7 @@ const initial = Math.min(BATCH, total);
           {listings.map((l) => <div class="listing-card-wrap reveal"><ListingCard listing={l} /></div>)}
         </div>
         <p class="loadmore">
-          <button type="button" class="btn btn--ghost loadmore__btn"
-            data-total={total}>Load more</button>
+          <button type="button" class="btn btn--ghost loadmore__btn">Load more</button>
           <span class="loadmore__count" aria-live="polite">Showing {initial} of {total}</span>
         </p>
         <TrademarkStatement />
