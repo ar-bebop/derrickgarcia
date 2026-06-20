@@ -95,7 +95,6 @@ export function primaryPhoto(media) {
 // All photo URLs, ascending by Order. [] when none.
 export function sortedPhotoUrls(media) {
   return photoItems(media)
-    .slice()
     .sort((a, b) => (a.Order ?? 0) - (b.Order ?? 0))
     .map((p) => p.MediaURL);
 }

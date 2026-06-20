@@ -15,6 +15,7 @@ import {
   normalizeListing,
   getToken,
   fetchJsonWithRetry,
+  fetchAllPages,
   fetchAllListings,
   fetchOfficeNameMap,
   buildDatasets,
@@ -343,6 +344,69 @@ describe('fetchJsonWithRetry', () => {
     await expect(fetchJsonWithRetry('u', { token: 't', fetchImpl, sleep: noSleep }))
       .rejects.toThrow('DDF request failed');
     expect(calls).toBe(1);
+  });
+});
+
+describe('fetchAllPages', () => {
+  const noSleep = async () => {};
+  const INITIAL = `${API_BASE}/Property?$top=100&$count=true`;
+
+  it('returns { records, count } from the first page count, concatenated across 2 pages', async () => {
+    const page2Url = `${API_BASE}/Property?$skiptoken=abc`;
+    const fetchImpl = async (url) => {
+      if (url.includes('$skiptoken')) {
+        // page 2: no count of its own — only the first page's count is authoritative.
+        return { ok: true, json: async () => ({ '@odata.count': 999, value: [{ k: 3 }] }) };
+      }
+      return {
+        ok: true,
+        json: async () => ({
+          '@odata.count': 7,
+          '@odata.nextLink': page2Url,
+          value: [{ k: 1 }, { k: 2 }],
+        }),
+      };
+    };
+    const { records, count } = await fetchAllPages(INITIAL, {
+      token: 't', fetchImpl, sleep: noSleep,
+    });
+    // count is the FIRST page's @odata.count, not page 2's.
+    expect(count).toBe(7);
+    expect(records).toEqual([{ k: 1 }, { k: 2 }, { k: 3 }]);
+  });
+
+  it('threads the refreshed bearer from a page-1 401 into the page-2 request', async () => {
+    const page2Url = `${API_BASE}/Property?$skiptoken=abc`;
+    const bearers = [];
+    let page1Calls = 0;
+    const fetchImpl = async (url, opts) => {
+      bearers.push(opts.headers.Authorization);
+      if (url.includes('$skiptoken')) {
+        // page 2 must already carry the FRESH bearer — never the stale one.
+        return { ok: true, json: async () => ({ value: [{ k: 2 }] }) };
+      }
+      page1Calls++;
+      if (page1Calls === 1) return { ok: false, status: 401, text: async () => 'expired' };
+      return {
+        ok: true,
+        json: async () => ({ '@odata.count': 2, '@odata.nextLink': page2Url, value: [{ k: 1 }] }),
+      };
+    };
+    let refreshed = 0;
+    const refreshToken = async () => { refreshed++; return 'fresh-token'; };
+
+    const { records } = await fetchAllPages(INITIAL, {
+      token: 'stale-token', fetchImpl, refreshToken, sleep: noSleep,
+    });
+
+    expect(refreshed).toBe(1);
+    // page 1 attempt 1: stale → 401; attempt 2: fresh; page 2: fresh (NOT a wasted re-401).
+    expect(bearers).toEqual([
+      'Bearer stale-token',
+      'Bearer fresh-token',
+      'Bearer fresh-token',
+    ]);
+    expect(records).toEqual([{ k: 1 }, { k: 2 }]);
   });
 });
 

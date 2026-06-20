@@ -21,4 +21,6 @@ async function main() {
   }
 }
 
-main();
+main().catch((err) => {
+  console.warn(`ensure-listings: failed to create stubs: ${err.message}`);
+});

@@ -39,8 +39,17 @@ async function writeEmpty() {
   await writeDataset(OUT_DERRICK, []);
 }
 
+// Env vars buildDatasets needs; surfaced up-front so a missing secret produces an
+// actionable warning rather than an opaque token/fetch failure deeper in the pipeline.
+// Thrown here, this is still caught by the top-level main().catch graceful path
+// (warning + empty datasets + exit 0), so the build never breaks.
+const REQUIRED_ENV = ['CREA_DDF_TOKEN_URL', 'CREA_DDF_CLIENT_ID', 'CREA_DDF_CLIENT_SECRET', 'CREA_DDF_SCOPE', 'CREA_DDF_API_BASE'];
+
 async function main() {
   await mkdir(OUT_DIR, { recursive: true });
+
+  const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
+  if (missing.length) throw new Error(`Missing required env vars: ${missing.join(', ')}`);
 
   const apiBase = normalizeApiBase(process.env.CREA_DDF_API_BASE);
   const { all, derrick } = await buildDatasets({
