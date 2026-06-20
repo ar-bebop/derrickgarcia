@@ -37,7 +37,7 @@ jobs:
           version: 11.3.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # >=22.13 required by pnpm 11.3.0 (uses node:sqlite); Node 20 is also EOL on runners
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Fetch listings
