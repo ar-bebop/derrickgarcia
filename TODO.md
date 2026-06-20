@@ -86,9 +86,10 @@ agent links, and GBP `sameAs` now render.
     builds empty (graceful).
   - [ ] After adding secrets, run a **`workflow_dispatch` dry-run** to confirm fetch+build+deploy works
     end-to-end; confirm the fetch step logs a listings count and Pages deploys green.
-  - [ ] Obtain **CREA's official "Powered by REALTOR.ca" logo asset** (+ dark-bg usage rules) → drop into
-    `src/assets/branding/` and replace the interim text badge in `src/components/PoweredByRealtor.astro`
-    (asset should be ≥90px wide, 1:1).
+  - [x] ~~Obtain **CREA's official "Powered by REALTOR.ca" logo asset**~~ — DONE: official SVG
+    (`powered_by_realtor.svg`, native 125×60) now served as a static file from `public/powered-by-realtor.svg`
+    and rendered by `src/components/PoweredByRealtor.astro` (links to the listing on REALTOR.ca, ≥90px wide,
+    native ratio, displayed unmodified). Source: CREA DDF forum / `realtor.ca/images/en-ca/powered_by_realtor.svg`.
   - [ ] Confirm the **exact current CREA MLS®/REALTOR® trademark statement wording** against CREA member
     rules; update `src/components/TrademarkStatement.astro` if it differs.
   - [ ] Obtain the **CREA Analytics Web Service API spec (DDF Rule 5c)** and implement it in the inert stub
