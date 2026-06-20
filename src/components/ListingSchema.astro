@@ -20,8 +20,17 @@ if (listing.city) address.addressLocality = listing.city;
 if (listing.province) address.addressRegion = listing.province;
 if (listing.postalCode) address.postalCode = listing.postalCode;
 
+// Map the free-text DDF PropertySubType to a schema.org Accommodation subtype
+// (SingleFamilyResidence is the sensible default for detached/unknown).
+const schemaType = (() => {
+  const t = (listing.propertyType ?? '').toLowerCase();
+  if (t.includes('condo') || t.includes('apt')) return 'Apartment';
+  if (t.includes('row') || t.includes('town')) return 'Townhouse';
+  return 'SingleFamilyResidence';
+})();
+
 const mainEntity: Record<string, unknown> = {
-  '@type': 'SingleFamilyResidence',
+  '@type': schemaType,
   address,
 };
 if (listing.beds != null) mainEntity.numberOfBedrooms = listing.beds;
@@ -32,9 +41,9 @@ const data: Record<string, unknown> = {
   '@type': 'RealEstateListing',
   name,
   url: `${SITE.url}/listings/${listing.id}`,
-  datePosted: listing.updatedAt,
   mainEntity,
 };
+if (listing.updatedAt) data.datePosted = listing.updatedAt;
 if (images.length > 0) data.image = images;
 if (listing.description) data.description = listing.description;
 if (listing.price != null) {
