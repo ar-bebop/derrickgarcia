@@ -1,0 +1,79 @@
+---
+import type { Listing } from '../data/listings.ts';
+import { SITE } from '../data/site.ts';
+import PoweredByRealtor from './PoweredByRealtor.astro';
+
+const { listing, detailHref } = Astro.props as { listing: Listing; detailHref?: string };
+
+// Accessible alt/name for the listing photo.
+const place = [listing.address, listing.city].filter(Boolean).join(', ') || 'this listing';
+const photoAlt = `Photo of ${place}`;
+
+// Meta line: beds · baths · type, skipping any null parts.
+const metaParts = [
+  listing.beds != null ? `${listing.beds} bd` : null,
+  listing.baths != null ? `${listing.baths} ba` : null,
+  listing.propertyType,
+].filter(Boolean);
+
+// Address / city line.
+const cityLine = [listing.city, listing.province].filter(Boolean).join(', ');
+
+// Primary action: internal detail link if given, else outbound realtor.ca link.
+const isInternal = Boolean(detailHref);
+const actionHref = detailHref ?? listing.url ?? SITE.listingsSearchUrl;
+const actionLabel = isInternal ? 'View details →' : 'View on REALTOR.ca ↗';
+const actionAria = isInternal
+  ? `View details for ${place}`
+  : `View ${place} on REALTOR.ca`;
+---
+<article class="listing-card">
+  {listing.primaryPhoto ? (
+    <img class="listing-card__photo" src={listing.primaryPhoto} alt={photoAlt}
+      loading="lazy" decoding="async" width="400" height="300" />
+  ) : (
+    <div class="listing-card__photo listing-card__photo--empty" aria-hidden="true">
+      <span>No photo</span>
+    </div>
+  )}
+  <div class="listing-card__body">
+    <p class="listing-card__price">{listing.priceFormatted ?? 'Price on request'}</p>
+    {metaParts.length > 0 && <p class="listing-card__meta">{metaParts.join(' · ')}</p>}
+    <p class="listing-card__addr">
+      {listing.address}{cityLine && <span class="listing-card__city">{cityLine}</span>}
+    </p>
+    {listing.brokerage && <p class="listing-card__broker">Listed by {listing.brokerage}</p>}
+    <p class="listing-card__action">
+      {isInternal ? (
+        <a href={actionHref} aria-label={actionAria}>{actionLabel}</a>
+      ) : (
+        <a href={actionHref} target="_blank" rel="noopener noreferrer"
+          aria-label={actionAria}>{actionLabel}</a>
+      )}
+    </p>
+    <p class="listing-card__pbr"><PoweredByRealtor url={listing.url} /></p>
+  </div>
+</article>
+<style>
+  .listing-card { border: 1px solid var(--color-line); border-radius: var(--radius);
+    overflow: hidden; transition: border-color .2s ease; background: transparent;
+    display: flex; flex-direction: column; }
+  .listing-card:hover { border-color: var(--color-accent); }
+  /* No CSS filter on the photo — it carries CREA's baked-in watermark and must not be modified. */
+  .listing-card__photo { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .listing-card__photo--empty { display: flex; align-items: center; justify-content: center;
+    background: var(--color-panel); color: var(--color-muted); font-size: .85rem;
+    letter-spacing: .04em; }
+  .listing-card__body { padding: 1.1rem 1.3rem 1.3rem; display: flex; flex-direction: column;
+    gap: .35rem; flex: 1; }
+  .listing-card__price { font-family: var(--font-display); color: var(--color-ink);
+    font-size: 1.5rem; margin: 0; }
+  .listing-card__meta { color: var(--color-accent); font-size: .72rem; letter-spacing: .12em;
+    text-transform: uppercase; font-weight: 600; margin: 0; }
+  .listing-card__addr { color: var(--color-text); font-size: .95rem; margin: 0; }
+  .listing-card__city { display: block; color: var(--color-muted); font-size: .85rem; }
+  .listing-card__broker { color: var(--color-muted); font-size: .78rem; margin: 0; }
+  .listing-card__action { margin: .5rem 0 .2rem; }
+  .listing-card__action a { font-weight: 600; font-size: .85rem; letter-spacing: .04em; }
+  .listing-card__pbr { margin: auto 0 0; padding-top: .4rem; }
+</style>

@@ -1,0 +1,49 @@
+---
+// RealEstateListing JSON-LD for listing detail pages (placed by Task 5). Mirrors
+// AreaSchema's inline pattern. Null fields are omitted rather than emitted as null.
+import type { Listing } from '../data/listings.ts';
+import { SITE } from '../data/site.ts';
+
+const { listing } = Astro.props as { listing: Listing };
+
+const name = listing.city ? `${listing.address}, ${listing.city}` : listing.address;
+
+// image: prefer the full photos array, fall back to [primaryPhoto]; only if non-empty.
+const images = listing.photos.length > 0
+  ? listing.photos
+  : (listing.primaryPhoto ? [listing.primaryPhoto] : []);
+
+// Address sub-object with null sub-fields dropped.
+const address: Record<string, unknown> = { '@type': 'PostalAddress', addressCountry: 'CA' };
+if (listing.address) address.streetAddress = listing.address;
+if (listing.city) address.addressLocality = listing.city;
+if (listing.province) address.addressRegion = listing.province;
+if (listing.postalCode) address.postalCode = listing.postalCode;
+
+const mainEntity: Record<string, unknown> = {
+  '@type': 'SingleFamilyResidence',
+  address,
+};
+if (listing.beds != null) mainEntity.numberOfBedrooms = listing.beds;
+if (listing.baths != null) mainEntity.numberOfBathroomsTotal = listing.baths;
+
+const data: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'RealEstateListing',
+  name,
+  url: `${SITE.url}/listings/${listing.id}`,
+  datePosted: listing.updatedAt,
+  mainEntity,
+};
+if (images.length > 0) data.image = images;
+if (listing.description) data.description = listing.description;
+if (listing.price != null) {
+  data.offers = {
+    '@type': 'Offer',
+    price: listing.price,
+    priceCurrency: 'CAD',
+    availability: 'https://schema.org/InStock',
+  };
+}
+---
+<script type="application/ld+json" is:inline set:html={JSON.stringify(data)} />

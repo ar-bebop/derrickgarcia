@@ -1,0 +1,30 @@
+---
+// CREA-required "Powered by REALTOR.ca" attribution badge for displayed DDF listings.
+import { SITE } from '../data/site.ts';
+const { url } = Astro.props as { url: string | null };
+const href = url ?? SITE.listingsSearchUrl;
+---
+<!-- TODO(go-live): replace this text badge with CREA's official "Powered by REALTOR.ca" logo asset (≥90px wide, 1:1) dropped into src/assets/branding/; keep the link wrapper. -->
+<a class="pbr" href={href} target="_blank" rel="noopener noreferrer"
+   aria-label="View this listing on REALTOR.ca">
+  <span class="pbr__badge">Powered by REALTOR.ca®</span>
+</a>
+<style>
+  .pbr { display: inline-block; text-decoration: none; }
+  .pbr__badge {
+    display: inline-block;
+    min-width: 90px;
+    padding: .35rem .7rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius);
+    color: var(--color-accent);
+    background: var(--color-panel);
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-align: center;
+    white-space: nowrap;
+    transition: border-color .2s ease;
+  }
+  .pbr:hover .pbr__badge { border-color: var(--color-accent); }
+</style>
