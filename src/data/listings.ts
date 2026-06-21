@@ -4,6 +4,7 @@
 // so these imports never break (empty case → { generatedAt: null, count: 0, listings: [] }).
 import listingsData from './generated/listings.json';
 import derrickData from './generated/listings-derrick.json';
+import { municipality, displayCity, median, toIndexRecord } from '../lib/listings-view.js';
 
 // Shape produced by normalizeListing() in src/lib/ddf.js — keep in sync.
 export interface Listing {
@@ -61,3 +62,23 @@ export function inDerricksMarkets(listing: Listing): boolean {
   const municipality = (parenIndex >= 0 ? city.slice(0, parenIndex) : city).trim().toUpperCase();
   return RELEVANT_MARKETS_SET.has(municipality);
 }
+
+// Real Broker listings in Derrick's markets (the default browse set).
+export const IN_MARKETS: Listing[] = LISTINGS.filter(inDerricksMarkets);
+
+// Build-time stats for the homepage (never hardcode counts).
+export const LISTING_STATS = {
+  total: LISTINGS.length,
+  inMarkets: IN_MARKETS.length,
+  median: median(IN_MARKETS.map((l) => l.price).filter((p): p is number => p != null)),
+  marketCount: RELEVANT_MARKETS.length,
+};
+
+// Lean index for the client browser (all listings → reachable detail pages; default filter is in-markets).
+export const LISTINGS_INDEX = LISTINGS.map(toIndexRecord);
+
+// Detail URL for any listing.
+export const detailHref = (l: Pick<Listing, 'id'>): string => `/listings/${l.id}`;
+
+// Re-export display helpers for templates.
+export { municipality, displayCity };
