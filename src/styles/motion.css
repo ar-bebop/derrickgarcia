@@ -1,0 +1,27 @@
+/* Motion system for Evolved Midnight. All animation is gated by prefers-reduced-motion
+   and html.js (set by BaseLayout); no-JS / reduced-motion users see final state only. */
+
+/* Scroll-progress bar (width driven by src/scripts/enhance.ts) */
+.progress-bar {
+  position: fixed; top: 0; left: 0; height: 2px; width: 0;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-bright));
+  z-index: 1000;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.js .reveal { opacity: 0; transform: translateY(18px);
+    transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease); }
+  html.js .reveal.is-in { opacity: 1; transform: none; }
+  html.js .reveal-2 { transition-delay: .08s; }
+  html.js .reveal-3 { transition-delay: .16s; }
+}
+
+/* Lightbox (listing detail gallery) */
+.lightbox { position: fixed; inset: 0; z-index: 1200; background: rgba(6, 6, 8, .95);
+  display: none; align-items: center; justify-content: center; flex-direction: column;
+  gap: 1rem; padding: 2rem; }
+.lightbox.is-open { display: flex; }
+.lightbox img { max-width: 92vw; max-height: 80vh; object-fit: contain; border-radius: var(--radius); }
+.lightbox__close { position: absolute; top: 1.2rem; right: 1.4rem; color: var(--color-ink);
+  font-family: var(--font-ui); font-size: 1.4rem; cursor: pointer; background: none; border: 0; }
+.lightbox__cap { color: var(--color-muted); font-family: var(--font-ui); font-size: .8rem; text-align: center; }

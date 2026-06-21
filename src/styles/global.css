@@ -1,4 +1,5 @@
 @import './tokens.css';
+@import './motion.css';
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; color-scheme: dark; }
@@ -50,9 +51,5 @@ input:focus, select:focus, textarea:focus { border-color: var(--color-accent); o
   background: var(--color-accent); color: var(--color-accent-ink); padding: .6rem 1rem; }
 .skip-link:focus { left: 0; }
 
-/* Scroll reveal — JS-gated (html.js) and motion-gated; no-JS users see everything */
-@media (prefers-reduced-motion: no-preference) {
-  html.js .reveal { opacity: 0; transform: translateY(12px);
-    transition: opacity .5s ease, transform .5s ease; }
-  html.js .reveal.is-in { opacity: 1; transform: none; }
-}
+/* Scroll reveal + motion utilities now live in ./motion.css */
+.ui { font-family: var(--font-ui); }
