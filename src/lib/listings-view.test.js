@@ -37,6 +37,12 @@ describe('filterListings', () => {
   it('filters by propertyType', () => { expect(filterListings(list, { propertyType: 'Multi-family' }).map((x) => x.id)).toEqual(['c']); });
   it('filters savedOnly', () => { expect(filterListings(list, { savedOnly: true, savedIds: ['c'] }).map((x) => x.id)).toEqual(['c']); });
   it('empty filter returns all', () => { expect(filterListings(list, {}).length).toBe(3); });
+  it('filters by municipality on lean index records (precomputed municipality, no city field)', () => {
+    const idx = [{ id: 'a', municipality: 'Toronto', price: 600000, beds: 1, propertyType: 'Single Family' },
+      { id: 'b', municipality: 'Milton', price: 600000, beds: 1, propertyType: 'Single Family' }];
+    expect(filterListings(idx, { municipality: 'Milton' }).map((x) => x.id)).toEqual(['b']);
+    expect(filterListings(idx, { municipality: 'Toronto' }).map((x) => x.id)).toEqual(['a']);
+  });
 });
 
 describe('sortListings', () => {

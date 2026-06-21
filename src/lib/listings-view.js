@@ -29,8 +29,10 @@ export function median(nums) {
 export function filterListings(list, opts = {}) {
   const { municipality: muni, maxPrice, minBeds, propertyType, savedOnly, savedIds = [] } = opts;
   const saved = new Set(savedIds);
+  // Accept both full listings (have `city`) and lean index records (precomputed `municipality`).
+  const muniOf = (l) => l.municipality ?? municipality(l.city);
   return list.filter((l) => {
-    if (muni && municipality(l.city) !== muni) return false;
+    if (muni && muniOf(l) !== muni) return false;
     if (maxPrice && (l.price == null || l.price > maxPrice)) return false;
     if (minBeds && (l.beds == null || l.beds < minBeds)) return false;
     if (propertyType && l.propertyType !== propertyType) return false;
