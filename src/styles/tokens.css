@@ -1,19 +1,26 @@
 :root {
-  /* Midnight Estate palette — all text tokens AA-verified on #121212 (see spec §2.1) */
-  --color-bg: #121212;
-  --color-panel: #1a1a1a;
-  --color-ink: #f3efe7;           /* headings  ~15.9:1 */
-  --color-fg: #f3efe7;            /* legacy alias used by existing components */
-  --color-text: #c9c3b8;          /* body      ~10.9:1 */
-  --color-muted: #9a9486;         /* secondary ~6.3:1 — do NOT go darker for text */
-  --color-accent: #b08d57;        /* gold (Real Broker emblem) ~6.2:1 */
+  /* Evolved Midnight — text tokens AA-verified on #0e0e10 (>= the prior #121212 ratios). */
+  --color-bg: #0e0e10;
+  --color-bg-2: #0b0b0d;            /* deeper band backgrounds */
+  --color-panel: #16161a;
+  --color-panel-2: #1b1b21;
+  --color-ink: #f4efe6;            /* headings */
+  --color-fg: #f4efe6;             /* legacy alias used by existing components */
+  --color-text: #c8c2b5;          /* body */
+  --color-muted: #9a9486;         /* secondary — proven AA, do NOT darken for text */
+  --color-accent: #c6a15b;        /* gold, brightened (higher contrast on #0e0e10 than legacy #b08d57) */
+  --color-accent-bright: #e7c987; /* emphasis / large display only — verify AA before small-text use */
   --color-accent-ink: #15130f;    /* text on gold */
-  --color-line: rgba(176, 141, 87, .25);
-  --color-line-strong: rgba(176, 141, 87, .45);
+  --color-line: rgba(198, 161, 91, .20);
+  --color-line-strong: rgba(198, 161, 91, .40);
+  --hair: rgba(255, 255, 255, .07);
   --font-display: 'Marcellus', 'Times New Roman', serif;
   --font-sans: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --maxw: 1100px;
+  --font-ui: 'Space Grotesk', var(--font-sans);
+  --maxw: 1200px;
   --space: 1rem;
-  --radius: 2px;                  /* sharp corners — luxury direction */
-  --section-pad: clamp(3rem, 7vw, 5rem);
+  --radius: 3px;                  /* sharp corners — luxury direction */
+  --section-pad: clamp(3.2rem, 7vw, 5.5rem);
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur: .6s;
 }
