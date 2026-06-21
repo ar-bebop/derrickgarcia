@@ -1,0 +1,39 @@
+/* Canonical listing-card styles — GLOBAL so the server (ListingCard.astro) and the client
+   browser (listings-browser.ts) render byte-identical cards. */
+
+.lcard { display: flex; flex-direction: column; background: var(--color-panel);
+  border: 1px solid var(--color-line); border-radius: var(--radius); overflow: hidden;
+  text-decoration: none; transition: transform .28s var(--ease), border-color .28s ease, box-shadow .28s ease; }
+.lcard:hover { transform: translateY(-6px); border-color: var(--color-accent);
+  box-shadow: 0 22px 46px -26px rgba(0, 0, 0, .9); }
+
+.lcard__ph { position: relative; aspect-ratio: 4 / 3; overflow: hidden;
+  background: linear-gradient(135deg, #33373f, #1c1f25); /* neutral photo-loading backdrop, not a brand colour */ }
+/* No CSS filter on listing photos — they carry CREA's baked-in watermark and must not be modified. */
+.lcard__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transition: transform .6s var(--ease); }
+.lcard:hover .lcard__img { transform: scale(1.06); }
+.lcard__empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: var(--color-muted); font-size: .85rem; letter-spacing: .04em; }
+
+.lcard__tag { position: absolute; top: .6rem; left: .6rem; font-family: var(--font-ui); font-size: .6rem;
+  letter-spacing: .08em; text-transform: uppercase; padding: .3rem .5rem; border-radius: 2px;
+  background: rgba(14, 14, 16, .82); color: var(--color-accent-bright); backdrop-filter: blur(4px); }
+.lcard__tag--d { background: var(--color-accent); color: var(--color-accent-ink); }
+
+.lcard__fav { position: absolute; top: .55rem; right: .55rem; width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(14, 14, 16, .7); border: 0; display: flex; align-items: center; justify-content: center;
+  color: var(--color-ink); font-size: .95rem; cursor: pointer; backdrop-filter: blur(4px);
+  transition: color .2s ease; z-index: 2; }
+.lcard__fav:hover, .lcard__fav.is-on { color: var(--color-accent-bright); }
+
+.lcard__b { padding: 1rem 1.1rem 1.2rem; display: flex; flex-direction: column; gap: .3rem; flex: 1; }
+.lcard__price { font-family: var(--font-display); color: var(--color-ink); font-size: 1.45rem; }
+.lcard__meta { color: var(--color-accent); font-family: var(--font-ui); font-size: .72rem;
+  letter-spacing: .06em; text-transform: uppercase; }
+.lcard__addr { color: var(--color-ink); font-size: .95rem; }
+.lcard__sub { color: var(--color-muted); font-size: .8rem; }
+.lcard__foot { display: flex; align-items: center; justify-content: space-between; margin-top: .7rem;
+  padding-top: .7rem; border-top: 1px solid var(--hair); font-family: var(--font-ui);
+  font-size: .72rem; color: var(--color-muted); }
+.lcard__go { color: var(--color-accent); }

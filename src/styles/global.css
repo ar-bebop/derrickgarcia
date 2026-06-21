@@ -1,5 +1,6 @@
 @import './tokens.css';
 @import './motion.css';
+@import './listing-card.css';
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; color-scheme: dark; }
