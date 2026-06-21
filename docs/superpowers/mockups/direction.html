@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visual Direction — Derrick Garcia redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Inter:wght@300;400;500;600&family=Marcellus&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --img1:linear-gradient(135deg,#3a3f4a,#20242c); }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', system-ui, sans-serif; background:#0a0a0b; color:#fff; }
+  img { display:block; }
+  a { text-decoration:none; color:inherit; }
+
+  /* ====== PICKER BAR ====== */
+  .picker {
+    position: sticky; top:0; z-index:999;
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    padding:.7rem 1.4rem; background:rgba(10,10,11,.92); backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,.12); font-family:'Space Grotesk',sans-serif;
+  }
+  .picker b { font-weight:600; font-size:.92rem; letter-spacing:.01em; }
+  .picker .hint { font-size:.78rem; color:#b9b3a8; }
+  .picker .hint .on { color:#e7c987; font-weight:600; }
+  .jump { display:flex; gap:.4rem; }
+  .jump a { font-size:.72rem; padding:.32rem .6rem; border:1px solid rgba(255,255,255,.18); border-radius:999px; color:#cfcabf; }
+  .jump a:hover { border-color:#e7c987; color:#fff; }
+
+  /* ====== SHARED SECTION SCAFFOLD ====== */
+  .dir { position:relative; min-height:100vh; padding-bottom:4.5rem; }
+  .tag { position:absolute; top:1.1rem; left:1.4rem; z-index:5; font-family:'Space Grotesk',sans-serif;
+         font-size:.7rem; letter-spacing:.22em; text-transform:uppercase; padding:.3rem .6rem; border-radius:2px; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 clamp(1.1rem,4vw,2.4rem); }
+
+  .pickrow { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-top:2.4rem; }
+  .pick { cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:.6rem;
+          font-family:'Space Grotesk',sans-serif; font-size:.82rem; font-weight:600; letter-spacing:.04em;
+          padding:.85rem 1.5rem; border-radius:999px; transition:all .2s ease; }
+  .pick .dot { width:.7rem; height:.7rem; border-radius:50%; border:2px solid currentColor; }
+  .pick.selected .dot { background:currentColor; box-shadow:0 0 0 3px rgba(255,255,255,.15); }
+  .pname { font-family:'Space Grotesk',sans-serif; font-weight:600; }
+  .pdesc { font-size:.9rem; opacity:.8; max-width:52ch; line-height:1.5; }
+
+  .nav { display:flex; align-items:center; justify-content:space-between; padding:1.15rem 0; }
+  .nav .links { display:flex; gap:1.5rem; align-items:center; font-size:.83rem; }
+  .nav .links a.muted { opacity:.85; }
+  .brand { font-size:1.15rem; letter-spacing:.02em; }
+  .phone { font-weight:600; }
+  .cta { font-family:'Space Grotesk',sans-serif; font-size:.76rem; letter-spacing:.06em; text-transform:uppercase;
+         padding:.6rem 1.1rem; border-radius:2px; }
+  @media(max-width:820px){ .nav .links a.muted{display:none;} }
+
+  .rail { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(240px,1fr); gap:1.1rem; overflow-x:auto;
+          padding-bottom:.8rem; scroll-snap-type:x mandatory; }
+  .rail.grid3 { grid-auto-flow:initial; grid-template-columns:repeat(3,1fr); }
+  @media(max-width:760px){ .rail.grid3{ grid-auto-flow:column; grid-template-columns:none; grid-auto-columns:minmax(230px,1fr);} }
+  .lcard { scroll-snap-align:start; overflow:hidden; transition:transform .25s ease, box-shadow .25s ease; cursor:pointer; }
+  .lcard:hover { transform:translateY(-5px); }
+  .ph { position:relative; aspect-ratio:4/3; overflow:hidden; }
+  .ph img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }
+  .lcard:hover .ph img { transform:scale(1.06); }
+  .badge { position:absolute; top:.6rem; left:.6rem; font-size:.62rem; letter-spacing:.08em; text-transform:uppercase;
+           padding:.28rem .5rem; border-radius:2px; font-family:'Space Grotesk',sans-serif; }
+  .price { font-size:1.3rem; }
+  .meta { font-size:.74rem; letter-spacing:.06em; text-transform:uppercase; }
+  .addr { font-size:.9rem; }
+  .sub { font-size:.78rem; opacity:.7; }
+  .sectlabel { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:1.1rem; }
+  .sectlabel .k { font-family:'Space Grotesk',sans-serif; font-size:.72rem; letter-spacing:.2em; text-transform:uppercase; }
+  .sectlabel .all { font-size:.78rem; }
+
+  /* fade-up entrance */
+  @keyframes up { from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:none;} }
+  .fu { animation:up .8s cubic-bezier(.2,.7,.2,1) both; }
+  .fu2 { animation:up .8s cubic-bezier(.2,.7,.2,1) .12s both; }
+  .fu3 { animation:up .8s cubic-bezier(.2,.7,.2,1) .24s both; }
+
+  /* ============================================================ */
+  /* DIRECTION A — EVOLVED MIDNIGHT (dark luxury, refined)        */
+  /* ============================================================ */
+  .dirA { background:#0e0e10; color:#f4efe6; font-family:'Inter',sans-serif; }
+  .dirA .tag { background:#c6a15b; color:#15130f; }
+  .dirA .brand { font-family:'Marcellus',serif; }
+  .dirA .brand .g { color:#c6a15b; }
+  .dirA a.muted:hover { color:#c6a15b; }
+  .dirA .phone { color:#c6a15b; }
+  .dirA .cta { background:#c6a15b; color:#15130f; }
+  .dirA .heroA {
+    position:relative; border-radius:4px; overflow:hidden; margin-top:.5rem;
+    min-height:520px; display:flex; align-items:flex-end;
+    background:
+      radial-gradient(120% 80% at 70% 10%, rgba(198,161,91,.18), transparent 60%),
+      linear-gradient(180deg, #15161b 0%, #0e0f13 55%, #0a0a0c 100%);
+  }
+  .dirA .skyline { position:absolute; inset:0; opacity:.5;
+    background:
+      linear-gradient(180deg, transparent 55%, rgba(0,0,0,.65) 100%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 2px, transparent 2px 26px);
+    -webkit-mask:linear-gradient(180deg, transparent 40%, #000 78%); mask:linear-gradient(180deg, transparent 40%, #000 78%); }
+  .dirA .heroA .inner { position:relative; padding:2.6rem; width:100%; }
+  .dirA .kick { font-family:'Space Grotesk',sans-serif; font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#c6a15b; }
+  .dirA h1 { font-family:'Marcellus',serif; font-weight:400; font-size:clamp(2.6rem,5.5vw,4.2rem); line-height:1.04; margin:.5rem 0 .8rem; }
+  .dirA .lede { max-width:48ch; color:#c8c2b5; line-height:1.6; }
+  .dirA .searchbar { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1.6rem; background:rgba(20,20,24,.7);
+    border:1px solid rgba(198,161,91,.35); border-radius:3px; padding:.5rem; max-width:680px; backdrop-filter:blur(6px); }
+  .dirA .searchbar .f { flex:1; min-width:130px; padding:.7rem .85rem; color:#c8c2b5; font-size:.85rem; border-right:1px solid rgba(255,255,255,.08); }
+  .dirA .searchbar button { background:#c6a15b; color:#15130f; border:none; padding:.7rem 1.4rem; border-radius:2px; font-weight:600; font-family:'Space Grotesk'; font-size:.8rem; letter-spacing:.04em; cursor:pointer; }
+  .dirA section.feat { padding-top:2.6rem; }
+  .dirA .lcard { background:#16161a; border:1px solid rgba(198,161,91,.18); border-radius:3px; }
+  .dirA .lcard:hover { border-color:#c6a15b; box-shadow:0 18px 40px -22px rgba(0,0,0,.9); }
+  .dirA .ph { background:var(--img1); }
+  .dirA .badge { background:rgba(14,14,16,.82); color:#e7c987; }
+  .dirA .lcard .body { padding:1rem 1.1rem 1.2rem; }
+  .dirA .price { font-family:'Marcellus',serif; color:#f4efe6; }
+  .dirA .meta { color:#c6a15b; margin:.35rem 0; }
+  .dirA .addr { color:#f4efe6; }
+  .dirA .sub { color:#9a9384; }
+  .dirA .sectlabel .k { color:#c6a15b; }
+  .dirA .sectlabel .all { color:#c6a15b; }
+  .dirA .pick { border:1px solid #c6a15b; color:#c6a15b; background:transparent; }
+  .dirA .pick:hover { background:rgba(198,161,91,.12); }
+  .dirA .pick.selected { background:#c6a15b; color:#15130f; }
+
+  /* ============================================================ */
+  /* DIRECTION B — EDITORIAL LIGHT (bright, airy, magazine)       */
+  /* ============================================================ */
+  .dirB { background:#f6f3ec; color:#1c1b18; font-family:'Inter',sans-serif; }
+  .dirB .tag { background:#1c1b18; color:#f6f3ec; }
+  .dirB .brand { font-family:'Fraunces',serif; font-weight:500; }
+  .dirB .brand .g { font-style:italic; }
+  .dirB .nav { border-bottom:1px solid rgba(0,0,0,.1); }
+  .dirB a.muted { color:#3b3a35; }
+  .dirB .phone { color:#1c1b18; }
+  .dirB .cta { background:#1c1b18; color:#f6f3ec; }
+  .dirB .heroB { display:grid; grid-template-columns:1.05fr .95fr; gap:2.2rem; align-items:center; padding:3.2rem 0 2.4rem; }
+  @media(max-width:840px){ .dirB .heroB{ grid-template-columns:1fr; } }
+  .dirB .kick { font-family:'Space Grotesk',sans-serif; font-size:.72rem; letter-spacing:.26em; text-transform:uppercase; color:#9a7b4f; }
+  .dirB h1 { font-family:'Fraunces',serif; font-weight:340; font-size:clamp(2.8rem,5.5vw,4.6rem); line-height:1.02; letter-spacing:-.01em; margin:.7rem 0 1rem; }
+  .dirB h1 em { font-style:italic; color:#9a7b4f; }
+  .dirB .lede { max-width:42ch; color:#54514a; line-height:1.7; font-size:1.02rem; }
+  .dirB .actions { display:flex; gap:.8rem; margin-top:1.8rem; flex-wrap:wrap; }
+  .dirB .btnp { background:#1c1b18; color:#f6f3ec; padding:.85rem 1.5rem; border-radius:2px; font-size:.8rem; font-family:'Space Grotesk'; letter-spacing:.04em; }
+  .dirB .btng { border:1px solid #1c1b18; padding:.85rem 1.5rem; border-radius:2px; font-size:.8rem; font-family:'Space Grotesk'; letter-spacing:.04em; }
+  .dirB .heroimg { position:relative; aspect-ratio:4/5; border-radius:3px; overflow:hidden;
+    background:linear-gradient(150deg,#cdbfa6,#9a7b4f 70%,#6f5836); }
+  .dirB .heroimg img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .dirB .heroimg .cap { position:absolute; left:1rem; bottom:1rem; background:rgba(246,243,236,.92); color:#1c1b18; padding:.55rem .8rem; border-radius:2px; font-size:.78rem; }
+  .dirB section.feat { padding-top:1rem; }
+  .dirB .lcard { background:#fff; border:1px solid rgba(0,0,0,.08); border-radius:3px; }
+  .dirB .lcard:hover { box-shadow:0 22px 40px -26px rgba(0,0,0,.45); }
+  .dirB .ph { background:linear-gradient(150deg,#d8cdb8,#b69e76); }
+  .dirB .badge { background:#fff; color:#9a7b4f; border:1px solid rgba(0,0,0,.08); }
+  .dirB .lcard .body { padding:1rem 1.1rem 1.2rem; }
+  .dirB .price { font-family:'Fraunces',serif; font-weight:420; }
+  .dirB .meta { color:#9a7b4f; margin:.35rem 0; }
+  .dirB .addr { color:#1c1b18; }
+  .dirB .sub { color:#7c786f; }
+  .dirB .sectlabel { border-top:1px solid rgba(0,0,0,.12); padding-top:1rem; }
+  .dirB .sectlabel .k { color:#1c1b18; }
+  .dirB .sectlabel .all { color:#9a7b4f; }
+  .dirB .pick { border:1px solid #1c1b18; color:#1c1b18; background:transparent; }
+  .dirB .pick:hover { background:rgba(0,0,0,.05); }
+  .dirB .pick.selected { background:#1c1b18; color:#f6f3ec; }
+  .dirB .pdesc, .dirB .picker-x { color:#54514a; }
+
+  /* ============================================================ */
+  /* DIRECTION C — ARCHITECTURAL CONTRAST (bold contemporary)     */
+  /* ============================================================ */
+  .dirC { background:#141416; color:#efe9df; font-family:'Inter',sans-serif; }
+  .dirC .tag { background:#e0883c; color:#141416; }
+  .dirC .brand { font-family:'Space Grotesk',sans-serif; font-weight:600; letter-spacing:-.01em; }
+  .dirC .brand .g { color:#e0883c; }
+  .dirC .phone { color:#e0883c; }
+  .dirC a.muted:hover { color:#e0883c; }
+  .dirC .cta { background:#e0883c; color:#141416; font-weight:600; }
+  .dirC .heroC { display:grid; grid-template-columns:1.1fr .9fr; gap:0; border:1px solid rgba(255,255,255,.14); border-radius:4px; overflow:hidden; margin-top:.5rem; }
+  @media(max-width:840px){ .dirC .heroC{ grid-template-columns:1fr; } }
+  .dirC .heroC .left { padding:2.8rem; display:flex; flex-direction:column; justify-content:center; border-right:1px solid rgba(255,255,255,.14); }
+  .dirC .idx { font-family:'Space Grotesk',sans-serif; font-size:.74rem; letter-spacing:.2em; color:#e0883c; }
+  .dirC h1 { font-family:'Fraunces',serif; font-weight:300; font-size:clamp(2.7rem,5.6vw,4.7rem); line-height:.98; letter-spacing:-.02em; margin:.8rem 0 1rem; }
+  .dirC h1 b { font-weight:600; }
+  .dirC .lede { max-width:40ch; color:#b8b2a7; line-height:1.6; }
+  .dirC .statline { display:flex; gap:2rem; margin-top:1.8rem; }
+  .dirC .statline .s b { font-family:'Fraunces',serif; font-size:2rem; font-weight:300; display:block; }
+  .dirC .statline .s span { font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:#8b857b; }
+  .dirC .heroC .right { position:relative; min-height:360px; background:linear-gradient(150deg,#2a2c33,#15161a); }
+  .dirC .heroC .right img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .dirC .heroC .right .ov { position:absolute; right:1rem; bottom:1rem; background:#e0883c; color:#141416; padding:.6rem .9rem; border-radius:2px; font-family:'Space Grotesk'; font-size:.78rem; font-weight:600; }
+  .dirC section.feat { padding-top:2.6rem; }
+  .dirC .lcard { background:#1b1c1f; border:1px solid rgba(255,255,255,.12); border-radius:3px; position:relative; }
+  .dirC .lcard:hover { border-color:#e0883c; }
+  .dirC .lcard .num { position:absolute; top:.5rem; right:.7rem; z-index:3; font-family:'Space Grotesk'; font-size:.72rem; color:#e0883c; }
+  .dirC .ph { background:linear-gradient(150deg,#2a2c33,#15161a); }
+  .dirC .badge { background:#141416; color:#e0883c; border:1px solid rgba(224,136,60,.4); }
+  .dirC .lcard .body { padding:1rem 1.1rem 1.2rem; }
+  .dirC .price { font-family:'Fraunces',serif; font-weight:300; font-size:1.6rem; }
+  .dirC .meta { color:#e0883c; margin:.3rem 0; }
+  .dirC .addr { color:#efe9df; }
+  .dirC .sub { color:#8b857b; }
+  .dirC .sectlabel .k { color:#e0883c; }
+  .dirC .sectlabel .all { color:#efe9df; }
+  .dirC .pick { border:1px solid #e0883c; color:#e0883c; background:transparent; }
+  .dirC .pick:hover { background:rgba(224,136,60,.12); }
+  .dirC .pick.selected { background:#e0883c; color:#141416; }
+</style>
+</head>
+<body>
+
+<div class="picker">
+  <b>Pick a visual direction</b>
+  <div class="hint" id="hint">Scroll through all three — click <em>“Select this direction”</em> on the one you like.</div>
+  <div class="jump"><a href="#A">A</a><a href="#B">B</a><a href="#C">C</a></div>
+</div>
+
+<!-- ============ DIRECTION A ============ -->
+<section class="dir dirA" id="A">
+  <div class="tag">A · Evolved Midnight</div>
+  <div class="wrap">
+    <nav class="nav">
+      <div class="brand">Derrick <span class="g">Garcia</span></div>
+      <div class="links">
+        <a class="muted" href="#A">Listings</a><a class="muted" href="#A">Sell</a><a class="muted" href="#A">Home Value</a><a class="muted" href="#A">Calculators</a><a class="muted" href="#A">Areas</a>
+        <a class="phone" href="#A">416-684-7370</a>
+        <a class="cta" href="#A">Book a Call</a>
+      </div>
+    </nav>
+
+    <div class="heroA">
+      <div class="skyline"></div>
+      <div class="inner">
+        <div class="kick fu">Real Broker Ontario · Toronto &amp; GTA</div>
+        <h1 class="fu2">Find your place<br>in the GTA.</h1>
+        <p class="lede fu2">Browse every Real Broker Ontario listing across Toronto and the GTA — refreshed nightly, straight from the source.</p>
+        <div class="searchbar fu3">
+          <div class="f">City or neighbourhood</div>
+          <div class="f">Any price</div>
+          <button>Search listings →</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="feat">
+      <div class="sectlabel">
+        <div class="k">Featured · Real Broker Ontario</div>
+        <div class="all">View all 805 listings →</div>
+      </div>
+      <div class="rail">
+        <div class="lcard">
+          <div class="ph"><span class="badge">For Sale</span><img src="https://ddfcdn.realtor.ca/listing/TS639069409605330000/reb82/highres/8/e12794868_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$999,000</div><div class="meta">5 bd · 4 ba · Detached</div><div class="addr">134 Jones Avenue</div><div class="sub">South Riverdale, Toronto</div></div>
+        </div>
+        <div class="lcard">
+          <div class="ph"><span class="badge">For Sale</span><img src="https://ddfcdn.realtor.ca/listing/TS639118423243770000/reb82/highres/0/w12774010_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$939,000</div><div class="meta">2 bd · 1 ba · Penthouse</div><div class="addr">PH3 — 2154 Dundas St W</div><div class="sub">Roncesvalles, Toronto</div></div>
+        </div>
+        <div class="lcard">
+          <div class="ph"><span class="badge">For Sale</span><img src="https://ddfcdn.realtor.ca/listing/TS639039929658470000/reb82/highres/8/c12695848_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$699,000</div><div class="meta">2 bd · 1 ba · Condo</div><div class="addr">516 — 118 Merchants Wharf</div><div class="sub">Waterfront, Toronto</div></div>
+        </div>
+        <div class="lcard">
+          <div class="ph"><span class="badge">For Sale</span><img src="https://ddfcdn.realtor.ca/listing/TS639159138322470000/reb82/highres/0/w12814290_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$949,000</div><div class="meta">3 bd · 2 ba · Townhouse</div><div class="addr">616 — 830 Megson Terrace</div><div class="sub">Willmott, Milton</div></div>
+        </div>
+      </div>
+
+      <div class="pickrow">
+        <div class="pick" data-choice="a" onclick="pick(this,'A · Evolved Midnight')"><span class="dot"></span> Select this direction</div>
+        <div>
+          <div class="pname">Evolved Midnight</div>
+          <div class="pdesc">Keeps Real Broker's gold-on-charcoal brand equity, but cinematic: bigger imagery, a real search bar up top, depth and warmth. Premium &amp; confident.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- ============ DIRECTION B ============ -->
+<section class="dir dirB" id="B">
+  <div class="tag">B · Editorial Light</div>
+  <div class="wrap">
+    <nav class="nav">
+      <div class="brand">Derrick <span class="g">Garcia</span></div>
+      <div class="links">
+        <a class="muted" href="#B">Listings</a><a class="muted" href="#B">Sell</a><a class="muted" href="#B">Home Value</a><a class="muted" href="#B">Calculators</a><a class="muted" href="#B">Areas</a>
+        <a class="phone" href="#B">416-684-7370</a>
+        <a class="cta" href="#B">Book a Call</a>
+      </div>
+    </nav>
+
+    <div class="heroB">
+      <div>
+        <div class="kick fu">Toronto + GTA Real Estate</div>
+        <h1 class="fu2">Homes worth<br>coming <em>home</em> to.</h1>
+        <p class="lede fu2">Every Real Broker Ontario listing across the GTA, in one calm place — plus the tools and guidance to buy or sell with confidence.</p>
+        <div class="actions fu3">
+          <a class="btnp" href="#B">Browse listings →</a>
+          <a class="btng" href="#B">What's my home worth?</a>
+        </div>
+      </div>
+      <div class="heroimg fu2">
+        <img src="https://ddfcdn.realtor.ca/listing/TS639069409605330000/reb82/highres/8/e12794868_1.jpg" onerror="this.style.display='none'" alt="">
+        <div class="cap">134 Jones Avenue · $999,000</div>
+      </div>
+    </div>
+
+    <section class="feat">
+      <div class="sectlabel">
+        <div class="k">Featured listings</div>
+        <div class="all">View all 805 →</div>
+      </div>
+      <div class="rail grid3">
+        <div class="lcard">
+          <div class="ph"><span class="badge">New</span><img src="https://ddfcdn.realtor.ca/listing/TS639159138322470000/reb82/highres/0/w12814290_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$949,000</div><div class="meta">3 bd · 2 ba</div><div class="addr">616 — 830 Megson Terrace</div><div class="sub">Willmott, Milton</div></div>
+        </div>
+        <div class="lcard">
+          <div class="ph"><span class="badge">New</span><img src="https://ddfcdn.realtor.ca/listing/TS639033323074530000/reb82/highres/2/w12670362_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$649,900</div><div class="meta">2 bd · 2 ba</div><div class="addr">2302 — 7 Mabelle Avenue</div><div class="sub">Islington, Toronto</div></div>
+        </div>
+        <div class="lcard">
+          <div class="ph"><span class="badge">New</span><img src="https://ddfcdn.realtor.ca/listing/TS639040884967300000/reb82/highres/6/e12700646_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$619,900</div><div class="meta">2 bd · 2 ba</div><div class="addr">3501 — 2033 Kennedy Road</div><div class="sub">Agincourt, Toronto</div></div>
+        </div>
+      </div>
+
+      <div class="pickrow">
+        <div class="pick" data-choice="b" onclick="pick(this,'B · Editorial Light')"><span class="dot"></span> Select this direction</div>
+        <div>
+          <div class="pname">Editorial Light</div>
+          <div class="pdesc">A bright, airy flip: cream &amp; charcoal, big elegant serif headlines, magazine whitespace. Fresh, sophisticated, approachable — a clean break from the dark site.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- ============ DIRECTION C ============ -->
+<section class="dir dirC" id="C">
+  <div class="tag">C · Architectural Contrast</div>
+  <div class="wrap">
+    <nav class="nav">
+      <div class="brand">Derrick <span class="g">Garcia</span></div>
+      <div class="links">
+        <a class="muted" href="#C">Listings</a><a class="muted" href="#C">Sell</a><a class="muted" href="#C">Home Value</a><a class="muted" href="#C">Calculators</a><a class="muted" href="#C">Areas</a>
+        <a class="phone" href="#C">416-684-7370</a>
+        <a class="cta" href="#C">Book a Call</a>
+      </div>
+    </nav>
+
+    <div class="heroC">
+      <div class="left">
+        <div class="idx fu">01 — Listings</div>
+        <h1 class="fu2">The GTA,<br><b>on the market.</b></h1>
+        <p class="lede fu2">Real Broker Ontario's full GTA inventory — bold, searchable, updated nightly. No portals, no noise.</p>
+        <div class="statline fu3">
+          <div class="s"><b>805</b><span>Live listings</span></div>
+          <div class="s"><b>$780K</b><span>Median price</span></div>
+          <div class="s"><b>26</b><span>GTA markets</span></div>
+        </div>
+      </div>
+      <div class="right fu2">
+        <img src="https://ddfcdn.realtor.ca/listing/TS639039929658470000/reb82/highres/8/c12695848_1.jpg" onerror="this.style.display='none'" alt="">
+        <div class="ov">Search the map →</div>
+      </div>
+    </div>
+
+    <section class="feat">
+      <div class="sectlabel">
+        <div class="k">Featured · Real Broker Ontario</div>
+        <div class="all">View all →</div>
+      </div>
+      <div class="rail grid3">
+        <div class="lcard">
+          <span class="num">01</span>
+          <div class="ph"><img src="https://ddfcdn.realtor.ca/listing/TS639069409605330000/reb82/highres/8/e12794868_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$999,000</div><div class="meta">5 bd · 4 ba · Detached</div><div class="addr">134 Jones Avenue</div><div class="sub">South Riverdale, Toronto</div></div>
+        </div>
+        <div class="lcard">
+          <span class="num">02</span>
+          <div class="ph"><img src="https://ddfcdn.realtor.ca/listing/TS639118423243770000/reb82/highres/0/w12774010_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$939,000</div><div class="meta">2 bd · 1 ba · Penthouse</div><div class="addr">PH3 — 2154 Dundas St W</div><div class="sub">Roncesvalles, Toronto</div></div>
+        </div>
+        <div class="lcard">
+          <span class="num">03</span>
+          <div class="ph"><img src="https://ddfcdn.realtor.ca/listing/TS639033323074530000/reb82/highres/2/w12670362_1.jpg" onerror="this.style.display='none'" alt=""></div>
+          <div class="body"><div class="price">$649,900</div><div class="meta">2 bd · 2 ba · Condo</div><div class="addr">2302 — 7 Mabelle Avenue</div><div class="sub">Islington, Toronto</div></div>
+        </div>
+      </div>
+
+      <div class="pickrow">
+        <div class="pick" data-choice="c" onclick="pick(this,'C · Architectural Contrast')"><span class="dot"></span> Select this direction</div>
+        <div>
+          <div class="pname">Architectural Contrast</div>
+          <div class="pdesc">High-contrast and design-forward: charcoal + bone, a bold amber accent, oversized serif numerals, visible grid lines, split-screen hero. Striking and modern.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<script>
+  function pick(el, label){
+    document.querySelectorAll('.pick').forEach(p=>p.classList.remove('selected'));
+    el.classList.add('selected');
+    var h=document.getElementById('hint');
+    h.innerHTML='<span class="on">'+label+'</span> selected — return to the terminal and tell me what you think.';
+  }
+</script>
+</body>
+</html>

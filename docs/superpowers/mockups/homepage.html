@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homepage mockup — Derrick Garcia (Evolved Midnight)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Marcellus&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0e10; --panel:#16161a; --panel2:#1b1b21; --ink:#f4efe6; --text:#c8c2b5; --muted:#948e80;
+    --gold:#c6a15b; --gold-br:#e7c987; --ink-on-gold:#15130f;
+    --line:rgba(198,161,91,.18); --line-2:rgba(198,161,91,.36); --hair:rgba(255,255,255,.07);
+    --maxw:1200px; --rad:4px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
+  img{display:block;max-width:100%}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-family:'Marcellus',serif;font-weight:400;color:var(--ink);line-height:1.08}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(1.1rem,4vw,2.2rem)}
+  .kick{font-family:'Space Grotesk',sans-serif;font-size:.72rem;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
+  .ui{font-family:'Space Grotesk',sans-serif}
+  section{position:relative}
+  .sect{padding:clamp(3.2rem,7vw,5.5rem) 0}
+  .eyebrow{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1.6rem;flex-wrap:wrap}
+  .eyebrow h2{font-size:clamp(1.7rem,3.2vw,2.4rem)}
+  .eyebrow .link{color:var(--gold);font-family:'Space Grotesk';font-size:.82rem;letter-spacing:.03em}
+  .eyebrow .link:hover{color:var(--gold-br)}
+
+  /* progress + nav */
+  .progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-br));z-index:1000}
+  .nav{position:sticky;top:0;z-index:900;transition:background .3s,border-color .3s,padding .3s;border-bottom:1px solid transparent}
+  .nav.scrolled{background:rgba(12,12,14,.82);backdrop-filter:blur(14px);border-bottom-color:var(--hair)}
+  .nav .bar{display:flex;align-items:center;justify-content:space-between;padding:.9rem 0;gap:1rem}
+  .brand{display:flex;align-items:center;gap:.6rem}
+  .brand img{height:34px;width:auto}
+  .brand .bt{display:flex;flex-direction:column;line-height:1}
+  .brand .bt b{font-family:'Marcellus',serif;font-size:1.12rem;color:var(--ink);font-weight:400;letter-spacing:.02em}
+  .brand .bt b span{color:var(--gold)}
+  .brand .bt em{font-family:'Space Grotesk';font-style:normal;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+  .navlinks{display:flex;align-items:center;gap:1.35rem;font-size:.84rem;font-family:'Space Grotesk'}
+  .navlinks a.l{color:var(--text)}
+  .navlinks a.l:hover{color:var(--gold)}
+  .navlinks .phone{color:var(--gold);font-weight:600}
+  .navlinks .book{background:var(--gold);color:var(--ink-on-gold);padding:.55rem 1.05rem;border-radius:2px;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+  .navlinks .book:hover{background:var(--gold-br)}
+  @media(max-width:1000px){.navlinks .l{display:none}}
+
+  /* hero */
+  .hero{position:relative;min-height:88vh;display:flex;align-items:center;overflow:hidden}
+  .hero .bgglow{position:absolute;inset:0;z-index:0;background:
+    radial-gradient(60% 50% at 72% 18%,rgba(198,161,91,.20),transparent 62%),
+    radial-gradient(70% 60% at 15% 90%,rgba(198,161,91,.07),transparent 60%),
+    linear-gradient(180deg,#15161b 0%,#0e0f13 55%,#0a0a0c 100%)}
+  .hero .sky{position:absolute;inset:0;z-index:0;opacity:.5;
+    background:linear-gradient(180deg,transparent 52%,rgba(0,0,0,.6) 100%),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.045) 0 2px,transparent 2px 30px),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 2px,transparent 2px 60px);
+    -webkit-mask:linear-gradient(180deg,transparent 38%,#000 80%);mask:linear-gradient(180deg,transparent 38%,#000 80%)}
+  .hero .wrap{position:relative;z-index:2;width:100%;padding-top:3rem;padding-bottom:3rem}
+  .hero h1{font-size:clamp(2.8rem,6.2vw,5rem);margin:.7rem 0 1rem;letter-spacing:.005em}
+  .hero .lede{max-width:50ch;color:var(--text);font-size:1.06rem}
+  .searchbar{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:1.8rem;background:rgba(18,18,22,.66);border:1px solid var(--line-2);border-radius:var(--rad);padding:.45rem;max-width:760px;backdrop-filter:blur(8px)}
+  .searchbar .f{flex:1;min-width:120px;display:flex;flex-direction:column;padding:.5rem .8rem;border-right:1px solid var(--hair)}
+  .searchbar .f span{font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-family:'Space Grotesk'}
+  .searchbar .f b{color:var(--ink);font-weight:400;font-size:.92rem;margin-top:2px}
+  .searchbar button{background:var(--gold);color:var(--ink-on-gold);border:none;border-radius:2px;padding:0 1.5rem;font-family:'Space Grotesk';font-weight:600;font-size:.82rem;letter-spacing:.04em;cursor:pointer}
+  .searchbar button:hover{background:var(--gold-br)}
+  .herostats{display:flex;gap:2.4rem;margin-top:2.2rem;flex-wrap:wrap}
+  .herostats .s b{font-family:'Marcellus',serif;color:var(--ink);font-size:2rem;display:block;line-height:1}
+  .herostats .s > span{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:'Space Grotesk'}
+  .herostats .s b .count{font-size:inherit;font-family:'Marcellus',serif;color:var(--ink);letter-spacing:0;text-transform:none}
+  .agentchip{display:inline-flex;align-items:center;gap:.7rem;margin-top:2.2rem;padding:.5rem .9rem .5rem .5rem;border:1px solid var(--line);border-radius:999px;background:rgba(22,22,26,.6)}
+  .agentchip img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid var(--line-2)}
+  .agentchip small{font-family:'Space Grotesk';font-size:.78rem;color:var(--text)}
+  .agentchip small b{color:var(--ink);font-weight:600}
+  .scrollcue{position:absolute;bottom:1.2rem;left:50%;transform:translateX(-50%);z-index:2;color:var(--muted);font-family:'Space Grotesk';font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:.4rem;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+  /* designer annotation */
+  .note{border:1px dashed var(--line-2);border-radius:var(--rad);background:rgba(198,161,91,.05);padding:.7rem 1rem;margin-bottom:1.2rem;font-family:'Space Grotesk';font-size:.76rem;color:var(--gold-br);display:flex;gap:.55rem;align-items:flex-start}
+  .note b{color:var(--gold-br)}
+  .note .pin{flex-shrink:0}
+
+  /* listing cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.3rem}
+  .rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(290px,360px);gap:1.3rem;overflow-x:auto;padding-bottom:.6rem;scroll-snap-type:x mandatory}
+  .lcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--rad);overflow:hidden;cursor:pointer;transition:transform .28s,border-color .28s,box-shadow .28s;scroll-snap-align:start}
+  .lcard:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 22px 46px -26px rgba(0,0,0,.9)}
+  .lcard .ph{position:relative;aspect-ratio:4/3;overflow:hidden;background:linear-gradient(135deg,#33373f,#1c1f25)}
+  .lcard .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+  .lcard:hover .ph img{transform:scale(1.07)}
+  .lcard .tags{position:absolute;top:.6rem;left:.6rem;display:flex;gap:.4rem}
+  .tag-b{font-family:'Space Grotesk';font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .5rem;border-radius:2px;background:rgba(14,14,16,.82);color:var(--gold-br);backdrop-filter:blur(4px)}
+  .tag-d{background:var(--gold);color:var(--ink-on-gold)}
+  .lcard .fav{position:absolute;top:.6rem;right:.6rem;width:30px;height:30px;border-radius:50%;background:rgba(14,14,16,.7);display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:.9rem;backdrop-filter:blur(4px);transition:color .2s}
+  .lcard .fav:hover{color:var(--gold-br)}
+  .lcard .body{padding:1rem 1.1rem 1.2rem}
+  .lcard .price{font-family:'Marcellus',serif;color:var(--ink);font-size:1.45rem}
+  .lcard .meta{color:var(--gold);font-family:'Space Grotesk';font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;margin:.4rem 0 .5rem}
+  .lcard .addr{color:var(--ink);font-size:.95rem}
+  .lcard .sub{color:var(--muted);font-size:.8rem}
+  .lcard .foot{display:flex;align-items:center;justify-content:space-between;margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--hair);font-size:.72rem;color:var(--muted);font-family:'Space Grotesk'}
+
+  /* filter chips */
+  .chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+  .chip{font-family:'Space Grotesk';font-size:.78rem;padding:.5rem 1rem;border:1px solid var(--line-2);border-radius:999px;color:var(--text);cursor:pointer;transition:all .2s}
+  .chip:hover{border-color:var(--gold);color:var(--ink)}
+  .chip.on{background:var(--gold);color:var(--ink-on-gold);border-color:var(--gold);font-weight:600}
+
+  /* map teaser */
+  .map{position:relative;border:1px solid var(--line);border-radius:var(--rad);overflow:hidden;min-height:340px;display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(circle at 30% 40%,rgba(198,161,91,.08),transparent 40%),
+      linear-gradient(180deg,#13141a,#0d0e12);
+  }
+  .map .grid-lines{position:absolute;inset:0;opacity:.5;background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 46px),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 1px,transparent 1px 46px)}
+  .map .roads{position:absolute;inset:0;opacity:.35;background:
+    linear-gradient(58deg,transparent 49.6%,rgba(198,161,91,.5) 49.6% 50.4%,transparent 50.4%),
+    linear-gradient(-22deg,transparent 49.7%,rgba(255,255,255,.18) 49.7% 50.3%,transparent 50.3%),
+    linear-gradient(94deg,transparent 49.7%,rgba(255,255,255,.12) 49.7% 50.3%,transparent 50.3%)}
+  .pin{position:absolute;transform:translate(-50%,-100%);z-index:3;font-family:'Space Grotesk';font-weight:600;font-size:.74rem;color:var(--ink-on-gold);background:var(--gold);padding:.3rem .55rem;border-radius:999px;box-shadow:0 6px 18px -6px rgba(0,0,0,.8);white-space:nowrap}
+  .pin::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--gold);border-bottom:0}
+  .pin.lg{background:var(--gold-br);font-size:.82rem;padding:.4rem .7rem;z-index:4}
+  .map .cta{position:relative;z-index:5;text-align:center}
+  .map .cta .btn{display:inline-block;margin-top:.8rem}
+
+  .btn{font-family:'Space Grotesk';font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600;padding:.85rem 1.6rem;border-radius:2px;cursor:pointer;display:inline-block;transition:all .2s}
+  .btn-gold{background:var(--gold);color:var(--ink-on-gold)}
+  .btn-gold:hover{background:var(--gold-br)}
+  .btn-ghost{border:1px solid var(--line-2);color:var(--ink)}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+  /* tools / calculator */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center}
+  @media(max-width:840px){.twocol{grid-template-columns:1fr}}
+  .calc{background:var(--panel);border:1px solid var(--line-2);border-radius:var(--rad);padding:1.6rem}
+  .calc h3{font-size:1.3rem;margin-bottom:.2rem}
+  .calc .row{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin:1rem 0}
+  .calc label{font-family:'Space Grotesk';font-size:.78rem;color:var(--text)}
+  .calc input[type=range]{flex:1;accent-color:var(--gold)}
+  .calc .val{font-family:'Space Grotesk';color:var(--ink);font-size:.86rem;min-width:96px;text-align:right}
+  .calc .result{margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid var(--hair);display:flex;align-items:baseline;justify-content:space-between}
+  .calc .result .big{font-family:'Marcellus',serif;color:var(--gold-br);font-size:2.4rem;line-height:1}
+  .calc .fine{font-size:.68rem;color:var(--muted);font-family:'Space Grotesk';margin-top:.7rem}
+  .toollist{display:flex;flex-direction:column;gap:.8rem}
+  .toollink{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.3rem;border:1px solid var(--line);border-radius:var(--rad);background:var(--panel);transition:all .2s}
+  .toollink:hover{border-color:var(--gold);transform:translateX(4px)}
+  .toollink b{font-family:'Marcellus';color:var(--ink);font-weight:400;font-size:1.05rem}
+  .toollink span{font-size:.82rem;color:var(--muted)}
+  .toollink .ar{color:var(--gold)}
+
+  /* sell band */
+  .sell{background:linear-gradient(120deg,#17130b,#0e0e10 60%);border:1px solid var(--line-2);border-radius:var(--rad);padding:clamp(1.8rem,4vw,3rem);display:grid;grid-template-columns:1.2fr 1fr;gap:2rem;align-items:center}
+  @media(max-width:840px){.sell{grid-template-columns:1fr}}
+  .valform{display:flex;gap:.5rem;margin-top:1.2rem;background:rgba(10,10,12,.6);border:1px solid var(--line-2);border-radius:var(--rad);padding:.45rem}
+  .valform input{flex:1;background:transparent;border:none;color:var(--ink);padding:.7rem .9rem;font-family:'Inter';font-size:.92rem;outline:none}
+  .valform input::placeholder{color:var(--muted)}
+  .valform button{background:var(--gold);color:var(--ink-on-gold);border:none;border-radius:2px;padding:0 1.2rem;font-family:'Space Grotesk';font-weight:600;font-size:.78rem;cursor:pointer}
+
+  /* meet derrick */
+  .agent{display:grid;grid-template-columns:.85fr 1.15fr;gap:2.6rem;align-items:center}
+  @media(max-width:840px){.agent{grid-template-columns:1fr}}
+  .agent .photo{position:relative;border-radius:var(--rad);overflow:hidden;border:1px solid var(--line-2);max-width:380px}
+  .agent .photo img{width:100%;aspect-ratio:1;object-fit:cover;filter:saturate(.95)}
+  .agent .photo .emblem{position:absolute;right:.8rem;bottom:.8rem;width:54px;height:54px;opacity:.95}
+  .agent .who .role{color:var(--gold);font-family:'Space Grotesk';font-size:.74rem;letter-spacing:.18em;text-transform:uppercase}
+  .agent .who h2{font-size:clamp(2rem,4vw,2.8rem);margin:.4rem 0 1rem}
+  .agent .who p{margin-bottom:1rem;max-width:54ch}
+  .team{display:flex;gap:1.4rem;margin-top:1.6rem;flex-wrap:wrap}
+  .tm{display:flex;align-items:center;gap:.7rem}
+  .tm img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:1px solid var(--line-2)}
+  .tm b{display:block;color:var(--ink);font-family:'Marcellus';font-weight:400}
+  .tm span{font-size:.74rem;color:var(--muted);font-family:'Space Grotesk';letter-spacing:.05em;text-transform:uppercase}
+
+  /* areas */
+  .areas{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1rem}
+  .area{position:relative;border:1px solid var(--line);border-radius:var(--rad);padding:1.2rem;overflow:hidden;transition:all .25s;background:var(--panel)}
+  .area:hover{border-color:var(--gold);transform:translateY(-3px)}
+  .area b{font-family:'Marcellus';color:var(--ink);font-weight:400;font-size:1.2rem}
+  .area span{display:block;color:var(--gold);font-family:'Space Grotesk';font-size:.74rem;margin-top:.3rem}
+  .area .ar{position:absolute;right:1rem;top:1.1rem;color:var(--muted)}
+
+  /* reviews */
+  .reviews{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.3rem}
+  .rev{border:1px solid var(--line);border-radius:var(--rad);padding:1.5rem;background:var(--panel)}
+  .rev .stars{color:var(--gold-br);letter-spacing:.1em;margin-bottom:.7rem}
+  .rev p{color:var(--text);font-size:.95rem}
+  .rev .by{margin-top:1rem;color:var(--muted);font-family:'Space Grotesk';font-size:.78rem}
+
+  /* guides */
+  .guides{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem}
+  .guide{border:1px solid var(--line);border-radius:var(--rad);padding:1.4rem;background:var(--panel);transition:all .25s}
+  .guide:hover{border-color:var(--gold);transform:translateY(-3px)}
+  .guide .k{font-family:'Space Grotesk';font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .guide h3{font-size:1.15rem;margin:.5rem 0 .4rem}
+  .guide span{font-size:.85rem;color:var(--muted)}
+
+  /* footer */
+  footer{border-top:1px solid var(--line);background:#0b0b0d;padding:3.4rem 0 2rem}
+  .fgrid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.1fr;gap:2rem}
+  @media(max-width:840px){.fgrid{grid-template-columns:1fr 1fr}}
+  .fbrand img.logo{height:60px;margin-bottom:1rem}
+  .fbrand p{font-size:.88rem;color:var(--muted)}
+  .fbrand .real{display:flex;align-items:center;gap:.7rem;margin-top:1.2rem}
+  .fbrand .real img{height:26px}
+  .fcol h4{font-family:'Space Grotesk';font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+  .fcol a{display:block;color:var(--text);font-size:.88rem;margin-bottom:.6rem}
+  .fcol a:hover{color:var(--gold)}
+  .legal{border-top:1px solid var(--hair);margin-top:2.4rem;padding-top:1.4rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.74rem;color:var(--muted)}
+  .legal .tm-stmt{max-width:60ch;line-height:1.5}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}.scrollcue,.agentchip{animation:none}}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <div class="wrap bar">
+    <a class="brand" href="#">
+      <img src="/files/dg-mark.png" alt="DG" onerror="this.style.display='none'">
+      <span class="bt"><b>Derrick <span>Garcia</span></b><em>Real Broker Ontario</em></span>
+    </a>
+    <nav class="navlinks ui">
+      <a class="l" href="#listings">Listings</a>
+      <a class="l" href="#sell">Sell</a>
+      <a class="l" href="#sell">Home Value</a>
+      <a class="l" href="#tools">Calculators</a>
+      <a class="l" href="#areas">Areas</a>
+      <a class="l" href="#derrick">About</a>
+      <a class="phone" href="tel:+14166847370">416-684-7370</a>
+      <a class="book" href="#">Book a Call</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="bgglow" id="glow"></div>
+  <div class="sky" id="sky"></div>
+  <div class="wrap">
+    <div class="kick reveal in">Real Broker Ontario · Toronto &amp; GTA</div>
+    <h1 class="reveal in">Find your place<br>in the GTA.</h1>
+    <p class="lede reveal in">Browse every Real Broker Ontario listing across Toronto and the Greater Toronto Area — straight from the source. No portals, no noise.</p>
+
+    <div class="searchbar reveal in">
+      <div class="f"><span>Where</span><b>City or neighbourhood</b></div>
+      <div class="f"><span>Price</span><b>Any price</b></div>
+      <div class="f"><span>Beds</span><b>Any</b></div>
+      <button>Search 805 listings →</button>
+    </div>
+
+    <div class="herostats reveal in">
+      <div class="s"><b><span class="count" data-to="805">0</span></b><span>Live listings</span></div>
+      <div class="s"><b>$<span class="count" data-to="780">0</span>K</b><span>Median price</span></div>
+      <div class="s"><b><span class="count" data-to="26">0</span></b><span>GTA markets</span></div>
+    </div>
+
+    <div class="agentchip reveal in">
+      <img src="/files/derrick-garcia.png" alt="Derrick Garcia" onerror="this.style.display='none'">
+      <small>Brokered by <b>Derrick Garcia</b> · Broker, Real Broker Ontario</small>
+    </div>
+  </div>
+  <div class="scrollcue">Scroll<br>▾</div>
+</section>
+
+<!-- DERRICK'S LISTINGS (conditional) -->
+<section class="sect" id="derrick-listings">
+  <div class="wrap">
+    <div class="note reveal"><span class="pin">📌</span><span><b>Designer note:</b> This “Derrick’s Listings” band renders <b>first — above the company listings</b> — but only when Derrick has active listings. Today he has <b>0</b>, so on the live site this whole section is <b>hidden</b> and the page opens straight into the Real Broker grid below. Shown here populated so you can see the treatment.</span></div>
+    <div class="eyebrow reveal">
+      <h2>Derrick’s Listings</h2>
+      <a class="link" href="#">All of Derrick’s listings →</a>
+    </div>
+    <div class="rail">
+      <div class="lcard reveal">
+        <div class="ph"><div class="tags"><span class="tag-b tag-d">Derrick’s Listing</span></div><span class="fav">♡</span><img src="https://ddfcdn.realtor.ca/listing/TS639069409605330000/reb82/highres/8/e12794868_1.jpg" onerror="this.style.display='none'" alt=""></div>
+        <div class="body"><div class="price">$999,000</div><div class="meta">5 bd · 4 ba · Detached</div><div class="addr">134 Jones Avenue</div><div class="sub">South Riverdale, Toronto</div>
+          <div class="foot"><span>MLS® E12794868</span><span style="color:var(--gold)">View details →</span></div></div>
+      </div>
+      <div class="lcard reveal">
+        <div class="ph"><div class="tags"><span class="tag-b tag-d">Derrick’s Listing</span></div><span class="fav">♡</span><img src="https://ddfcdn.realtor.ca/listing/TS639159138322470000/reb82/highres/0/w12814290_1.jpg" onerror="this.style.display='none'" alt=""></div>
+        <div class="body"><div class="price">$949,000</div><div class="meta">3 bd · 2 ba · Townhouse</div><div class="addr">616 — 830 Megson Terrace</div><div class="sub">Willmott, Milton</div>
+          <div class="foot"><span>MLS® W12814290</span><span style="color:var(--gold)">View details →</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPANY LISTINGS -->
+<section class="sect" id="listings" style="border-top:1px solid var(--hair)">
+  <div class="wrap">
+    <div class="eyebrow reveal">
+      <div>
+        <div class="kick">Real Broker Ontario</div>
+        <h2>Featured GTA listings</h2>
+      </div>
+      <a class="link" href="#">View all 805 listings →</a>
+    </div>
+
+    <div class="chips reveal" id="chips">
+      <span class="chip on" data-f="all">All</span>
+      <span class="chip" data-f="toronto">Toronto</span>
+      <span class="chip" data-f="milton">Milton</span>
+      <span class="chip" data-f="house">Houses</span>
+      <span class="chip" data-f="condo">Condos</span>
+      <span class="chip" data-f="under700">Under $700K</span>
+    </div>
+
+    <div class="grid" id="lgrid">
+      <div class="lcard reveal" data-city="toronto" data-type="house" data-price="999000">
+        <div class="ph"><div class="tags"><span class="tag-b">For Sale</span></div><span class="fav">♡</span><img src="https://ddfcdn.realtor.ca/listing/TS639069409605330000/reb82/highres/8/e12794868_1.jpg" onerror="this.style.display='none'" alt=""></div>
+        <div class="body"><div class="price">$999,000</div><div class="meta">5 bd · 4 ba · Detached</div><div class="addr">134 Jones Avenue</div><div class="sub">South Riverdale, Toronto</div>
+          <div class="foot"><span>Real Broker Ontario</span><span style="color:var(--gold)">View on REALTOR.ca →</span></div></div>
+      </div>
+      <div class="lcard reveal" data-city="toronto" data-type="condo" data-price="939000">
+        <div class="ph"><div class="tags"><span class="tag-b">For Sale</span></div><span class="fav">♡</span><img src="https://ddfcdn.realtor.ca/listing/TS639118423243770000/reb82/highres/0/w12774010_1.jpg" onerror="this.style.display='none'" alt=""></div>
+        <div class="body"><div class="price">$939,000</div><div class="meta">2 bd · 1 ba · Penthouse</div><div class="addr">PH3 — 2154 Dundas St W</div><div class="sub">Roncesvalles, Toronto</div>
+          <div class="foot"><span>Real Broker Ontario</span><span style="color:var(--gold)">View on REALTOR.ca →</span></div></div>
+      </div>
+      <div class="lcard reveal" data-city="toronto" data-type="condo" data-price="699000">
+        <div class="ph"><div class="tags"><span class="tag-b">For Sale</span></div><span class="fav">♡</span><img src="https://ddfcdn.realtor.ca/listing/TS639039929658470000/reb82/highres/8/c12695848_1.jpg" onerror="this.style.display='none'" alt=""></div>
+        <div class="body"><div class="price">$699,000</div><div class="meta">2 bd · 1 ba · Condo</div><div class="addr">516 — 118 Merchants Wharf</div><div class="sub">Waterfront, Toronto</div>
+          <div class="foot"><span>Real Broker Ontario</span><span style="color:var(--gold)">View on REALTOR.ca →</span></div></div>
+      </div>
+      <div class="lcard reveal" data-city="milton" data-type="house" data-price="949000">
+        <div class="ph"><div class="tags"><span class="tag-b">For Sale</span></div><span class="fav">♡</span><img src="https://ddfcdn.realtor.ca/listing/TS639159138322470000/reb82/highres/0/w12814290_1.jpg" onerror="this.style.display='none'" alt=""></div>
+        <div class="body"><div class="price">$949,000</div><div class="meta">3 bd · 2 ba · Townhouse</div><div class="addr">616 — 830 Megson Terrace</div><div class="sub">Willmott, Milton</div>
+          <div class="foot"><span>Real Broker Ontario</span><span style="color:var(--gold)">View on REALTOR.ca →</span></div></div>
+      </div>
+      <div class="lcard reveal" data-city="toronto" data-type="condo" data-price="649900">
+        <div class="ph"><div class="tags"><span class="tag-b">For Sale</span></div><span class="fav">♡</span><img src="https://ddfcdn.realtor.ca/listing/TS639033323074530000/reb82/highres/2/w12670362_1.jpg" onerror="this.style.display='none'" alt=""></div>
+        <div class="body"><div class="price">$649,900</div><div class="meta">2 bd · 2 ba · Condo</div><div class="addr">2302 — 7 Mabelle Avenue</div><div class="sub">Islington, Toronto</div>
+          <div class="foot"><span>Real Broker Ontario</span><span style="color:var(--gold)">View on REALTOR.ca →</span></div></div>
+      </div>
+      <div class="lcard reveal" data-city="toronto" data-type="condo" data-price="619900">
+        <div class="ph"><div class="tags"><span class="tag-b">For Sale</span></div><span class="fav">♡</span><img src="https://ddfcdn.realtor.ca/listing/TS639040884967300000/reb82/highres/6/e12700646_1.jpg" onerror="this.style.display='none'" alt=""></div>
+        <div class="body"><div class="price">$619,900</div><div class="meta">2 bd · 2 ba · Condo</div><div class="addr">3501 — 2033 Kennedy Road</div><div class="sub">Agincourt, Toronto</div>
+          <div class="foot"><span>Real Broker Ontario</span><span style="color:var(--gold)">View on REALTOR.ca →</span></div></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:2.2rem" class="reveal"><a class="btn btn-ghost" href="#">Load more · 799 remaining</a></div>
+  </div>
+</section>
+
+<!-- MAP -->
+<section class="sect" style="background:#0b0b0d">
+  <div class="wrap">
+    <div class="eyebrow reveal"><div><div class="kick">Explore</div><h2>Browse the GTA by map</h2></div></div>
+    <div class="map reveal">
+      <div class="grid-lines"></div><div class="roads"></div>
+      <span class="pin lg" style="left:42%;top:46%">Toronto · 410</span>
+      <span class="pin" style="left:23%;top:62%">Mississauga · 88</span>
+      <span class="pin" style="left:18%;top:33%">Brampton · 64</span>
+      <span class="pin" style="left:64%;top:30%">Markham · 41</span>
+      <span class="pin" style="left:70%;top:60%">Scarborough · 37</span>
+      <span class="pin" style="left:33%;top:18%">Caledon · 22</span>
+      <div class="cta">
+        <div class="ui" style="color:var(--muted);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase">Interactive map · filter by price, beds &amp; type</div>
+        <a class="btn btn-gold" href="#">Open map search →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section class="sect" id="tools">
+  <div class="wrap">
+    <div class="eyebrow reveal"><div><div class="kick">Know your numbers</div><h2>Plan your purchase — right here.</h2></div></div>
+    <div class="note reveal"><span class="pin">📌</span><span><b>Designer note:</b> the calculator below is <b>live</b> — drag the sliders. It surfaces a real estimate on the homepage instead of hiding the tools behind a button (Canadian semi-annual compounding, the correct math).</span></div>
+    <div class="twocol">
+      <div class="calc reveal">
+        <h3>Mortgage payment</h3>
+        <span class="fine">Estimate your monthly payment</span>
+        <div class="row"><label>Home price</label><input type="range" id="m_price" min="300000" max="2500000" step="10000" value="850000"><span class="val" id="m_price_v">$850,000</span></div>
+        <div class="row"><label>Down payment</label><input type="range" id="m_dp" min="5" max="50" step="1" value="20"><span class="val" id="m_dp_v">20% · $170,000</span></div>
+        <div class="row"><label>Rate</label><input type="range" id="m_rate" min="2" max="8" step="0.05" value="4.79"><span class="val" id="m_rate_v">4.79%</span></div>
+        <div class="row"><label>Amortization</label><input type="range" id="m_amort" min="5" max="30" step="5" value="25"><span class="val" id="m_amort_v">25 yrs</span></div>
+        <div class="result"><span class="ui" style="color:var(--muted);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase">Est. monthly</span><span class="big" id="m_out">$0</span></div>
+        <div class="fine" id="m_note"></div>
+      </div>
+      <div class="toollist reveal">
+        <a class="toollink" href="#"><span><b>Affordability calculator</b><br><span>What price can you carry? GDS/TDS + stress test.</span></span><span class="ar">→</span></a>
+        <a class="toollink" href="#"><span><b>Land transfer tax</b><br><span>Ontario + Toronto LTT, with first-time rebates.</span></span><span class="ar">→</span></a>
+        <a class="toollink" href="#"><span><b>Rent-to-own readiness</b><br><span>Not mortgage-ready yet? See the path.</span></span><span class="ar">→</span></a>
+        <a class="toollink" href="#"><span><b>Deposit lending</b><br><span>Bridge your deposit before closing.</span></span><span class="ar">→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SELL / VALUATION -->
+<section class="sect" id="sell">
+  <div class="wrap">
+    <div class="sell reveal">
+      <div>
+        <div class="kick">Selling?</div>
+        <h2 style="font-size:clamp(1.8rem,3.6vw,2.6rem);margin:.5rem 0 .6rem">What’s your home worth today?</h2>
+        <p>Get a no-obligation valuation grounded in live GTA comparables and what’s actually selling on your street. Enter your address to start.</p>
+        <div class="valform">
+          <input type="text" placeholder="123 Your Street, Toronto, ON">
+          <button>Get my valuation →</button>
+        </div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-family:'Marcellus';font-size:3rem;color:var(--gold-br);line-height:1">48 hrs</div>
+        <div class="ui" style="color:var(--muted);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-top:.4rem">Typical turnaround on a full valuation</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEET DERRICK -->
+<section class="sect" id="derrick" style="background:#0b0b0d">
+  <div class="wrap">
+    <div class="agent">
+      <div class="photo reveal">
+        <img src="/files/derrick-garcia.png" alt="Derrick Garcia" onerror="this.style.opacity=0">
+        <img class="emblem" src="/files/real-emblem-gold.png" alt="Real Broker" onerror="this.style.display='none'">
+      </div>
+      <div class="who reveal">
+        <div class="role">Your agent · Broker</div>
+        <h2>Derrick Garcia</h2>
+        <p>Derrick is a Broker with Real Broker Ontario, helping buyers and sellers across Toronto and the GTA. Straight advice, sharp pricing, and a process that respects your time — whether you’re buying your first condo or selling a family home.</p>
+        <p>From the first showing to closing day, you work directly with Derrick and a team that knows these neighbourhoods street by street.</p>
+        <div style="display:flex;gap:.8rem;margin-top:1.4rem;flex-wrap:wrap">
+          <a class="btn btn-gold" href="#">Book a call</a>
+          <a class="btn btn-ghost" href="tel:+14166847370">416-684-7370</a>
+        </div>
+        <div class="team">
+          <div class="tm"><img src="/files/pina-marrella.png" alt="Pina Marrella" onerror="this.style.display='none'"><div><b>Pina Marrella</b><span>Agent</span></div></div>
+          <div class="tm"><img src="/files/voula-spingos.png" alt="Voula Spingos" onerror="this.style.display='none'"><div><b>Voula Spingos</b><span>Agent</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AREAS -->
+<section class="sect" id="areas">
+  <div class="wrap">
+    <div class="eyebrow reveal"><div><div class="kick">Where Derrick works</div><h2>Explore GTA areas</h2></div><a class="link" href="#">All areas →</a></div>
+    <div class="areas">
+      <a class="area reveal" href="#"><span class="ar">→</span><b>Toronto</b><span>410 listings</span></a>
+      <a class="area reveal" href="#"><span class="ar">→</span><b>Mississauga</b><span>88 listings</span></a>
+      <a class="area reveal" href="#"><span class="ar">→</span><b>Brampton</b><span>64 listings</span></a>
+      <a class="area reveal" href="#"><span class="ar">→</span><b>Caledon</b><span>22 listings</span></a>
+      <a class="area reveal" href="#"><span class="ar">→</span><b>Bolton</b><span>14 listings</span></a>
+      <a class="area reveal" href="#"><span class="ar">→</span><b>Orangeville</b><span>11 listings</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="sect" style="background:#0b0b0d">
+  <div class="wrap">
+    <div class="eyebrow reveal"><div><div class="kick">Reviews</div><h2>What clients say</h2></div><a class="link" href="#">Read all reviews →</a></div>
+    <div class="note reveal"><span class="pin">📌</span><span><b>Designer note:</b> placeholder testimonials — these get swapped for Derrick’s real Google reviews. The section auto-hides if none are configured (honest empty state).</span></div>
+    <div class="reviews">
+      <div class="rev reveal"><div class="stars">★★★★★</div><p>“Derrick made our first purchase painless — clear pricing, fast answers, and he caught issues we’d never have seen.”</p><div class="by">— A. &amp; M., Toronto</div></div>
+      <div class="rev reveal"><div class="stars">★★★★★</div><p>“Sold over asking in a slow market. The strategy and the prep work were the difference.”</p><div class="by">— R. Spadafora, Mississauga</div></div>
+      <div class="rev reveal"><div class="stars">★★★★★</div><p>“Knows the GTA cold. We toured three areas and he had the data on each one ready.”</p><div class="by">— J. Nguyen, Brampton</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- GUIDES -->
+<section class="sect">
+  <div class="wrap">
+    <div class="eyebrow reveal"><div><div class="kick">Guides</div><h2>Understand the market first</h2></div><a class="link" href="#">All guides →</a></div>
+    <div class="guides">
+      <a class="guide reveal"><div class="k">Buying</div><h3>First-Time Buyer Guide</h3><span>Deposits, closing costs &amp; the Toronto timeline.</span></a>
+      <a class="guide reveal"><div class="k">Financing</div><h3>The Mortgage Stress Test</h3><span>What you actually need to qualify for.</span></a>
+      <a class="guide reveal"><div class="k">Costs</div><h3>Toronto’s Double Land Transfer Tax</h3><span>Municipal + provincial, and the rebates.</span></a>
+      <a class="guide reveal"><div class="k">Alternative</div><h3>Rent-to-Own, Explained</h3><span>How it actually works, step by step.</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div class="fbrand">
+        <img class="logo" src="/files/dg-logo-text-light.png" alt="Derrick Garcia" onerror="this.style.display='none'">
+        <p>Derrick Garcia · Real Broker Ontario LTD<br>130 King St W, Unit 1800B<br>Toronto, ON M5X 1E3</p>
+        <p style="margin-top:.8rem"><a href="tel:+14166847370" style="color:var(--gold)">+1 416-684-7370</a><br><a href="mailto:info@derrickgarcia.ca" style="color:var(--gold)">info@derrickgarcia.ca</a></p>
+        <div class="real"><img src="/files/real-wordmark-white.png" alt="Real Broker" onerror="this.style.display='none'"></div>
+      </div>
+      <div class="fcol"><h4>Explore</h4><a href="#listings">Listings</a><a href="#sell">Sell my home</a><a href="#sell">Home valuation</a><a href="#">Rent to own</a><a href="#">Deposit lending</a></div>
+      <div class="fcol"><h4>Tools</h4><a href="#tools">Mortgage calculator</a><a href="#tools">Affordability</a><a href="#tools">Land transfer tax</a><a href="#">Guides</a><a href="#areas">Areas</a></div>
+      <div class="fcol"><h4>Connect</h4><a href="#">Instagram @derrickgarcia__</a><a href="#">Facebook</a><a href="#">Book a call</a><a href="#derrick">About Derrick</a><a href="#">Contact</a></div>
+    </div>
+    <div class="legal">
+      <span class="tm-stmt">The trademarks REALTOR®, REALTORS®, and the REALTOR® logo are controlled by CREA and identify real estate professionals who are members of CREA. Listing data via CREA’s DDF® — Powered by REALTOR.ca.</span>
+      <span>© 2026 Derrick Garcia · <a href="#" style="color:var(--muted)">Privacy</a> · <a href="#" style="color:var(--muted)">Accessibility</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // scroll progress + nav + parallax
+  var prog=document.getElementById('prog'), nav=document.getElementById('nav'), glow=document.getElementById('glow'), sky=document.getElementById('sky');
+  function onScroll(){
+    var st=window.scrollY||document.documentElement.scrollTop;
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    prog.style.width=(100*st/h)+'%';
+    nav.classList.toggle('scrolled', st>40);
+    if(st<window.innerHeight){ if(glow)glow.style.transform='translateY('+(st*0.18)+'px)'; if(sky)sky.style.transform='translateY('+(st*0.06)+'px)'; }
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  // reveal on scroll
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+  document.querySelectorAll('.reveal:not(.in)').forEach(function(el){io.observe(el)});
+
+  // animated counters
+  var seen=false;
+  var statObs=new IntersectionObserver(function(es){es.forEach(function(e){
+    if(e.isIntersecting&&!seen){seen=true;document.querySelectorAll('.count').forEach(function(c){
+      var to=+c.dataset.to, t0=null;
+      function step(ts){if(!t0)t0=ts;var p=Math.min((ts-t0)/1100,1);c.textContent=Math.floor(p*to).toLocaleString();if(p<1)requestAnimationFrame(step);}
+      requestAnimationFrame(step);
+    });}
+  })},{threshold:.4});
+  var hs=document.querySelector('.herostats'); if(hs)statObs.observe(hs);
+
+  // filter chips
+  var chips=document.getElementById('chips'), grid=document.getElementById('lgrid');
+  if(chips){chips.addEventListener('click',function(ev){
+    var c=ev.target.closest('.chip'); if(!c)return;
+    chips.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on')}); c.classList.add('on');
+    var f=c.dataset.f;
+    grid.querySelectorAll('.lcard').forEach(function(card){
+      var show=f==='all'
+        || (f==='toronto'&&card.dataset.city==='toronto')
+        || (f==='milton'&&card.dataset.city==='milton')
+        || (f==='house'&&card.dataset.type==='house')
+        || (f==='condo'&&card.dataset.type==='condo')
+        || (f==='under700'&&+card.dataset.price<700000);
+      card.style.display=show?'':'none';
+    });
+  });}
+
+  // live mortgage calc — Canadian semi-annual compounding
+  function fmt(n){return '$'+Math.round(n).toLocaleString()}
+  function calc(){
+    var price=+document.getElementById('m_price').value, dp=+document.getElementById('m_dp').value,
+        rate=+document.getElementById('m_rate').value, amort=+document.getElementById('m_amort').value;
+    var dpAmt=price*dp/100, P=price-dpAmt, n=amort*12;
+    var i=Math.pow(1+(rate/100)/2,1/6)-1; // semi-annual -> monthly effective
+    var pay=i===0?P/n:P*i/(1-Math.pow(1+i,-n));
+    document.getElementById('m_price_v').textContent=fmt(price);
+    document.getElementById('m_dp_v').textContent=dp+'% · '+fmt(dpAmt);
+    document.getElementById('m_rate_v').textContent=rate.toFixed(2)+'%';
+    document.getElementById('m_amort_v').textContent=amort+' yrs';
+    document.getElementById('m_out').textContent=fmt(pay)+'/mo';
+    var ins = dp<20 ? ' · CMHC insurance applies under 20% down' : '';
+    document.getElementById('m_note').textContent='On '+fmt(P)+' financed at '+rate.toFixed(2)+'% over '+amort+' years'+ins+'.';
+  }
+  ['m_price','m_dp','m_rate','m_amort'].forEach(function(id){document.getElementById(id).addEventListener('input',calc)});
+  calc();
+</script>
+</body>
+</html>
