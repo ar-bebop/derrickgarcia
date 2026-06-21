@@ -42,7 +42,11 @@ const links = [
     btn.setAttribute('aria-expanded', String(open));
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { header.classList.remove('nav-open'); btn.setAttribute('aria-expanded', 'false'); }
+    if (e.key === 'Escape' && header.classList.contains('nav-open')) {
+      header.classList.remove('nav-open');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.focus(); // restore focus to the toggle (WCAG 2.4.3) when closing the mobile overlay
+    }
   });
 </script>
 <style>
