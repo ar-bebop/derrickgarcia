@@ -1,7 +1,10 @@
 ---
 // Leaflet map island. Two modes:
-//  - browse (no props): clustered pins from the inline #listings-index, synced to client filters.
+//  - browse (no props): clustered pins from the inline #listings-index, synced to the client filters.
+//    Built lazily the first time the Grid→Map toggle reveals it (so the container has a real size).
 //  - detail (single prop): one marker at the listing's coordinates.
+// leaflet-setup (imported first) puts Leaflet on window.L and guarantees Leaflet evaluates before the
+// markercluster UMD plugin, which attaches to that L.
 const { single } = Astro.props as { single?: { lat: number; lng: number; label?: string } };
 ---
 <div class="lmap" data-single={single ? JSON.stringify(single) : undefined}></div>
@@ -17,8 +20,7 @@ const { single } = Astro.props as { single?: { lat: number; lng: number; label?:
     border: 2px solid var(--color-accent-ink); box-shadow: 0 0 0 2px rgba(198, 161, 91, .4); }
 </style>
 <script>
-  import L from 'leaflet';
-  import 'leaflet/dist/leaflet.css';
+  import L from '../../scripts/leaflet-setup';
   import 'leaflet.markercluster';
   import 'leaflet.markercluster/dist/MarkerCluster.css';
   import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -37,25 +39,37 @@ const { single } = Astro.props as { single?: { lat: number; lng: number; label?:
       L.marker([s.lat, s.lng], { icon: pin, title: s.label }).addTo(map);
     } else {
       const indexEl = document.getElementById('listings-index');
-      const data: any[] = indexEl ? JSON.parse(indexEl.textContent || '[]') : [];
-      const map = L.map(el).setView([43.72, -79.42], 9);
-      L.tileLayer(tiles, { attribution, maxZoom: 19 }).addTo(map);
-      const cluster = (L as any).markerClusterGroup({ showCoverageOnHover: false });
       const popup = (d: any) =>
         `<b>${d.priceFormatted ?? ''}</b><br>${d.address}<br><a href="/listings/${d.id}">View details &rarr;</a>`;
+      let map: any = null;
+      let cluster: any = null;
+      let latest: any[] = indexEl ? JSON.parse(indexEl.textContent || '[]') : [];
+
+      const fit = () => { const b = cluster.getBounds(); if (b.isValid()) map.fitBounds(b.pad(0.1)); };
       function render(rows: any[]) {
+        if (!cluster) return;
         cluster.clearLayers();
         rows.filter((d) => d.lat && d.lng).forEach((d) => {
-          L.marker([d.lat, d.lng], { icon: pin, title: `${d.priceFormatted ?? ''} — ${d.address}`.trim() }).bindPopup(popup(d)).addTo(cluster);
+          L.marker([d.lat, d.lng], { icon: pin, title: `${d.priceFormatted ?? ''} — ${d.address}`.trim() })
+            .bindPopup(popup(d)).addTo(cluster);
         });
+        fit();
       }
-      render(data);
-      map.addLayer(cluster);
-      const fit = () => { const b = cluster.getBounds(); if (b.isValid()) map.fitBounds(b.pad(0.1)); };
-      fit();
-      // Re-filter from the browser island, and fix sizing when revealed by the Grid/Map toggle.
-      window.addEventListener('listings:filtered', (e: any) => { render(e.detail || []); fit(); });
-      window.addEventListener('listings:mapshown', () => setTimeout(() => { map.invalidateSize(); fit(); }, 0));
+
+      // Build the map the first time it's revealed (container visible → real size); resize on later reveals.
+      window.addEventListener('listings:mapshown', () => {
+        if (!map) {
+          map = L.map(el).setView([43.72, -79.42], 9);
+          L.tileLayer(tiles, { attribution, maxZoom: 19 }).addTo(map);
+          cluster = (L as any).markerClusterGroup({ showCoverageOnHover: false });
+          map.addLayer(cluster);
+          render(latest);
+        }
+        setTimeout(() => { map.invalidateSize(); fit(); }, 0);
+      });
+
+      // Keep the latest filtered set even before the map is built; re-render once it exists.
+      window.addEventListener('listings:filtered', (e: any) => { latest = e.detail || []; if (cluster) render(latest); });
     }
   }
 </script>
