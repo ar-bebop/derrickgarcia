@@ -1,0 +1,61 @@
+---
+// Leaflet map island. Two modes:
+//  - browse (no props): clustered pins from the inline #listings-index, synced to client filters.
+//  - detail (single prop): one marker at the listing's coordinates.
+const { single } = Astro.props as { single?: { lat: number; lng: number; label?: string } };
+---
+<div class="lmap" data-single={single ? JSON.stringify(single) : undefined}></div>
+<style>
+  .lmap { width: 100%; height: 100%; min-height: 360px; border-radius: var(--radius); overflow: hidden; z-index: 0; }
+  :global(.leaflet-container) { background: #0d0e12; font-family: var(--font-ui); }
+  :global(.leaflet-popup-content-wrapper), :global(.leaflet-popup-tip) {
+    background: var(--color-panel); color: var(--color-text); border: 1px solid var(--color-line-strong); }
+  :global(.leaflet-popup-content) { margin: .7rem .9rem; font-size: .85rem; line-height: 1.5; }
+  :global(.leaflet-popup-content b) { font-family: var(--font-display); color: var(--color-ink); font-size: 1.05rem; }
+  :global(.leaflet-popup-content a) { color: var(--color-accent); }
+  :global(.lmap-pin) { width: 14px; height: 14px; border-radius: 50%; background: var(--color-accent);
+    border: 2px solid var(--color-accent-ink); box-shadow: 0 0 0 2px rgba(198, 161, 91, .4); }
+</style>
+<script>
+  import L from 'leaflet';
+  import 'leaflet/dist/leaflet.css';
+  import 'leaflet.markercluster';
+  import 'leaflet.markercluster/dist/MarkerCluster.css';
+  import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+
+  const el = document.querySelector<HTMLElement>('.lmap');
+  if (el) {
+    const tiles = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+    const attribution = '&copy; OpenStreetMap contributors &copy; CARTO';
+    const pin = L.divIcon({ className: 'lmap-pin', iconSize: [14, 14] });
+    const singleAttr = el.getAttribute('data-single');
+
+    if (singleAttr) {
+      const s = JSON.parse(singleAttr);
+      const map = L.map(el, { scrollWheelZoom: false }).setView([s.lat, s.lng], 14);
+      L.tileLayer(tiles, { attribution, maxZoom: 19 }).addTo(map);
+      L.marker([s.lat, s.lng], { icon: pin }).addTo(map);
+    } else {
+      const indexEl = document.getElementById('listings-index');
+      const data: any[] = indexEl ? JSON.parse(indexEl.textContent || '[]') : [];
+      const map = L.map(el).setView([43.72, -79.42], 9);
+      L.tileLayer(tiles, { attribution, maxZoom: 19 }).addTo(map);
+      const cluster = (L as any).markerClusterGroup({ showCoverageOnHover: false });
+      const popup = (d: any) =>
+        `<b>${d.priceFormatted ?? ''}</b><br>${d.address}<br><a href="/listings/${d.id}">View details &rarr;</a>`;
+      function render(rows: any[]) {
+        cluster.clearLayers();
+        rows.filter((d) => d.lat && d.lng).forEach((d) => {
+          L.marker([d.lat, d.lng], { icon: pin }).bindPopup(popup(d)).addTo(cluster);
+        });
+      }
+      render(data);
+      map.addLayer(cluster);
+      const fit = () => { const b = cluster.getBounds(); if (b.isValid()) map.fitBounds(b.pad(0.1)); };
+      fit();
+      // Re-filter from the browser island, and fix sizing when revealed by the Grid/Map toggle.
+      window.addEventListener('listings:filtered', (e: any) => { render(e.detail || []); fit(); });
+      window.addEventListener('listings:mapshown', () => setTimeout(() => { map.invalidateSize(); fit(); }, 0));
+    }
+  }
+</script>
