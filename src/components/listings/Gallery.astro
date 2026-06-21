@@ -20,7 +20,7 @@ const thumbs = photos.slice(0, 8);
       </div>
     )}
   </div>
-  <div class="lightbox" id="lightbox">
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label={`Photo viewer — ${place}`}>
     <button class="lightbox__close ui" type="button" aria-label="Close photo viewer">✕ Close</button>
     <img class="lightbox__img" id="lbimg" src={photos[0]} alt={`Photo of ${place}`} />
     <p class="lightbox__cap">{place} · Real Broker Ontario · Photo via REALTOR.ca</p>
@@ -57,11 +57,20 @@ const thumbs = photos.slice(0, 8);
     });
     const lb = document.getElementById('lightbox')!;
     const lbimg = document.getElementById('lbimg') as HTMLImageElement;
-    const open = () => { lbimg.src = main.src; lb.classList.add('is-open'); };
-    const close = () => lb.classList.remove('is-open');
+    const closeBtn = lb.querySelector('.lightbox__close') as HTMLButtonElement;
+    let lastFocused: HTMLElement | null = null;
+    const open = () => {
+      lbimg.src = main.src;
+      lastFocused = document.activeElement as HTMLElement;
+      lb.classList.add('is-open');
+      closeBtn.focus();
+    };
+    const close = () => { lb.classList.remove('is-open'); lastFocused?.focus(); };
     document.querySelector('.gallery__main')?.addEventListener('click', open);
-    lb.querySelector('.lightbox__close')?.addEventListener('click', close);
+    closeBtn.addEventListener('click', close);
     lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    // Minimal focus trap — only the close button is focusable inside the dialog.
+    lb.addEventListener('keydown', (e) => { if (e.key === 'Tab') { e.preventDefault(); closeBtn.focus(); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && lb.classList.contains('is-open')) close(); });
   }
 </script>

@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import heroPhoto from '../../assets/photos/toronto-skyline-night.jpg';
 import derrickPhoto from '../../assets/profile/derrick-garcia.webp';
-import { LISTING_STATS, RELEVANT_MARKETS } from '../../data/listings.ts';
+import { LISTING_STATS, MARKET_OPTIONS } from '../../data/listings.ts';
 const medianK = Math.round(LISTING_STATS.median / 1000);
 ---
 <section class="hero">
@@ -18,7 +18,7 @@ const medianK = Math.round(LISTING_STATS.median / 1000);
       <label class="f"><span class="ui">Where</span>
         <select name="area">
           <option value="">All GTA markets</option>
-          {RELEVANT_MARKETS.map((m) => <option value={m}>{m}</option>)}
+          {MARKET_OPTIONS.map((m) => <option value={m}>{m}</option>)}
         </select></label>
       <label class="f"><span class="ui">Price</span>
         <select name="maxPrice">
@@ -31,9 +31,9 @@ const medianK = Math.round(LISTING_STATS.median / 1000);
     </form>
 
     <div class="hero__stats">
-      <div class="s"><b><span data-count={LISTING_STATS.inMarkets}>0</span></b><span class="ui">Listings in your markets</span></div>
-      <div class="s"><b>$<span data-count={medianK}>0</span>K</b><span class="ui">Median price</span></div>
-      <div class="s"><b><span data-count={LISTING_STATS.marketCount}>0</span></b><span class="ui">GTA markets</span></div>
+      <div class="s"><b><span data-count={LISTING_STATS.inMarkets}>{LISTING_STATS.inMarkets}</span></b><span class="ui">Listings in your markets</span></div>
+      <div class="s"><b>$<span data-count={medianK}>{medianK}</span>K</b><span class="ui">Median price</span></div>
+      <div class="s"><b><span data-count={LISTING_STATS.marketCount}>{LISTING_STATS.marketCount}</span></b><span class="ui">GTA markets</span></div>
     </div>
 
     <div class="hero__agent">

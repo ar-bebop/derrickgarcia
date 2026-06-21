@@ -1,15 +1,14 @@
 ---
-// Leaflet map island. Two modes:
-//  - browse (no props): clustered pins from the inline #listings-index, synced to the client filters.
-//    Built lazily the first time the Grid→Map toggle reveals it (so the container has a real size).
-//  - detail (single prop): one marker at the listing's coordinates.
-// leaflet-setup (imported first) puts Leaflet on window.L and guarantees Leaflet evaluates before the
-// markercluster UMD plugin, which attaches to that L.
+// Leaflet map island. Leaflet is imported DYNAMICALLY (never on the critical path):
+//  - browse (no props): clustered pins, loaded on the first Grid→Map toggle.
+//  - detail (single prop): one marker, loaded when the map scrolls into view.
+// window.L is set before the markercluster UMD plugin (browse only) so it resolves.
 const { single } = Astro.props as { single?: { lat: number; lng: number; label?: string } };
 ---
 <div class="lmap" data-single={single ? JSON.stringify(single) : undefined}></div>
 <style>
-  .lmap { width: 100%; height: 100%; min-height: 360px; border-radius: var(--radius); overflow: hidden; z-index: 0; }
+  .lmap { width: 100%; height: 100%; min-height: 360px; border-radius: var(--radius); overflow: hidden; z-index: 0;
+    background: linear-gradient(135deg, #1a1c22, #0d0e12); }
   :global(.leaflet-container) { background: #0d0e12; font-family: var(--font-ui); }
   :global(.leaflet-popup-content-wrapper), :global(.leaflet-popup-tip) {
     background: var(--color-panel); color: var(--color-text); border: 1px solid var(--color-line-strong); }
@@ -20,56 +19,77 @@ const { single } = Astro.props as { single?: { lat: number; lng: number; label?:
     border: 2px solid var(--color-accent-ink); box-shadow: 0 0 0 2px rgba(198, 161, 91, .4); }
 </style>
 <script>
-  import L from '../../scripts/leaflet-setup';
-  import 'leaflet.markercluster';
-  import 'leaflet.markercluster/dist/MarkerCluster.css';
-  import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-
   const el = document.querySelector<HTMLElement>('.lmap');
   if (el) {
     const tiles = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
     const attribution = '&copy; OpenStreetMap contributors &copy; CARTO';
-    const pin = L.divIcon({ className: 'lmap-pin', iconSize: [14, 14] });
+
+    let leafletP: Promise<any> | null = null;
+    function loadLeaflet() {
+      if (!leafletP) leafletP = (async () => {
+        const L = (await import('leaflet')).default;
+        (window as any).L = L; // markercluster (loaded next, browse only) attaches to the global L
+        await import('leaflet/dist/leaflet.css');
+        return L;
+      })();
+      return leafletP;
+    }
+    let clusterP: Promise<void> | null = null;
+    function loadCluster() {
+      if (!clusterP) clusterP = (async () => {
+        await import('leaflet.markercluster');
+        await import('leaflet.markercluster/dist/MarkerCluster.css');
+        await import('leaflet.markercluster/dist/MarkerCluster.Default.css');
+      })();
+      return clusterP;
+    }
+
     const singleAttr = el.getAttribute('data-single');
 
     if (singleAttr) {
       const s = JSON.parse(singleAttr);
-      const map = L.map(el, { scrollWheelZoom: false }).setView([s.lat, s.lng], 14);
-      L.tileLayer(tiles, { attribution, maxZoom: 19 }).addTo(map);
-      L.marker([s.lat, s.lng], { icon: pin, title: s.label }).addTo(map);
+      const build = async () => {
+        const L = await loadLeaflet();
+        const map = L.map(el, { scrollWheelZoom: false }).setView([s.lat, s.lng], 14);
+        L.tileLayer(tiles, { attribution, maxZoom: 19 }).addTo(map);
+        L.marker([s.lat, s.lng], { icon: L.divIcon({ className: 'lmap-pin', iconSize: [14, 14] }), title: s.label }).addTo(map);
+      };
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries, obs) => {
+          if (entries.some((e) => e.isIntersecting)) { obs.disconnect(); build(); }
+        }, { rootMargin: '250px' });
+        io.observe(el);
+      } else { build(); }
     } else {
       const indexEl = document.getElementById('listings-index');
-      const popup = (d: any) =>
-        `<b>${d.priceFormatted ?? ''}</b><br>${d.address}<br><a href="/listings/${d.id}">View details &rarr;</a>`;
-      let map: any = null;
-      let cluster: any = null;
       let latest: any[] = indexEl ? JSON.parse(indexEl.textContent || '[]') : [];
+      let map: any = null, cluster: any = null, building = false;
+      let render: ((rows: any[]) => void) | null = null;
+      const popup = (d: any) => `<b>${d.priceFormatted ?? ''}</b><br>${d.address}<br><a href="/listings/${d.id}">View details &rarr;</a>`;
 
-      const fit = () => { const b = cluster.getBounds(); if (b.isValid()) map.fitBounds(b.pad(0.1), { maxZoom: 13 }); };
-      function render(rows: any[]) {
-        if (!cluster) return;
-        cluster.clearLayers();
-        rows.filter((d) => d.lat && d.lng).forEach((d) => {
-          L.marker([d.lat, d.lng], { icon: pin, title: `${d.priceFormatted ?? ''} — ${d.address}`.trim() })
-            .bindPopup(popup(d)).addTo(cluster);
-        });
-        fit();
-      }
-
-      // Build the map the first time it's revealed (container visible → real size); resize on later reveals.
-      window.addEventListener('listings:mapshown', () => {
-        if (!map) {
-          map = L.map(el).setView([43.72, -79.42], 9);
-          L.tileLayer(tiles, { attribution, maxZoom: 19 }).addTo(map);
-          cluster = (L as any).markerClusterGroup({ showCoverageOnHover: false });
-          map.addLayer(cluster);
-          render(latest);
-        }
-        setTimeout(() => { map.invalidateSize(); fit(); }, 0);
+      window.addEventListener('listings:mapshown', async () => {
+        if (map) { setTimeout(() => map.invalidateSize(), 0); return; }
+        if (building) return;
+        building = true;
+        const L = await loadLeaflet();
+        await loadCluster();
+        map = L.map(el).setView([43.72, -79.42], 9);
+        L.tileLayer(tiles, { attribution, maxZoom: 19 }).addTo(map);
+        const pin = L.divIcon({ className: 'lmap-pin', iconSize: [14, 14] });
+        cluster = (L as any).markerClusterGroup({ showCoverageOnHover: false });
+        const fit = () => { const b = cluster.getBounds(); if (b.isValid()) map.fitBounds(b.pad(0.1), { maxZoom: 13 }); };
+        render = (rows: any[]) => {
+          cluster.clearLayers();
+          rows.filter((d) => d.lat && d.lng).forEach((d) => {
+            L.marker([d.lat, d.lng], { icon: pin, title: `${d.priceFormatted ?? ''} — ${d.address}`.trim() }).bindPopup(popup(d)).addTo(cluster);
+          });
+          fit();
+        };
+        map.addLayer(cluster);
+        render(latest);
+        setTimeout(() => map.invalidateSize(), 0);
       });
-
-      // Keep the latest filtered set even before the map is built; re-render once it exists.
-      window.addEventListener('listings:filtered', (e: any) => { latest = e.detail || []; if (cluster) render(latest); });
+      window.addEventListener('listings:filtered', (e: any) => { latest = e.detail || []; if (render) render(latest); });
     }
   }
 </script>

@@ -1,7 +1,7 @@
 ---
 import ListingCard from '../ListingCard.astro';
 import ListingsMap from './ListingsMap.astro';
-import { IN_MARKETS, LISTINGS_INDEX, RELEVANT_MARKETS } from '../../data/listings.ts';
+import { IN_MARKETS, LISTINGS_INDEX, RELEVANT_MARKETS, MARKET_OPTIONS } from '../../data/listings.ts';
 import { sortListings } from '../../lib/listings-view.js';
 
 const initial = sortListings(IN_MARKETS, 'new');
@@ -16,7 +16,7 @@ const types = [...new Set(IN_MARKETS.map((l) => l.propertyType).filter(Boolean))
       <label class="fld"><span>Area</span>
         <select data-filter="municipality">
           <option value="">All GTA markets</option>
-          {RELEVANT_MARKETS.map((m) => <option value={m}>{m}</option>)}
+          {MARKET_OPTIONS.map((m) => <option value={m}>{m}</option>)}
         </select></label>
       <label class="fld"><span>Max price</span>
         <select data-filter="maxPrice">

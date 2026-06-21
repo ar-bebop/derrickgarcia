@@ -66,6 +66,12 @@ export function inDerricksMarkets(listing: Listing): boolean {
 // Real Broker listings in Derrick's markets (the default browse set).
 export const IN_MARKETS: Listing[] = LISTINGS.filter(inDerricksMarkets);
 
+// Municipalities actually present in-markets — the real options for area filters. Excludes
+// subsumed labels (e.g. Bolton/Georgetown roll into a parent municipality in the DDF feed),
+// so the dropdowns never offer a market that returns zero results.
+export const MARKET_OPTIONS: string[] = [...new Set(IN_MARKETS.map((l) => municipality(l.city)))]
+  .filter(Boolean).sort();
+
 // Build-time stats for the homepage (never hardcode counts).
 export const LISTING_STATS = {
   total: LISTINGS.length,
