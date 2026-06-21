@@ -1,0 +1,31 @@
+---
+import { Image } from 'astro:assets';
+import LeadForm from '../LeadForm.astro';
+import { SITE } from '../../data/site.ts';
+import derrickPhoto from '../../assets/profile/derrick-garcia.webp';
+const { place } = Astro.props as { place: string };
+---
+<aside class="contactcard">
+  <div class="contactcard__who">
+    <Image src={derrickPhoto} alt="Derrick Garcia" width={56} height={56} densities={[1, 2]} class="contactcard__photo" />
+    <div>
+      <b>Derrick Garcia</b>
+      <span>Broker · Real Broker Ontario</span>
+    </div>
+  </div>
+  <p class="contactcard__lead">Book a showing or ask about this home.</p>
+  <LeadForm subject={`🏠 Showing request — ${place}`} formName="Showing request" />
+  <p class="contactcard__or">or call <a href={SITE.phoneHref}>{SITE.phoneDisplay}</a></p>
+</aside>
+<style>
+  .contactcard { border: 1px solid var(--color-line-strong); border-radius: var(--radius);
+    background: linear-gradient(160deg, #17130b, var(--color-panel)); padding: 1.4rem; }
+  .contactcard__who { display: flex; align-items: center; gap: .8rem; margin-bottom: 1rem; }
+  .contactcard__photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
+    border: 1px solid var(--color-line-strong); }
+  .contactcard__who b { display: block; font-family: var(--font-display); color: var(--color-ink); font-size: 1.1rem; }
+  .contactcard__who span { color: var(--color-accent); font-family: var(--font-ui); font-size: .7rem;
+    letter-spacing: .1em; text-transform: uppercase; }
+  .contactcard__lead { color: var(--color-text); font-size: .92rem; margin: 0 0 1rem; }
+  .contactcard__or { text-align: center; color: var(--color-muted); font-size: .82rem; margin: .8rem 0 0; }
+</style>

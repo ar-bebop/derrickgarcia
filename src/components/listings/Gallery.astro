@@ -1,0 +1,67 @@
+---
+// Listing photo gallery: main image + thumbnail strip + click-to-open lightbox.
+// Photos are hotlinked, unmodified CREA images (object-fit only, no filters — compliance).
+const { photos, place } = Astro.props as { photos: string[]; place: string };
+const thumbs = photos.slice(0, 8);
+---
+{photos.length > 0 && (
+  <div class="gallery">
+    <button class="gallery__main" type="button" aria-label="Open photo viewer">
+      <img id="gmain" src={photos[0]} alt={`Photo of ${place}`} loading="eager" decoding="async" />
+      {photos.length > 1 && <span class="gallery__count ui">⊞ {photos.length} photos</span>}
+    </button>
+    {thumbs.length > 1 && (
+      <div class="gallery__thumbs">
+        {thumbs.map((p, i) => (
+          <button class={`gallery__thumb${i === 0 ? ' is-on' : ''}`} type="button" data-src={p} aria-label={`Show photo ${i + 1}`}>
+            <img src={p} alt="" loading="lazy" decoding="async" />
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox__close ui" type="button" aria-label="Close photo viewer">✕ Close</button>
+    <img class="lightbox__img" id="lbimg" src={photos[0]} alt={`Photo of ${place}`} />
+    <p class="lightbox__cap">{place} · Real Broker Ontario · Photo via REALTOR.ca</p>
+  </div>
+)}
+<style>
+  .gallery { display: grid; grid-template-columns: 2fr 1fr; gap: .7rem; height: 60vh; min-height: 420px;
+    border-radius: var(--radius); overflow: hidden; }
+  @media (max-width: 840px) { .gallery { grid-template-columns: 1fr; height: auto; } }
+  .gallery__main { position: relative; padding: 0; border: 0; cursor: zoom-in; overflow: hidden;
+    background: linear-gradient(135deg, #33373f, #1c1f25); }
+  /* No CSS filter on listing photos — CREA watermark must not be modified. */
+  .gallery__main img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery__count { position: absolute; right: .8rem; bottom: .8rem; background: rgba(14, 14, 16, .82);
+    color: var(--color-ink); font-size: .74rem; padding: .5rem .8rem; border-radius: 2px; backdrop-filter: blur(4px); }
+  .gallery__thumbs { display: grid; grid-template-rows: repeat(3, 1fr); gap: .7rem; }
+  @media (max-width: 840px) { .gallery__thumbs { grid-template-rows: none; grid-auto-flow: column;
+    grid-auto-columns: 30%; overflow-x: auto; height: 90px; } }
+  .gallery__thumb { padding: 0; border: 1px solid transparent; cursor: pointer; overflow: hidden;
+    background: linear-gradient(135deg, #33373f, #1c1f25); border-radius: 2px; }
+  .gallery__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s var(--ease); }
+  .gallery__thumb:hover img { transform: scale(1.08); }
+  .gallery__thumb.is-on { border-color: var(--color-accent); }
+</style>
+<script>
+  const main = document.getElementById('gmain') as HTMLImageElement | null;
+  if (main) {
+    document.querySelectorAll<HTMLElement>('.gallery__thumb').forEach((t) => {
+      t.addEventListener('click', () => {
+        main.src = t.dataset.src!;
+        document.querySelectorAll('.gallery__thumb').forEach((x) => x.classList.remove('is-on'));
+        t.classList.add('is-on');
+      });
+    });
+    const lb = document.getElementById('lightbox')!;
+    const lbimg = document.getElementById('lbimg') as HTMLImageElement;
+    const open = () => { lbimg.src = main.src; lb.classList.add('is-open'); };
+    const close = () => lb.classList.remove('is-open');
+    document.querySelector('.gallery__main')?.addEventListener('click', open);
+    lb.querySelector('.lightbox__close')?.addEventListener('click', close);
+    lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  }
+</script>

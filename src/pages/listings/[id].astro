@@ -1,98 +1,131 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Gallery from '../../components/listings/Gallery.astro';
+import ContactCard from '../../components/listings/ContactCard.astro';
+import ListingsMap from '../../components/listings/ListingsMap.astro';
+import ListingCard from '../../components/ListingCard.astro';
 import ListingSchema from '../../components/ListingSchema.astro';
-import TrademarkStatement from '../../components/TrademarkStatement.astro';
 import PoweredByRealtor from '../../components/PoweredByRealtor.astro';
-import { DERRICK_LISTINGS } from '../../data/listings.ts';
+import { LISTINGS, IN_MARKETS, displayCity } from '../../data/listings.ts';
 
-// Detail pages exist only for Derrick's own listings. With DERRICK_LISTINGS empty,
-// zero pages are built — consistent with the "no fabricated placeholders" rule.
+// On-site detail pages for ALL Real Broker Ontario listings.
 export async function getStaticPaths() {
-  return DERRICK_LISTINGS.map((listing) => ({ params: { id: listing.id }, props: { listing } }));
+  return LISTINGS.map((listing) => ({ params: { id: listing.id }, props: { listing } }));
 }
-
 const { listing } = Astro.props;
 
-const place = [listing.address, listing.city].filter(Boolean).join(', ') || 'this home';
-const pageTitle = `${place} — Derrick Garcia | Real Broker Ontario`;
+const cityLabel = displayCity(listing.city);
+const place = [listing.address, cityLabel].filter(Boolean).join(', ') || 'this home';
+const pageTitle = `${listing.address}${cityLabel ? ', ' + cityLabel : ''} — Derrick Garcia | Real Broker Ontario`;
 const trimmed = (listing.description ?? '').trim();
 const description = trimmed
   ? (trimmed.length > 155 ? `${trimmed.slice(0, 152).trimEnd()}…` : trimmed)
-  : `${place} — listed by Derrick Garcia. See photos, price, and details, and book a viewing.`;
+  : `${listing.address} — listed by Real Broker Ontario. See photos, price, and details, and book a viewing with Derrick Garcia.`;
 
-const metaParts = [
-  listing.beds != null ? `${listing.beds} bd` : null,
-  listing.baths != null ? `${listing.baths} ba` : null,
-  listing.propertyType,
-].filter(Boolean);
+const specs = [
+  listing.beds != null ? { value: String(listing.beds), label: 'Beds' } : null,
+  listing.baths != null ? { value: String(listing.baths), label: 'Baths' } : null,
+  listing.propertyType ? { value: listing.propertyType, label: 'Type' } : null,
+].filter((s): s is { value: string; label: string } => s !== null);
 
-const cityLine = [listing.city, listing.province, listing.postalCode].filter(Boolean).join(', ');
+const facts = [
+  { label: 'Property type', value: listing.propertyType },
+  { label: 'Community', value: cityLabel },
+  { label: 'Bedrooms', value: listing.beds != null ? String(listing.beds) : null },
+  { label: 'Bathrooms', value: listing.baths != null ? String(listing.baths) : null },
+  { label: 'Postal code', value: listing.postalCode },
+  { label: 'MLS® number', value: listing.mlsNumber },
+].filter((f) => f.value != null && f.value !== '');
+
+const similar = IN_MARKETS.filter((l) => l.id !== listing.id).slice(0, 4);
+const hasGeo = listing.lat != null && listing.lng != null;
 ---
 <BaseLayout title={pageTitle} description={description}>
   <ListingSchema slot="head" listing={listing} />
-  <article class="container article" data-listing-id={listing.id}>
-    <header>
-      <p class="kicker"><a href="/listings/derrick">Listings</a> · {listing.city ?? listing.province}</p>
-      <h1>{listing.address}</h1>
-      {cityLine && <p class="dek">{cityLine}</p>}
-    </header>
+  <article class="container detail" data-listing-id={listing.id}>
+    <p class="crumb ui"><a href="/listings">Listings</a>{cityLabel && ` · ${cityLabel}`}</p>
 
-    {listing.photos.length > 0 && (
-      <div class="gallery">
-        {listing.photos.map((src, i) => (
-          <img class="gallery__img" src={src} alt={`Photo ${i + 1} of ${place}`}
-            loading="lazy" decoding="async" />
-        ))}
+    {listing.photos.length > 0 && <Gallery photos={listing.photos} place={place} />}
+
+    <div class="detail__head">
+      <div>
+        <p class="detail__price">{listing.priceFormatted ?? 'Price on request'}</p>
+        <h1>{listing.address}</h1>
+        {cityLabel && <p class="detail__sub">{cityLabel}, {listing.province}</p>}
+        {specs.length > 0 && (
+          <div class="detail__specs">
+            {specs.map((s) => <div class="spec"><b>{s.value}</b><span class="ui">{s.label}</span></div>)}
+          </div>
+        )}
       </div>
-    )}
-
-    <div class="facts">
-      <p class="price">{listing.priceFormatted ?? 'Price on request'}</p>
-      {metaParts.length > 0 && <p class="meta">{metaParts.join(' · ')}</p>}
+      <div class="detail__mls"><span class="ui">MLS®</span><b>{listing.mlsNumber}</b></div>
     </div>
 
-    {trimmed && <div class="prose"><p>{trimmed}</p></div>}
+    <div class="detail__body">
+      <div class="detail__main">
+        {trimmed && (<><h2>About this home</h2><div class="prose"><p>{trimmed}</p></div></>)}
+        {facts.length > 0 && (
+          <div class="facts">
+            {facts.map((f) => <div><span class="ui">{f.label}</span><b>{f.value}</b></div>)}
+          </div>
+        )}
+        {hasGeo && (
+          <div class="detail__loc">
+            <h2>Location</h2>
+            <div class="detail__mapwrap"><ListingsMap single={{ lat: listing.lat!, lng: listing.lng!, label: listing.address }} /></div>
+          </div>
+        )}
+      </div>
+      <aside class="detail__side">
+        <ContactCard place={place} />
+        <div class="pwbox">
+          <PoweredByRealtor url={listing.url} />
+          <p class="pwbox__bk">Listed by <b>{listing.brokerage ?? 'Real Broker Ontario LTD.'}</b></p>
+          {listing.url && <a class="pwbox__link ui" href={listing.url} target="_blank" rel="noopener noreferrer">View on REALTOR.ca ↗</a>}
+        </div>
+      </aside>
+    </div>
 
-    {listing.brokerage && <p class="broker">Listed by {listing.brokerage}</p>}
-
-    <p class="pbr"><PoweredByRealtor url={listing.url} /></p>
-    {listing.url && (
-      <p class="view">
-        <a class="btn" href={listing.url} target="_blank" rel="noopener noreferrer">View on REALTOR.ca ↗</a>
-      </p>
+    {similar.length > 0 && (
+      <section class="similar">
+        <div class="eyebrow"><h2>Similar listings</h2><a class="link ui" href="/listings">Back to all →</a></div>
+        <div class="sgrid">{similar.map((l) => <ListingCard listing={l} tag={l.isDerrick ? "Derrick's Listing" : 'For Sale'} />)}</div>
+      </section>
     )}
-
-    <TrademarkStatement />
-
-    <section class="cta">
-      <h2>Interested in this home?</h2>
-      <p>Book a viewing or ask us anything — we'll get right back to you.</p>
-      <p><a class="btn" href="/contact">Get in Touch</a></p>
-    </section>
   </article>
 </BaseLayout>
 <style>
-  .article { padding-block: clamp(2.5rem, 7vw, 4rem) var(--section-pad); max-width: 900px; }
-  .kicker a { color: inherit; text-decoration: none; }
-  .article h1 { max-width: 22ch; margin-bottom: .3rem; }
-  .dek { color: var(--color-muted); font-size: 1.05rem; margin: 0 0 .5rem; }
-  .gallery { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    margin: 1.5rem 0; }
-  /* No CSS filter on listing photos — they carry CREA's baked-in watermark and must not be modified. */
-  .gallery__img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius);
-    border: 1px solid var(--color-line); }
-  .gallery__img:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
-  .facts { border-top: 1px solid var(--color-line); padding-top: 1.5rem; margin-top: 1rem; }
-  .price { font-family: var(--font-display); color: var(--color-ink);
-    font-size: clamp(2rem, 5vw, 2.8rem); margin: 0; }
-  .meta { color: var(--color-accent); font-size: .8rem; letter-spacing: .12em;
-    text-transform: uppercase; font-weight: 600; margin: .4rem 0 0; }
-  .prose { max-width: 64ch; margin-top: 1.5rem; line-height: 1.7; }
-  .broker { color: var(--color-muted); font-size: .85rem; margin-top: 1.2rem; }
-  .pbr { margin-top: 1.2rem; }
-  .view { margin-top: 1rem; }
-  .cta { border-top: 1px solid var(--color-line); margin-top: 2.5rem; padding-top: 2rem; }
-  .cta h2 { font-size: 1.4rem; }
+  .detail { padding-block: clamp(1.4rem, 4vw, 2.4rem) var(--section-pad); max-width: 1180px; }
+  .crumb { color: var(--color-muted); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 1rem; }
+  .crumb a { color: var(--color-accent); text-decoration: none; }
+  .detail__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem;
+    margin: 1.8rem 0 1.4rem; flex-wrap: wrap; }
+  .detail__price { font-family: var(--font-display); color: var(--color-ink); font-size: clamp(2rem, 4vw, 3rem); line-height: 1; margin: 0; }
+  .detail__head h1 { margin: .4rem 0 .2rem; }
+  .detail__sub { color: var(--color-muted); margin: 0; }
+  .detail__specs { display: flex; gap: 1.6rem; margin-top: 1rem; }
+  .spec b { font-family: var(--font-display); color: var(--color-accent-bright); font-size: 1.5rem; display: block; line-height: 1; }
+  .spec span { font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--color-muted); }
+  .detail__mls { text-align: right; }
+  .detail__mls span { color: var(--color-muted); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; }
+  .detail__mls b { font-family: var(--font-display); color: var(--color-ink); font-size: 1.2rem; font-weight: 400; }
+  .detail__body { display: grid; grid-template-columns: 1.6fr 1fr; gap: 2.2rem; align-items: start; }
+  @media (max-width: 840px) { .detail__body { grid-template-columns: 1fr; } }
+  .detail__main h2 { font-size: 1.4rem; margin: 1.4rem 0 .7rem; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border: 1px solid var(--color-line);
+    border-radius: var(--radius); overflow: hidden; margin-top: 1.4rem; }
+  .facts div { padding: .85rem 1rem; background: var(--color-panel); }
+  .facts span { font-size: .64rem; letter-spacing: .1em; text-transform: uppercase; color: var(--color-muted); display: block; }
+  .facts b { color: var(--color-ink); font-weight: 400; font-family: var(--font-display); font-size: 1.05rem; }
+  .detail__mapwrap { height: 360px; margin-top: .4rem; }
+  .detail__side { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 1rem; }
+  .pwbox { border: 1px solid var(--color-line); border-radius: var(--radius); background: var(--color-panel); padding: 1.1rem; text-align: center; }
+  .pwbox__bk { color: var(--color-text); font-size: .82rem; margin: .6rem 0 .3rem; }
+  .pwbox__link { color: var(--color-accent); font-size: .78rem; }
+  .similar { margin-top: 2.8rem; }
+  .similar .eyebrow { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.2rem; }
+  .similar .link { color: var(--color-accent); font-size: .82rem; text-decoration: none; }
+  .sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.3rem; }
 </style>
 <script>
   // Gated CREA DDF Analytics (Rule 5c). Inert until CONFIG.creaAnalyticsKey is set.
