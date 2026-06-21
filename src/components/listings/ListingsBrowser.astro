@@ -36,6 +36,7 @@ const types = [...new Set(IN_MARKETS.map((l) => l.propertyType).filter(Boolean))
           <option value="">All types</option>
           {types.map((t) => <option value={t}>{t}</option>)}
         </select></label>
+      <button type="button" class="savedtoggle" id="saved-toggle" aria-pressed="false">♥ Saved <span id="saved-count">(0)</span></button>
       <div class="seg" role="group" aria-label="View">
         <button type="button" class="is-on" data-view="grid" aria-pressed="true">▦ Grid</button>
         <button type="button" data-view="map" aria-pressed="false">◎ Map</button>
@@ -45,7 +46,6 @@ const types = [...new Set(IN_MARKETS.map((l) => l.propertyType).filter(Boolean))
       <div class="chips" id="listings-chips">
         <button type="button" class="chip is-on" data-chip="">All</button>
         {chipMarkets.map((m) => <button type="button" class="chip" data-chip={m}>{m}</button>)}
-        <button type="button" class="chip" data-chip="saved">♥ Saved</button>
       </div>
       <label class="wide"><input type="checkbox" id="ontario-wide" /> Show all Real Broker Ontario (Ontario-wide)</label>
     </div>
@@ -85,6 +85,10 @@ const types = [...new Set(IN_MARKETS.map((l) => l.propertyType).filter(Boolean))
   .seg button { background: transparent; color: var(--color-text); border: 0; padding: .58rem .95rem;
     font-family: var(--font-ui); font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
   .seg button.is-on { background: var(--color-accent); color: var(--color-accent-ink); font-weight: 600; }
+  .savedtoggle { font-family: var(--font-ui); font-size: .78rem; padding: .58rem .9rem; border: 1px solid var(--color-line-strong);
+    border-radius: 2px; color: var(--color-text); background: transparent; cursor: pointer; transition: all .2s ease; white-space: nowrap; }
+  .savedtoggle:hover { border-color: var(--color-accent); color: var(--color-ink); }
+  .savedtoggle.is-on { background: var(--color-accent); color: var(--color-accent-ink); border-color: var(--color-accent); font-weight: 600; }
   .chips { display: flex; gap: .5rem; flex-wrap: wrap; }
   .chip { font-family: var(--font-ui); font-size: .76rem; padding: .45rem .9rem; border: 1px solid var(--color-line);
     border-radius: 999px; color: var(--color-text); background: transparent; cursor: pointer; transition: all .2s ease; }

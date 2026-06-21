@@ -6,6 +6,10 @@ if (dataEl) {
   const inMarkets = new Set<string>(JSON.parse(dataEl.dataset.markets || '[]'));
   const grid = document.getElementById('listings-grid')!;
   const countEl = document.getElementById('listings-count');
+  const chips = document.getElementById('listings-chips');
+  const areaSel = document.querySelector<HTMLSelectElement>('[data-filter="municipality"]');
+  const savedBtn = document.getElementById('saved-toggle');
+  const savedCountEl = document.getElementById('saved-count');
   const FAV_KEY = 'dg:favs';
   const favs = new Set<string>(JSON.parse(localStorage.getItem(FAV_KEY) || '[]'));
   const state: any = { municipality: '', maxPrice: 0, minBeds: 0, propertyType: '', savedOnly: false, sort: 'new', ontarioWide: false };
@@ -43,27 +47,32 @@ if (dataEl) {
     window.dispatchEvent(new CustomEvent('listings:filtered', { detail: rows }));
   }
 
-  // Selects: data-filter = municipality | maxPrice | minBeds | propertyType
-  document.querySelectorAll<HTMLSelectElement>('[data-filter]').forEach((el) => {
-    el.addEventListener('change', () => {
-      const key = el.dataset.filter!;
-      const v = el.value;
-      state[key] = v === '' ? (key === 'municipality' || key === 'propertyType' ? '' : 0) : (isNaN(Number(v)) ? v : Number(v));
-      apply();
-    });
-  });
+  function updateSavedCount() { if (savedCountEl) savedCountEl.textContent = `(${favs.size})`; }
 
-  // Quick chips: data-chip = '' (All) | <municipality> | 'saved'
-  const chips = document.getElementById('listings-chips');
+  // Area is ONE filter with two synced inputs: the dropdown (all markets) + the quick bubbles.
+  function setArea(muni: string) {
+    state.municipality = muni;
+    if (areaSel) areaSel.value = muni;
+    chips?.querySelectorAll<HTMLElement>('[data-chip]').forEach((c) => c.classList.toggle('is-on', (c.dataset.chip || '') === muni));
+    apply();
+  }
+
+  // Bubbles → setArea (keeps the dropdown in sync)
   chips?.addEventListener('click', (e) => {
     const chip = (e.target as HTMLElement).closest<HTMLElement>('[data-chip]');
     if (!chip) return;
-    chips.querySelectorAll('[data-chip]').forEach((c) => c.classList.remove('is-on'));
-    chip.classList.add('is-on');
-    const v = chip.dataset.chip || '';
-    state.municipality = v === '' || v === 'saved' ? '' : v;
-    state.savedOnly = v === 'saved';
-    apply();
+    setArea(chip.dataset.chip || '');
+  });
+
+  // Selects: municipality routes through setArea (syncs bubbles); the rest are independent dimensions.
+  document.querySelectorAll<HTMLSelectElement>('[data-filter]').forEach((el) => {
+    el.addEventListener('change', () => {
+      const key = el.dataset.filter!;
+      if (key === 'municipality') { setArea(el.value); return; }
+      const v = el.value;
+      state[key] = v === '' ? (key === 'propertyType' ? '' : 0) : (isNaN(Number(v)) ? v : Number(v));
+      apply();
+    });
   });
 
   const sortSel = document.getElementById('listings-sort') as HTMLSelectElement | null;
@@ -71,6 +80,14 @@ if (dataEl) {
 
   const wide = document.getElementById('ontario-wide') as HTMLInputElement | null;
   wide?.addEventListener('change', () => { state.ontarioWide = wide.checked; apply(); });
+
+  // Saved is its own toggle, independent of area.
+  savedBtn?.addEventListener('click', () => {
+    state.savedOnly = !state.savedOnly;
+    savedBtn.classList.toggle('is-on', state.savedOnly);
+    savedBtn.setAttribute('aria-pressed', String(state.savedOnly));
+    apply();
+  });
 
   // Favorites (localStorage, event-delegated)
   grid.addEventListener('click', (e) => {
@@ -82,6 +99,7 @@ if (dataEl) {
     localStorage.setItem(FAV_KEY, JSON.stringify([...favs]));
     const on = favs.has(id);
     btn.classList.toggle('is-on', on); btn.setAttribute('aria-pressed', String(on)); btn.textContent = on ? '♥' : '♡';
+    updateSavedCount();
     if (state.savedOnly) apply();
   });
 
@@ -96,5 +114,6 @@ if (dataEl) {
     if (v === 'map') window.dispatchEvent(new Event('listings:mapshown'));
   }));
 
+  updateSavedCount();
   apply();
 }
