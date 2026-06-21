@@ -2,8 +2,8 @@
 // Empty values make the related feature render a graceful fallback instead of a broken widget.
 export const CONFIG = {
   web3formsAccessKey: '610ea3a2-77ef-4010-b294-4b68ef49aeec',  // forms — https://web3forms.com
-  // ^ key currently delivers to aribeir4@gmail.com (testing). Before go-live: relink to
-  //   info@derrickgarcia.ca in the Web3Forms dashboard, or swap in a key created under info@.
+  // ^ destination inbox is set to info@derrickgarcia.ca in the Web3Forms dashboard (live). The
+  //   delivery address is a dashboard setting, not in code — this key just identifies the form.
   tidycalUrl: 'https://tidycal.com/3ezo9wz/consult',  // booking — embedded as iframe on /contact
   // ^ account slug is auto-generated; before go-live confirm the account is Derrick's
   //   (primary calendar = his iCloud) and optionally set a custom username in TidyCal settings.

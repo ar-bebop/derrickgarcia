@@ -22,7 +22,7 @@ All centralized; empty values render a graceful fallback (never a broken widget)
 
 | Value | File | Empty-state behavior |
 |-------|------|----------------------|
-| ~~`web3formsAccessKey`~~ ✅ filled | `src/data/config.ts` | **Go-live:** key delivers to aribeir4@gmail.com (testing); relink to `info@derrickgarcia.ca` first |
+| ~~`web3formsAccessKey`~~ ✅ done | `src/data/config.ts` | Delivers to **`info@derrickgarcia.ca`** (destination set in the Web3Forms dashboard) |
 | ~~`tidycalUrl`~~ ✅ filled | `src/data/config.ts` | **Go-live:** confirm TidyCal account is Derrick's (primary cal = his iCloud, bookings land there); slug `3ezo9wz` is auto-generated — optional custom username |
 | ~~`cloudflareAnalyticsToken`~~ ✅ filled | `src/data/config.ts` | Dashboard registers data only post-cutover (beacon reports by hostname) |
 | ~~per-agent `realtorCaUrl` / `realBrokerUrl`~~ ✅ all filled | `src/data/agents.ts` | realtor.ca + onereal.ca ×3; socials/personal sites/GBPs in per-agent `sameAs` JSON-LD |
