@@ -1,0 +1,27 @@
+---
+import ListingCard from './ListingCard.astro';
+import { DERRICK_LISTINGS } from '../data/listings.ts';
+
+const { heading = "Derrick's Listings", limit } = Astro.props as { heading?: string; limit?: number };
+const items = limit ? DERRICK_LISTINGS.slice(0, limit) : DERRICK_LISTINGS;
+---
+{items.length > 0 && (
+  <section class="section derrick">
+    <div class="container">
+      <div class="eyebrow">
+        <h2>{heading}</h2>
+        <a class="link ui" href="/listings">All of Derrick's →</a>
+      </div>
+      <div class="dgrid">
+        {items.map((l) => <ListingCard listing={l} tag="Derrick's Listing" />)}
+      </div>
+    </div>
+  </section>
+)}
+<style>
+  .eyebrow { display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
+  .eyebrow .link { color: var(--color-accent); font-size: .82rem; text-decoration: none; }
+  .eyebrow .link:hover { color: var(--color-accent-bright); }
+  .dgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.3rem; }
+</style>
