@@ -26,6 +26,15 @@ photography (`src/assets/photos/CREDITS.md`). `extracted/` was removed (recovera
 history at `7ff5c76^`). **What remains: the manual production go-live** (external keys + DNS
 cutover) plus content inputs from Derrick — all captured in `TODO.md`.
 
+**Listings-first redesign (2026-06-21, branch `worktree-redesign-listings-first`, not yet merged):**
+an "Evolved Midnight" evolution of the visual system + a listings-first homepage, a client-side
+`/listings` browser (filter/sort/search + a real Leaflet map, lazy-loaded), and on-site detail pages
+for **all** ~805 Real Broker Ontario listings (gallery+lightbox, location mini-map, contact card,
+compliance furniture). `pnpm build|check|test` green (838 pages, 83 unit tests). Spec:
+`docs/superpowers/specs/2026-06-20-listings-first-redesign-design.md`; plan:
+`docs/superpowers/plans/2026-06-20-listings-first-redesign.md`; approved mockups in
+`docs/superpowers/mockups/`. New content input: GTA-area photos (see `TODO.md`).
+
 - `docs/superpowers/specs/2026-06-09-derrickgarcia-static-site-design.md` — Phase 1 design (hosting/forms/booking/analytics still authoritative)
 - `docs/superpowers/specs/2026-06-09-midnight-estate-redesign-design.md` — Phase 2 redesign spec (visual system, parity pages, guides; alternates B/C archived for client)
 - `docs/superpowers/specs/2026-06-09-brainstorm-research-appendix.md` — research detail, incl. the

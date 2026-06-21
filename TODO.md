@@ -8,6 +8,14 @@ What remains is external configuration + the production go-live, plus optional p
 Nothing below blocks local development or the build — the site ships today with graceful
 call/email fallbacks wherever an external service is not yet configured.
 
+**Listings-first redesign (2026-06-21, branch `worktree-redesign-listings-first`, not yet merged):**
+an "Evolved Midnight" visual refresh + listings-first homepage, a live `/listings` browser
+(filter/sort/search + interactive Leaflet map), and on-site detail pages for all ~805 Real Broker
+Ontario listings (`pnpm build|check|test` green; spec + plan in `docs/superpowers/`).
+**New content input needed:** free-licensed photos of the GTA areas (Toronto, Mississauga, Brampton,
+Caledon, Bolton, Orangeville) for the homepage Areas grid — add to `src/assets/photos/` + credit in
+`src/assets/photos/CREDITS.md`. Until sourced, the area cards use tasteful gradient tiles (no broken images).
+
 ## 1. External service keys — fill before launch
 
 All centralized; empty values render a graceful fallback (never a broken widget).
