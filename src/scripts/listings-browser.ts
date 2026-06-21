@@ -111,7 +111,7 @@ if (dataEl) {
     document.querySelectorAll('[data-view]').forEach((x) => {
       const on = x === b; x.classList.toggle('is-on', on); x.setAttribute('aria-pressed', String(on));
     });
-    if (v === 'map') window.dispatchEvent(new Event('listings:mapshown'));
+    if (v === 'map') { apply(); window.dispatchEvent(new Event('listings:mapshown')); }
   }));
 
   updateSavedCount();

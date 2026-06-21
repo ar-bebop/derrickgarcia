@@ -45,7 +45,7 @@ const { single } = Astro.props as { single?: { lat: number; lng: number; label?:
       let cluster: any = null;
       let latest: any[] = indexEl ? JSON.parse(indexEl.textContent || '[]') : [];
 
-      const fit = () => { const b = cluster.getBounds(); if (b.isValid()) map.fitBounds(b.pad(0.1)); };
+      const fit = () => { const b = cluster.getBounds(); if (b.isValid()) map.fitBounds(b.pad(0.1), { maxZoom: 13 }); };
       function render(rows: any[]) {
         if (!cluster) return;
         cluster.clearLayers();
