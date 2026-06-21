@@ -1,0 +1,103 @@
+---
+import ListingCard from '../ListingCard.astro';
+import ListingsMap from './ListingsMap.astro';
+import { IN_MARKETS, LISTINGS_INDEX, RELEVANT_MARKETS } from '../../data/listings.ts';
+import { sortListings } from '../../lib/listings-view.js';
+
+const initial = sortListings(IN_MARKETS, 'new');
+const chipMarkets = ['Toronto', 'Mississauga', 'Brampton', 'Caledon', 'Milton', 'Oakville'];
+const types = [...new Set(IN_MARKETS.map((l) => l.propertyType).filter(Boolean))].sort();
+---
+<script is:inline type="application/json" id="listings-index" set:html={JSON.stringify(LISTINGS_INDEX)} data-markets={JSON.stringify(RELEVANT_MARKETS)}></script>
+
+<div class="browser">
+  <div class="filterbar ui">
+    <div class="filterbar__row">
+      <label class="fld"><span>Area</span>
+        <select data-filter="municipality">
+          <option value="">All GTA markets</option>
+          {RELEVANT_MARKETS.map((m) => <option value={m}>{m}</option>)}
+        </select></label>
+      <label class="fld"><span>Max price</span>
+        <select data-filter="maxPrice">
+          <option value="">Any price</option>
+          <option value="700000">Up to $700K</option>
+          <option value="1000000">Up to $1M</option>
+          <option value="1500000">Up to $1.5M</option>
+          <option value="2000000">Up to $2M</option>
+        </select></label>
+      <label class="fld"><span>Beds</span>
+        <select data-filter="minBeds">
+          <option value="">Any</option>
+          <option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option>
+        </select></label>
+      <label class="fld"><span>Type</span>
+        <select data-filter="propertyType">
+          <option value="">All types</option>
+          {types.map((t) => <option value={t}>{t}</option>)}
+        </select></label>
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" class="is-on" data-view="grid" aria-pressed="true">▦ Grid</button>
+        <button type="button" data-view="map" aria-pressed="false">◎ Map</button>
+      </div>
+    </div>
+    <div class="filterbar__row filterbar__row--2">
+      <div class="chips" id="listings-chips">
+        <button type="button" class="chip is-on" data-chip="">All</button>
+        {chipMarkets.map((m) => <button type="button" class="chip" data-chip={m}>{m}</button>)}
+        <button type="button" class="chip" data-chip="saved">♥ Saved</button>
+      </div>
+      <label class="wide"><input type="checkbox" id="ontario-wide" /> Show all Real Broker Ontario (Ontario-wide)</label>
+    </div>
+  </div>
+
+  <div class="results">
+    <span><b id="listings-count">{initial.length}</b> listings in Derrick's markets</span>
+    <label class="sortwrap">Sort
+      <select id="listings-sort" aria-label="Sort listings">
+        <option value="new">Newest</option><option value="lo">Price ↑</option><option value="hi">Price ↓</option>
+      </select></label>
+  </div>
+
+  <div id="view-grid">
+    <div id="listings-grid" class="lgrid">
+      {initial.map((l) => <ListingCard listing={l} />)}
+    </div>
+  </div>
+  <div id="view-map" hidden>
+    <div class="mapwrap"><ListingsMap /></div>
+  </div>
+</div>
+
+<script>import '../../scripts/listings-browser.ts';</script>
+
+<style>
+  .filterbar { border: 1px solid var(--color-line); border-radius: var(--radius);
+    background: var(--color-panel); padding: .8rem; margin-bottom: 1.4rem; }
+  .filterbar__row { display: flex; gap: .6rem; align-items: end; flex-wrap: wrap; }
+  .filterbar__row--2 { margin-top: .8rem; justify-content: space-between; align-items: center; }
+  .fld { display: flex; flex-direction: column; gap: .25rem; font-family: var(--font-ui);
+    font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; color: var(--color-muted); }
+  .fld select { font-family: var(--font-sans); font-size: .88rem; text-transform: none; letter-spacing: 0;
+    color: var(--color-ink); background: var(--color-bg); border: 1px solid var(--color-line);
+    border-radius: 2px; padding: .5rem .6rem; min-width: 150px; }
+  .seg { display: flex; border: 1px solid var(--color-line-strong); border-radius: 2px; overflow: hidden; margin-left: auto; }
+  .seg button { background: transparent; color: var(--color-text); border: 0; padding: .58rem .95rem;
+    font-family: var(--font-ui); font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+  .seg button.is-on { background: var(--color-accent); color: var(--color-accent-ink); font-weight: 600; }
+  .chips { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .chip { font-family: var(--font-ui); font-size: .76rem; padding: .45rem .9rem; border: 1px solid var(--color-line);
+    border-radius: 999px; color: var(--color-text); background: transparent; cursor: pointer; transition: all .2s ease; }
+  .chip:hover { border-color: var(--color-accent); color: var(--color-ink); }
+  .chip.is-on { background: var(--color-accent); color: var(--color-accent-ink); border-color: var(--color-accent); font-weight: 600; }
+  .wide { display: flex; align-items: center; gap: .5rem; font-family: var(--font-ui); font-size: .78rem; color: var(--color-muted); }
+  .results { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 1.1rem; flex-wrap: wrap; gap: .5rem; }
+  .results b { font-family: var(--font-display); color: var(--color-accent); font-size: 1.25rem; }
+  .results span { color: var(--color-text); }
+  .sortwrap { font-family: var(--font-ui); color: var(--color-muted); font-size: .8rem; display: flex; align-items: center; gap: .5rem; }
+  .sortwrap select { font-family: var(--font-sans); font-size: .85rem; color: var(--color-ink);
+    background: var(--color-bg); border: 1px solid var(--color-line); border-radius: 2px; padding: .4rem .5rem; }
+  .lgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.3rem; }
+  .mapwrap { height: 74vh; min-height: 460px; }
+  :global(.browser-empty) { color: var(--color-muted); padding: 2rem 0; }
+</style>

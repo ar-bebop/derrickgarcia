@@ -1,107 +1,53 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ListingCard from '../../components/ListingCard.astro';
-import TrademarkStatement from '../../components/TrademarkStatement.astro';
-import { LISTINGS, inDerricksMarkets } from '../../data/listings.ts';
+import DerrickListings from '../../components/DerrickListings.astro';
+import ListingsBrowser from '../../components/listings/ListingsBrowser.astro';
+import PoweredByRealtor from '../../components/PoweredByRealtor.astro';
+import { IN_MARKETS } from '../../data/listings.ts';
 import { SITE } from '../../data/site.ts';
 
-// Most-recently-updated first.
-const listings = LISTINGS.filter(inDerricksMarkets)
-  .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
-
-// Initial visible batch for the "Load more" progressive enhancement. Keep this in sync
-// with the CSS :nth-child rule below (n + BATCH + 1).
-const BATCH = 24;
-const total = listings.length;
-const initial = Math.min(BATCH, total);
+const hasListings = IN_MARKETS.length > 0;
 ---
 <BaseLayout title="Homes for Sale Across the GTA — Derrick Garcia | Real Broker Ontario"
-  description="Browse active listings across Toronto and the GTA — Mississauga, Brampton, Caledon, and the towns we serve. Updated from REALTOR.ca.">
+  description="Browse every Real Broker Ontario listing across Toronto and the GTA. Filter by area, price and type, or explore the interactive map.">
   <section class="head container">
-    <p class="kicker">Listings</p>
-    <h1>Homes for sale across the GTA.</h1>
-    <p class="dek">A live look at active listings in the markets we work — Toronto and across
-      the GTA. Tap any home to see the full details on REALTOR.ca.</p>
+    <p class="kicker">Listings · Real Broker Ontario</p>
+    <h1>Homes for sale across the GTA</h1>
+    <p class="dek">Every Real Broker Ontario listing in Derrick's markets, in one place — filter, sort, or explore the map.</p>
   </section>
+
+  <DerrickListings />
+
   <section class="container body">
-    {listings.length > 0 ? (
+    {hasListings ? (
       <>
-        <div class="listings grid" data-collapsed="true" data-batch={BATCH}>
-          {listings.map((l) => <div class="listing-card-wrap reveal"><ListingCard listing={l} /></div>)}
+        <ListingsBrowser />
+        <div class="compliance">
+          <PoweredByRealtor url={null} />
+          <p class="compliance__tm">Listings provided by <b>Real Broker Ontario LTD.</b> via CREA's DDF®.
+            Photos are displayed unmodified from REALTOR.ca.</p>
         </div>
-        <p class="loadmore">
-          <button type="button" class="btn btn--ghost loadmore__btn">Load more</button>
-          <span class="loadmore__count" aria-live="polite">Showing {initial} of {total}</span>
-        </p>
-        <TrademarkStatement />
       </>
     ) : (
-      <p class="empty">Our live listings feed is temporarily unavailable. You can search every
-        active GTA listing on REALTOR.ca, or get in touch and we'll send you matches by hand.</p>
+      <div class="empty">
+        <p>Our live listings feed is temporarily unavailable. You can search every active GTA listing
+          on REALTOR.ca, or get in touch and we'll send you matches by hand.</p>
+        <p class="ctas">
+          <a class="btn" href={SITE.listingsSearchUrl} target="_blank" rel="noopener noreferrer">Search realtor.ca ↗</a>
+          <a class="btn btn--ghost" href="/contact">Get in Touch</a>
+        </p>
+      </div>
     )}
-    {listings.length === 0 && (
-      <p class="ctas">
-        <a class="btn" href={SITE.listingsSearchUrl} target="_blank" rel="noopener noreferrer">Search realtor.ca ↗</a>
-        <a class="btn btn--ghost" href="/contact">Get in Touch</a>
-      </p>
-    )}
-  </section>
-  <section class="cta-band">
-    <div class="container">
-      <h2>Looking for something specific?</h2>
-      <p>Tell us what you're after — or find out what your current home is worth.</p>
-      <p class="ctas">
-        <a class="btn" href="/contact">Get in Touch</a>
-        <a class="btn btn--ghost" href="/home-valuation">What's My Home Worth?</a>
-      </p>
-    </div>
   </section>
 </BaseLayout>
 <style>
   .head { padding-block: clamp(2.5rem, 7vw, 4rem) 1rem; }
-  .dek { max-width: 58ch; font-size: 1.05rem; }
+  .dek { max-width: 60ch; font-size: 1.05rem; color: var(--color-muted); }
   .body { padding-bottom: var(--section-pad); }
-  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-  .listing-card-wrap { display: flex; }
-  .listing-card-wrap > :global(.listing-card) { flex: 1; }
+  .compliance { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap;
+    margin-top: 2.4rem; padding-top: 1.4rem; border-top: 1px solid var(--hair); }
+  .compliance__tm { font-size: .8rem; color: var(--color-muted); max-width: 70ch; }
   .empty { max-width: 56ch; font-size: 1.05rem; }
   .ctas { margin-top: 1.6rem; }
   .ctas .btn { margin-right: .6rem; }
-
-  /* Load-more progressive enhancement.
-     No-JS users get every card (good for SEO) and never see the button.
-     The `js` class is set synchronously in <head> by BaseLayout, so there is no flash:
-     under html.js the overflow is hidden before paint and the button is shown. */
-  .loadmore { margin-top: 1.6rem; display: none; align-items: center; gap: 1rem; }
-  .loadmore__count { color: var(--color-muted); font-size: .85rem; }
-  :global(html.js) .loadmore { display: flex; }
-  :global(html.js) .listings[data-collapsed="true"] .listing-card-wrap:nth-child(n + 25) { display: none; }
-
-  .cta-band { border-top: 1px solid var(--color-line); padding-block: var(--section-pad); }
-  .cta-band h2 { font-size: clamp(1.5rem, 3vw, 1.9rem); margin: 0 0 .4rem; }
-  .cta-band p { color: var(--color-muted); margin: 0; }
-  .cta-band .ctas { margin-top: 1.4rem; }
 </style>
-<script>
-  const grid = document.querySelector<HTMLElement>('.listings');
-  const wrap = document.querySelector<HTMLElement>('.loadmore');
-  const btn = document.querySelector<HTMLButtonElement>('.loadmore__btn');
-  const count = document.querySelector<HTMLElement>('.loadmore__count');
-  if (grid && wrap && btn && count) {
-    const total = grid.querySelectorAll('.listing-card-wrap').length;
-    const batch = Number(grid.dataset.batch) || 24;
-
-    // Everything already fits in the first batch → no button needed.
-    if (total <= batch) {
-      wrap.style.display = 'none';
-    } else {
-      count.textContent = `Showing ${batch} of ${total}`;
-      btn.addEventListener('click', () => {
-        // Reveal-all: drop the CSS gate so every remaining card shows.
-        grid.dataset.collapsed = 'false';
-        count.textContent = `Showing ${total} of ${total}`;
-        wrap.style.display = 'none';
-      });
-    }
-  }
-</script>
