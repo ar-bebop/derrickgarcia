@@ -34,7 +34,7 @@ const { single } = Astro.props as { single?: { lat: number; lng: number; label?:
       const s = JSON.parse(singleAttr);
       const map = L.map(el, { scrollWheelZoom: false }).setView([s.lat, s.lng], 14);
       L.tileLayer(tiles, { attribution, maxZoom: 19 }).addTo(map);
-      L.marker([s.lat, s.lng], { icon: pin }).addTo(map);
+      L.marker([s.lat, s.lng], { icon: pin, title: s.label }).addTo(map);
     } else {
       const indexEl = document.getElementById('listings-index');
       const data: any[] = indexEl ? JSON.parse(indexEl.textContent || '[]') : [];
@@ -46,7 +46,7 @@ const { single } = Astro.props as { single?: { lat: number; lng: number; label?:
       function render(rows: any[]) {
         cluster.clearLayers();
         rows.filter((d) => d.lat && d.lng).forEach((d) => {
-          L.marker([d.lat, d.lng], { icon: pin }).bindPopup(popup(d)).addTo(cluster);
+          L.marker([d.lat, d.lng], { icon: pin, title: `${d.priceFormatted ?? ''} — ${d.address}`.trim() }).bindPopup(popup(d)).addTo(cluster);
         });
       }
       render(data);

@@ -61,7 +61,7 @@ const types = [...new Set(IN_MARKETS.map((l) => l.propertyType).filter(Boolean))
 
   <div id="view-grid">
     <div id="listings-grid" class="lgrid">
-      {initial.map((l) => <ListingCard listing={l} />)}
+      {initial.map((l) => <ListingCard listing={l} tag={l.isDerrick ? "Derrick's Listing" : 'For Sale'} />)}
     </div>
   </div>
   <div id="view-map" hidden>
