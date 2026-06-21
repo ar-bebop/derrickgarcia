@@ -2,175 +2,200 @@
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import DerrickListings from '../components/DerrickListings.astro';
+import ListingCard from '../components/ListingCard.astro';
+import MortgageMini from '../components/home/MortgageMini.astro';
+import AreaGrid from '../components/home/AreaGrid.astro';
 import RealEstateAgentSchema from '../components/RealEstateAgentSchema.astro';
+import realEmblem from '../assets/branding/real-emblem-gold.png';
 import { AGENTS } from '../data/agents.ts';
 import { SITE } from '../data/site.ts';
 import { TESTIMONIALS } from '../data/config.ts';
-import heroNight from '../assets/photos/toronto-skyline-night.jpg';
-import sunset from '../assets/photos/toronto-skyline-sunset.jpg';
-import park from '../assets/photos/toronto-island-park.jpg';
-const images = import.meta.glob<{ default: ImageMetadata }>('../assets/profile/*.webp', { eager: true });
+import { IN_MARKETS } from '../data/listings.ts';
+import { sortListings } from '../lib/listings-view.js';
+
+const profileImgs = import.meta.glob<{ default: ImageMetadata }>('../assets/profile/*.webp', { eager: true });
+const photoOf = (agent: (typeof AGENTS)[number]) => profileImgs[`../assets/${agent.photo}`]?.default;
+const derrick = AGENTS[0];
+const team = AGENTS.slice(1);
+const derrickIntro = `${derrick.bio.split('. ').slice(0, 2).join('. ')}.`;
+const featured = sortListings(IN_MARKETS, 'new').slice(0, 6);
+
 const guides = [
-  { href: '/guides/first-time-buyer-toronto', title: 'First-Time Buyer Guide (Toronto)' },
-  { href: '/guides/mortgage-stress-test', title: 'The Mortgage Stress Test, Explained' },
-  { href: '/guides/toronto-land-transfer-tax', title: "Toronto's Double Land Transfer Tax" },
-  { href: '/guides/rent-to-own-explained', title: 'Rent-to-Own: How It Actually Works' },
+  { slug: 'first-time-buyer-toronto', kicker: 'Buying', title: 'First-Time Buyer Guide', dek: 'Deposits, closing costs & the Toronto timeline.' },
+  { slug: 'mortgage-stress-test', kicker: 'Financing', title: 'The Mortgage Stress Test', dek: 'What you actually need to qualify for.' },
+  { slug: 'toronto-land-transfer-tax', kicker: 'Costs', title: "Toronto's Double Land Transfer Tax", dek: 'Municipal + provincial, and the rebates.' },
+  { slug: 'rent-to-own-explained', kicker: 'Alternative', title: 'Rent-to-Own, Explained', dek: 'How it actually works, step by step.' },
 ];
 ---
-<BaseLayout title="Derrick Garcia — Toronto & GTA Real Estate Broker | Real Broker Ontario"
-  description="Buy or sell with Derrick Garcia, Toronto & GTA real estate broker at Real Broker Ontario. Calculators, home valuations, rent-to-own, and a team that picks up the phone.">
+<BaseLayout title="Derrick Garcia — Toronto & GTA Real Estate | Real Broker Ontario"
+  description="Browse every Real Broker Ontario listing across Toronto and the GTA, plan your purchase with live calculators, and work with Derrick Garcia, Broker.">
   <RealEstateAgentSchema slot="head" />
 
-  <section class="hero">
-    <Image src={heroNight} alt="" class="hero__bg" widths={[800, 1400, 2000]} sizes="100vw" loading="eager" />
-    <div class="container hero__inner">
-      <p class="kicker">Real Broker Ontario · Toronto &amp; GTA</p>
-      <h1>A higher standard for Toronto real estate.</h1>
-      <p class="hero__sub">Buy and sell with a broker who treats your move like the investment
-        it is — backed by a team that knows every corner of the GTA.</p>
-      <div class="hero__ctas">
-        <a class="btn" href="/contact">Work With Us</a>
-        <a class="btn btn--ghost" href={SITE.listingsSearchUrl} target="_blank" rel="noopener noreferrer">Search Homes ↗</a>
+  <Hero />
+  <DerrickListings />
+
+  <section class="section reveal">
+    <div class="container">
+      <div class="eyebrow"><div><p class="kicker">Real Broker Ontario</p><h2>Featured GTA listings</h2></div>
+        <a class="link ui" href="/listings">View all listings →</a></div>
+      <div class="fgrid">{featured.map((l) => <ListingCard listing={l} tag={l.isDerrick ? "Derrick's Listing" : 'For Sale'} />)}</div>
+    </div>
+  </section>
+
+  <section class="section reveal" style="background:var(--color-bg-2)">
+    <div class="container">
+      <div class="eyebrow"><div><p class="kicker">Explore</p><h2>Browse the GTA by map</h2></div></div>
+      <a class="mapteaser" href="/listings" aria-label="Open the interactive listings map">
+        <div class="mapteaser__grid"></div><div class="mapteaser__roads"></div>
+        <span class="mp" style="left:42%;top:52%">Toronto</span>
+        <span class="mp" style="left:24%;top:66%">Mississauga</span>
+        <span class="mp" style="left:18%;top:36%">Brampton</span>
+        <span class="mp" style="left:64%;top:40%">Markham</span>
+        <span class="mp" style="left:33%;top:22%">Caledon</span>
+        <span class="mapteaser__cta ui">Open the interactive map →</span>
+      </a>
+    </div>
+  </section>
+
+  <MortgageMini />
+
+  <section class="section reveal" id="sell">
+    <div class="container">
+      <div class="sellband">
+        <div>
+          <p class="kicker">Selling?</p>
+          <h2>What's your home worth today?</h2>
+          <p class="sellband__lede">A no-obligation valuation grounded in live GTA comparables and what's actually selling on your street.</p>
+          <form class="sellband__form" action="/home-valuation" method="get">
+            <input type="text" name="address" placeholder="123 Your Street, Toronto, ON" aria-label="Property address">
+            <button class="ui" type="submit">Get my valuation →</button>
+          </form>
+        </div>
+        <div class="sellband__stat"><b>48 hrs</b><span class="ui">Typical turnaround on a full valuation</span></div>
       </div>
     </div>
   </section>
 
-  <section class="section container">
-    <p class="kicker">Plan your purchase</p>
-    <h2>Know your numbers before you offer.</h2>
-    <div class="tools">
-      <a class="card reveal" href="/mortgage-calculator"><h3>Mortgage Calculator</h3>
-        <p>Payments computed the Canadian way — semi-annual compounding, CMHC included.</p><span class="card__cta">Open →</span></a>
-      <a class="card reveal" href="/affordability-calculator"><h3>Affordability</h3>
-        <p>Stress test and GDS/TDS limits. Your true ceiling, no surprises.</p><span class="card__cta">Open →</span></a>
-      <a class="card reveal" href="/land-transfer-tax"><h3>Land Transfer Tax</h3>
-        <p>Ontario plus Toronto's double LTT, with first-time buyer rebates.</p><span class="card__cta">Open →</span></a>
-    </div>
-  </section>
-
-  <section class="section section--line">
-    <div class="container sell">
-      <div class="reveal">
-        <p class="kicker">Selling?</p>
-        <h2>What is your home worth today?</h2>
-        <p>Get a no-obligation valuation grounded in real comparables — not an algorithm's
-          guess. We'll walk you through pricing, prep, and timing.</p>
-        <p><a class="btn" href="/home-valuation">Get a Home Valuation</a></p>
+  <section class="section reveal" id="derrick" style="background:var(--color-bg-2)">
+    <div class="container agent">
+      <div class="agent__photo">
+        {photoOf(derrick) && <Image src={photoOf(derrick)!} alt={derrick.name} width={420} class="agent__img" />}
+        <Image src={realEmblem} alt="Real Broker" width={54} class="agent__emblem" />
       </div>
-      <Image src={sunset} alt="Toronto skyline at sunset over Lake Ontario" class="sell__img reveal"
-        widths={[600, 1200]} sizes="(max-width: 760px) 100vw, 50vw" />
+      <div class="agent__who">
+        <p class="kicker">Your agent · {derrick.title}</p>
+        <h2>{derrick.name}</h2>
+        <p>{derrickIntro}</p>
+        <div class="agent__cta">
+          <a class="btn" href="/contact">Book a call</a>
+          <a class="btn btn--ghost" href={SITE.phoneHref}>{SITE.phoneDisplay}</a>
+          <a class="link ui" href="/about">More about Derrick →</a>
+        </div>
+        <div class="team">
+          {team.map((a) => (
+            <div class="tm">{photoOf(a) && <Image src={photoOf(a)!} alt={a.name} width={52} height={52} class="tm__img" />}
+              <div><b>{a.name}</b><span class="ui">{a.title}</span></div></div>
+          ))}
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="rto">
-    <div class="container rto__inner">
-      <div><h2>Not mortgage-ready yet? Rent to own.</h2>
-        <p>A structured path from renting to owning — see if the program fits you.</p></div>
-      <a class="btn rto__btn" href="/rent-to-own">How It Works</a>
-    </div>
-  </section>
-
-  <section class="section container">
-    <p class="kicker">Who you'll work with</p>
-    <h2>Meet the team.</h2>
-    <div class="team">
-      {AGENTS.map((agent) => {
-        const img = images[`../assets/${agent.photo}`]?.default;
-        return (
-          <a class="agent reveal" href="/about">
-            {img && <Image src={img} alt={`${agent.name}, ${agent.title}`} width={500} height={550} />}
-            <span class="agent__name">{agent.name}</span>
-            <span class="agent__role">{agent.title}</span>
-          </a>
-        );
-      })}
-    </div>
-  </section>
+  <AreaGrid />
 
   {TESTIMONIALS.length > 0 && (
-    <section class="section section--line">
-      <div class="container quote reveal">
-        <p class="quote__stars" aria-hidden="true">★★★★★</p>
-        <blockquote>“{TESTIMONIALS[0].quote}”</blockquote>
-        <p class="quote__who">{TESTIMONIALS[0].name} · {TESTIMONIALS[0].source}</p>
-        <p><a href="/reviews">Read more reviews →</a></p>
+    <section class="section reveal">
+      <div class="container">
+        <div class="eyebrow"><div><p class="kicker">Reviews</p><h2>What clients say</h2></div>
+          <a class="link ui" href="/reviews">Read all reviews →</a></div>
+        <div class="reviews">{TESTIMONIALS.map((t) => (
+          <figure class="rev"><div class="rev__stars">★★★★★</div><blockquote>{t.quote}</blockquote>
+            <figcaption class="ui">— {t.name}{t.location ? `, ${t.location}` : ''}</figcaption></figure>))}</div>
       </div>
     </section>
   )}
 
-  <section class="section section--line container">
-    <p class="kicker">Guides</p>
-    <h2>Understand the market before you move.</h2>
-    <ul class="guides">
-      {guides.map((g) => (
-        <li class="reveal"><a href={g.href}>{g.title}<span aria-hidden="true"> →</span></a></li>
-      ))}
-    </ul>
+  <section class="section reveal">
+    <div class="container">
+      <div class="eyebrow"><div><p class="kicker">Guides</p><h2>Understand the market first</h2></div>
+        <a class="link ui" href="/guides">All guides →</a></div>
+      <div class="guides">{guides.map((g) => (
+        <a class="guide" href={`/guides/${g.slug}`}><p class="guide__k ui">{g.kicker}</p><h3>{g.title}</h3><span>{g.dek}</span></a>))}</div>
+    </div>
   </section>
 
-  <section class="cta">
-    <Image src={park} alt="" class="cta__bg" widths={[800, 1600]} sizes="100vw" />
-    <div class="container cta__inner reveal">
+  <section class="section reveal cta-final">
+    <div class="container">
       <p class="kicker">Ready when you are</p>
       <h2>Let's talk about your move.</h2>
-      <p>Book a call, send a note, or just phone — no pressure, no spam.</p>
-      <p><a class="btn" href="/contact">Get in Touch</a></p>
+      <p class="cta-final__lede">Buying, selling, or just exploring — get straight advice from Derrick.</p>
+      <a class="btn" href="/contact">Get in touch</a>
     </div>
   </section>
 </BaseLayout>
 <style>
-  .hero { position: relative; overflow: hidden; }
-  .hero__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
-  .hero::before { content: ''; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(12,12,14,.45), rgba(12,12,14,.9)); }
-  .hero__inner { position: relative; padding-block: clamp(4rem, 12vw, 7.5rem) clamp(3rem, 8vw, 5rem); }
-  .hero h1 { max-width: 14ch; margin: 0 0 1rem; }
-  .hero__sub { max-width: 46ch; font-size: 1.05rem; margin: 0 0 1.8rem; }
-  .hero__ctas { display: flex; gap: .9rem; flex-wrap: wrap; }
+  .eyebrow { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.6rem; flex-wrap: wrap; }
+  .link { color: var(--color-accent); font-size: .82rem; text-decoration: none; }
+  .link:hover { color: var(--color-accent-bright); }
+  .fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.3rem; }
 
-  .tools { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 1.8rem; }
-  .tools .card { text-decoration: none; display: flex; flex-direction: column; gap: .5rem; }
-  .tools h3 { margin: 0; font-size: 1.15rem; }
-  .tools p { color: var(--color-muted); font-size: .9rem; margin: 0; flex: 1; }
-  .card__cta { color: var(--color-accent); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; }
+  .mapteaser { position: relative; display: block; min-height: 320px; border: 1px solid var(--color-line);
+    border-radius: var(--radius); overflow: hidden; background:
+      radial-gradient(circle at 35% 40%, rgba(198,161,91,.08), transparent 42%), linear-gradient(180deg, #13141a, #0d0e12); }
+  .mapteaser__grid { position: absolute; inset: 0; opacity: .5; background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 1px, transparent 1px 46px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 1px, transparent 1px 46px); }
+  .mapteaser__roads { position: absolute; inset: 0; opacity: .32; background:
+    linear-gradient(58deg, transparent 49.6%, rgba(198,161,91,.5) 49.6% 50.4%, transparent 50.4%),
+    linear-gradient(-22deg, transparent 49.7%, rgba(255,255,255,.18) 49.7% 50.3%, transparent 50.3%); }
+  .mp { position: absolute; transform: translate(-50%, -100%); z-index: 3; font-family: var(--font-ui); font-weight: 600;
+    font-size: .74rem; color: var(--color-accent-ink); background: var(--color-accent); padding: .3rem .55rem; border-radius: 999px; }
+  .mapteaser__cta { position: absolute; left: 50%; bottom: 1.4rem; transform: translateX(-50%); z-index: 4;
+    color: var(--color-ink); background: rgba(14,14,16,.7); border: 1px solid var(--color-line-strong);
+    padding: .6rem 1.1rem; border-radius: 2px; font-size: .8rem; backdrop-filter: blur(6px); }
+  .mapteaser:hover .mapteaser__cta { background: var(--color-accent); color: var(--color-accent-ink); }
 
-  .sell { display: grid; gap: 2.5rem; grid-template-columns: 1fr 1fr; align-items: center; }
-  .sell__img { border: 1px solid var(--color-line-strong); aspect-ratio: 16/10; object-fit: cover; }
-  @media (max-width: 760px) { .sell { grid-template-columns: 1fr; } }
+  .sellband { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem; align-items: center; padding: clamp(1.6rem,4vw,2.8rem);
+    border: 1px solid var(--color-line-strong); border-radius: var(--radius); background: linear-gradient(120deg, #17130b, var(--color-bg) 60%); }
+  @media (max-width: 760px) { .sellband { grid-template-columns: 1fr; } }
+  .sellband__lede { color: var(--color-text); max-width: 48ch; }
+  .sellband__form { display: flex; gap: .5rem; margin-top: 1.2rem; background: rgba(10,10,12,.6);
+    border: 1px solid var(--color-line-strong); border-radius: var(--radius); padding: .4rem; flex-wrap: wrap; }
+  .sellband__form input { flex: 1; min-width: 180px; background: transparent; border: 0; color: var(--color-ink); padding: .7rem .9rem; outline: none; }
+  .sellband__form button { background: var(--color-accent); color: var(--color-accent-ink); border: 0; border-radius: 2px; padding: .7rem 1.2rem; font-weight: 600; cursor: pointer; }
+  .sellband__stat { text-align: center; }
+  .sellband__stat b { font-family: var(--font-display); color: var(--color-accent-bright); font-size: 3rem; line-height: 1; display: block; }
+  .sellband__stat span { color: var(--color-muted); font-size: .76rem; letter-spacing: .1em; text-transform: uppercase; }
 
-  .rto { background: var(--color-accent); }
-  .rto__inner { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem;
-    flex-wrap: wrap; padding-block: 1.8rem; }
-  .rto h2 { color: var(--color-accent-ink); font-size: 1.4rem; margin: 0; }
-  .rto p { color: rgba(21, 19, 15, .75); margin: .3rem 0 0; font-size: .95rem; }
-  .rto__btn { background: var(--color-accent-ink); color: #ecd9b8; }
-  .rto__btn:hover { background: #000; color: #ecd9b8; }
+  .agent { display: grid; grid-template-columns: .85fr 1.15fr; gap: 2.6rem; align-items: center; }
+  @media (max-width: 840px) { .agent { grid-template-columns: 1fr; } }
+  .agent__photo { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--color-line-strong); max-width: 400px; }
+  .agent__img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; display: block; }
+  .agent__emblem { position: absolute; right: .8rem; bottom: .8rem; width: 54px; }
+  .agent__who p { max-width: 56ch; }
+  .agent__cta { display: flex; gap: .8rem; align-items: center; margin-top: 1.4rem; flex-wrap: wrap; }
+  .team { display: flex; gap: 1.4rem; margin-top: 1.8rem; flex-wrap: wrap; }
+  .tm { display: flex; align-items: center; gap: .7rem; }
+  .tm__img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-line-strong); }
+  .tm b { display: block; color: var(--color-ink); font-family: var(--font-display); font-weight: 400; }
+  .tm span { font-size: .72rem; color: var(--color-muted); letter-spacing: .06em; text-transform: uppercase; }
 
-  .team { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 1.8rem; }
-  .agent { border: 1px solid var(--color-line); text-decoration: none; transition: border-color .2s ease; }
-  .agent:hover { border-color: var(--color-accent); }
-  .agent img { width: 100%; height: auto; object-fit: cover; filter: saturate(.88); }
-  .agent__name { display: block; font-family: var(--font-display); color: var(--color-ink);
-    font-size: 1.05rem; padding: .8rem 1rem 0; }
-  .agent__role { display: block; color: var(--color-accent); font-size: .7rem;
-    letter-spacing: .16em; text-transform: uppercase; padding: .15rem 1rem .9rem; }
+  .reviews { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.3rem; }
+  .rev { border: 1px solid var(--color-line); border-radius: var(--radius); padding: 1.5rem; background: var(--color-panel); margin: 0; }
+  .rev__stars { color: var(--color-accent-bright); letter-spacing: .1em; margin-bottom: .7rem; }
+  .rev blockquote { color: var(--color-text); margin: 0; font-size: .95rem; }
+  .rev figcaption { margin-top: 1rem; color: var(--color-muted); font-size: .78rem; }
 
-  .quote { text-align: center; max-width: 640px; }
-  .quote__stars { color: var(--color-accent); letter-spacing: 6px; margin: 0; }
-  .quote blockquote { font-family: var(--font-display); color: var(--color-ink);
-    font-size: 1.35rem; line-height: 1.45; margin: 1rem 0; }
-  .quote__who { color: var(--color-muted); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
+  .guides { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
+  .guide { border: 1px solid var(--color-line); border-radius: var(--radius); padding: 1.4rem; background: var(--color-panel); transition: all .25s ease; text-decoration: none; }
+  .guide:hover { border-color: var(--color-accent); transform: translateY(-3px); }
+  .guide__k { font-size: .66rem; letter-spacing: .16em; text-transform: uppercase; color: var(--color-accent); margin: 0; }
+  .guide h3 { font-size: 1.15rem; margin: .5rem 0 .4rem; }
+  .guide span { font-size: .85rem; color: var(--color-muted); }
 
-  .guides { list-style: none; margin: 1.8rem 0 0; padding: 0; display: grid;
-    gap: 0 2.5rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
-  .guides li { border-bottom: 1px solid var(--color-line); }
-  .guides a { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem .2rem;
-    font-family: var(--font-display); color: var(--color-ink); text-decoration: none; font-size: 1.05rem; }
-  .guides a:hover { color: var(--color-accent); }
-
-  .cta { position: relative; overflow: hidden; margin-top: var(--section-pad); }
-  .cta__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
-  .cta::before { content: ''; position: absolute; inset: 0; background: rgba(14, 14, 15, .93); }
-  .cta__inner { position: relative; text-align: center; padding-block: clamp(3rem, 8vw, 4.5rem); }
-  .cta__inner p { max-width: 44ch; margin-inline: auto; }
+  .cta-final { text-align: center; }
+  .cta-final__lede { color: var(--color-text); max-width: 44ch; margin-inline: auto; }
+  .cta-final .btn { margin-top: 1.4rem; }
 </style>

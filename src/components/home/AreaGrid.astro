@@ -1,0 +1,50 @@
+---
+import { IN_MARKETS, municipality } from '../../data/listings.ts';
+
+// TODO(content): source free-licensed GTA-area photos (Toronto, Mississauga, Brampton, Caledon,
+// Bolton, Orangeville) into src/assets/photos/ + credit in CREDITS.md. Until then: gradient tiles.
+const defs = [
+  { name: 'Toronto', muni: 'Toronto', href: '/listings?area=Toronto' },
+  { name: 'Mississauga', muni: 'Mississauga', href: '/areas/mississauga' },
+  { name: 'Brampton', muni: 'Brampton', href: '/areas/brampton' },
+  { name: 'Caledon', muni: 'Caledon', href: '/areas/caledon' },
+  { name: 'Bolton', muni: 'Bolton', href: '/areas/bolton' },
+  { name: 'Orangeville', muni: 'Orangeville', href: '/areas/orangeville' },
+];
+const areas = defs.map((d) => ({ ...d, count: IN_MARKETS.filter((l) => municipality(l.city) === d.muni).length }));
+---
+<section class="section areas-sec">
+  <div class="container">
+    <div class="eyebrow">
+      <div><p class="kicker">Where Derrick works</p><h2>Explore GTA areas</h2></div>
+      <a class="link ui" href="/areas">All areas →</a>
+    </div>
+    <div class="areas">
+      {areas.map((a, i) => (
+        <a class={`area area--${i % 3}`} href={a.href}>
+          <span class="area__ar">→</span>
+          <b>{a.name}</b>
+          <span class="area__c ui">{a.count > 0 ? `${a.count} listings` : 'Explore'}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+<style>
+  .areas-sec .eyebrow { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.6rem; flex-wrap: wrap; }
+  .areas-sec .link { color: var(--color-accent); font-size: .82rem; text-decoration: none; }
+  .areas { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1rem; }
+  .area { position: relative; border: 1px solid var(--color-line); border-radius: var(--radius); padding: 1.3rem;
+    overflow: hidden; transition: transform .25s ease, border-color .25s ease; min-height: 140px;
+    display: flex; flex-direction: column; justify-content: flex-end; text-decoration: none; }
+  .area::before { content: ''; position: absolute; inset: 0; z-index: 0; opacity: .5; transition: opacity .3s ease; }
+  .area--0::before { background: radial-gradient(120% 100% at 0% 0%, rgba(198,161,91,.22), transparent 60%), linear-gradient(160deg, #1d1f25, #121319); }
+  .area--1::before { background: radial-gradient(120% 100% at 100% 0%, rgba(198,161,91,.18), transparent 60%), linear-gradient(160deg, #20222a, #121319); }
+  .area--2::before { background: radial-gradient(120% 100% at 50% 120%, rgba(198,161,91,.2), transparent 60%), linear-gradient(160deg, #1a1c22, #101116); }
+  .area:hover { border-color: var(--color-accent); transform: translateY(-3px); }
+  .area:hover::before { opacity: .75; }
+  .area > * { position: relative; z-index: 1; }
+  .area b { font-family: var(--font-display); color: var(--color-ink); font-weight: 400; font-size: 1.3rem; }
+  .area__c { color: var(--color-accent); font-size: .74rem; margin-top: .3rem; }
+  .area__ar { position: absolute; right: 1rem; top: 1.1rem; color: var(--color-muted); }
+</style>

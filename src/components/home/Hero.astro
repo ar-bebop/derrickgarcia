@@ -1,0 +1,73 @@
+---
+import { Image } from 'astro:assets';
+import heroPhoto from '../../assets/photos/toronto-skyline-night.jpg';
+import derrickPhoto from '../../assets/profile/derrick-garcia.webp';
+import { LISTING_STATS, RELEVANT_MARKETS } from '../../data/listings.ts';
+const medianK = Math.round(LISTING_STATS.median / 1000);
+---
+<section class="hero">
+  <Image src={heroPhoto} alt="" class="hero__bg" loading="eager" widths={[768, 1280, 1920]} sizes="100vw" />
+  <div class="hero__scrim"></div>
+  <div class="container hero__inner">
+    <p class="kicker">Real Broker Ontario · Toronto &amp; GTA</p>
+    <h1 class="hero__h1">Find your place<br>in the GTA.</h1>
+    <p class="hero__lede">Browse every Real Broker Ontario listing across Toronto and the Greater
+      Toronto Area — straight from the source. No portals, no noise.</p>
+
+    <form class="hero__search" action="/listings" method="get">
+      <label class="f"><span class="ui">Where</span>
+        <select name="area">
+          <option value="">All GTA markets</option>
+          {RELEVANT_MARKETS.map((m) => <option value={m}>{m}</option>)}
+        </select></label>
+      <label class="f"><span class="ui">Price</span>
+        <select name="maxPrice">
+          <option value="">Any price</option>
+          <option value="700000">Up to $700K</option>
+          <option value="1000000">Up to $1M</option>
+          <option value="1500000">Up to $1.5M</option>
+        </select></label>
+      <button class="ui" type="submit">Search listings →</button>
+    </form>
+
+    <div class="hero__stats">
+      <div class="s"><b><span data-count={LISTING_STATS.inMarkets}>0</span></b><span class="ui">Listings in your markets</span></div>
+      <div class="s"><b>$<span data-count={medianK}>0</span>K</b><span class="ui">Median price</span></div>
+      <div class="s"><b><span data-count={LISTING_STATS.marketCount}>0</span></b><span class="ui">GTA markets</span></div>
+    </div>
+
+    <div class="hero__agent">
+      <Image src={derrickPhoto} alt="Derrick Garcia" width={40} height={40} densities={[1, 2]} class="hero__agentimg" />
+      <small class="ui">Brokered by <b>Derrick Garcia</b> · Broker, Real Broker Ontario</small>
+    </div>
+  </div>
+</section>
+<style>
+  .hero { position: relative; min-height: 88vh; display: flex; align-items: center; overflow: hidden; }
+  .hero__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+  .hero__scrim { position: absolute; inset: 0; z-index: 1; background:
+    radial-gradient(60% 50% at 72% 18%, rgba(198,161,91,.18), transparent 62%),
+    linear-gradient(180deg, rgba(12,12,14,.55) 0%, rgba(12,12,14,.78) 60%, rgba(10,10,12,.95) 100%); }
+  .hero__inner { position: relative; z-index: 2; width: 100%; padding-block: 3rem; }
+  .hero__h1 { font-size: clamp(2.8rem, 6.2vw, 5rem); margin: .6rem 0 1rem; letter-spacing: .005em; }
+  .hero__lede { max-width: 50ch; color: var(--color-text); font-size: 1.06rem; }
+  .hero__search { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: 1.8rem; max-width: 720px;
+    background: rgba(18,18,22,.66); border: 1px solid var(--color-line-strong); border-radius: var(--radius);
+    padding: .45rem; backdrop-filter: blur(8px); }
+  .hero__search .f { flex: 1; min-width: 150px; display: flex; flex-direction: column; padding: .35rem .7rem;
+    border-right: 1px solid var(--hair); }
+  .hero__search .f span { font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; color: var(--color-muted); }
+  .hero__search select { background: transparent; border: 0; color: var(--color-ink); font-size: .92rem; margin-top: 2px; outline: none; }
+  .hero__search select option { background: #15151a; }
+  .hero__search button { background: var(--color-accent); color: var(--color-accent-ink); border: 0; border-radius: 2px;
+    padding: 0 1.5rem; font-weight: 600; font-size: .82rem; letter-spacing: .04em; cursor: pointer; }
+  .hero__search button:hover { background: var(--color-accent-bright); }
+  .hero__stats { display: flex; gap: 2.4rem; margin-top: 2.2rem; flex-wrap: wrap; }
+  .hero__stats .s b { font-family: var(--font-display); color: var(--color-ink); font-size: 2rem; display: block; line-height: 1; }
+  .hero__stats .s > span { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--color-muted); }
+  .hero__agent { display: inline-flex; align-items: center; gap: .7rem; margin-top: 2.2rem;
+    padding: .5rem .9rem .5rem .5rem; border: 1px solid var(--color-line); border-radius: 999px; background: rgba(22,22,26,.6); }
+  .hero__agentimg { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid var(--color-line-strong); }
+  .hero__agent small { font-size: .78rem; color: var(--color-text); }
+  .hero__agent b { color: var(--color-ink); }
+</style>

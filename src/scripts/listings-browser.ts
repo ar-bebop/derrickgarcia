@@ -114,6 +114,21 @@ if (dataEl) {
     if (v === 'map') { apply(); window.dispatchEvent(new Event('listings:mapshown')); }
   }));
 
+  // Honor ?area= / ?maxPrice= from the homepage hero search.
+  const params = new URLSearchParams(location.search);
+  const areaParam = params.get('area') || '';
+  const priceParam = params.get('maxPrice') || '';
+  if (areaParam) {
+    state.municipality = areaParam;
+    if (areaSel) areaSel.value = areaParam;
+    chips?.querySelectorAll<HTMLElement>('[data-chip]').forEach((c) => c.classList.toggle('is-on', (c.dataset.chip || '') === areaParam));
+  }
+  if (priceParam) {
+    state.maxPrice = Number(priceParam) || 0;
+    const ps = document.querySelector<HTMLSelectElement>('[data-filter="maxPrice"]');
+    if (ps) ps.value = priceParam;
+  }
+
   updateSavedCount();
   apply();
 }
