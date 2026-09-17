@@ -58,7 +58,7 @@ compliance furniture). Spec:
 - `src/` — the implemented site (layout, pages, calculators, tested math module, guides collection)
 
 **Toolchain note:** this environment has **pnpm, not npm** (`pnpm install|build|test|check`).
-`@astrojs/sitemap` is pinned to `3.2.1` (3.7.x needs Astro 5); `sharp` is an explicit dep (pnpm
+`@astrojs/sitemap` tracks `^3.7.4` (the old `3.2.1` pin is gone); `sharp` is an explicit dep (pnpm
 strict-linking); `pnpm-workspace.yaml` whitelists esbuild/sharp build scripts. See `TODO.md` §4.
 
 ## Commands

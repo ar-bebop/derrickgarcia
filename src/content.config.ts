@@ -1,7 +1,11 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
+// Content Layer API (Astro 5+). `base` keeps the markdown where it already lives, so entry
+// ids — and therefore every /guides/* and /areas/* URL — are unchanged from the legacy
+// `type: 'content'` collections this replaces.
 const guides = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/guides' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -13,7 +17,7 @@ const guides = defineCollection({
 });
 
 const areas = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/areas' }),
   schema: z.object({
     title: z.string(),         // on-page H1 (the <title> tag is built from `town` in the template)
     description: z.string(),   // meta description

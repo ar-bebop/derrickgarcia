@@ -13,7 +13,7 @@ const guides = (await getCollection('guides')).sort((a, b) => a.data.order - b.d
   </section>
   <section class="container list">
     {guides.map((g) => (
-      <a class="row reveal" href={`/guides/${g.slug}`}>
+      <a class="row reveal" href={`/guides/${g.id}`}>
         <div>
           <h2>{g.data.title}</h2>
           <p>{g.data.description}</p>

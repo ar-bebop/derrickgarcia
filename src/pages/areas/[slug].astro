@@ -1,14 +1,14 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AreaSchema from '../../components/AreaSchema.astro';
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
   const areas = await getCollection('areas');
-  return areas.map((a) => ({ params: { slug: a.slug }, props: { area: a } }));
+  return areas.map((a) => ({ params: { slug: a.id }, props: { area: a } }));
 }
 const { area } = Astro.props;
-const { Content } = await area.render();
+const { Content } = await render(area);
 const { town, region, title, description, date, ltt } = area.data;
 ---
 <BaseLayout title={`Real Estate Agent in ${town} — Derrick Garcia | Real Broker`} description={description}>

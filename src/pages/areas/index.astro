@@ -13,7 +13,7 @@ const areas = (await getCollection('areas')).sort((a, b) => a.data.order - b.dat
   </section>
   <section class="container list">
     {areas.map((a) => (
-      <a class="row reveal" href={`/areas/${a.slug}`}>
+      <a class="row reveal" href={`/areas/${a.id}`}>
         <div>
           <h2>{a.data.town}</h2>
           <p>{a.data.teaser}</p>

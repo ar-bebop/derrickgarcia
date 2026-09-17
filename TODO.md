@@ -136,8 +136,11 @@ agent links, and GBP `sameAs` now render.
 - **pnpm, not npm** — `npm` is not installed here. `pnpm install` / `pnpm build` / `pnpm test`
   / `pnpm check`. `pnpm-workspace.yaml` whitelists `esbuild` + `sharp` build scripts.
   `withastro/action@v3` auto-detects pnpm from `pnpm-lock.yaml` in CI.
-- **`@astrojs/sitemap` pinned to `3.2.1`** — 3.7.x requires Astro 5's `routes:resolved` hook
-  and crashes on Astro 4. Revisit if/when upgrading to Astro 5.
+- **`@astrojs/sitemap` is on `^3.7.4`** — the old `3.2.1` pin is gone (it existed only because
+  3.7.x needs Astro 5's `routes:resolved` hook, and this repo was on Astro 4). Note the package
+  declares NO astro peerDependency at any version, so nothing in the package manager guards this
+  pairing — a wrong one installs cleanly and fails at build time or silently truncates the sitemap.
+  Assert `dist/sitemap-index.xml` and the `<loc>` count after any Astro version change.
 - **`sharp` is an explicit dependency** — Astro's image optimization can't resolve it through
   pnpm's strict linking otherwise.
 - `pnpm check` (`astro check`) was added for the type-check; not in the original plan.
