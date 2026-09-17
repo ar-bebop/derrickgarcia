@@ -135,12 +135,20 @@ agent links, and GBP `sameAs` now render.
 
 - **pnpm, not npm** — `npm` is not installed here. `pnpm install` / `pnpm build` / `pnpm test`
   / `pnpm check`. `pnpm-workspace.yaml` whitelists `esbuild` + `sharp` build scripts.
-  `withastro/action@v3` auto-detects pnpm from `pnpm-lock.yaml` in CI.
+  CI uses explicit checkout/setup-node/pnpm steps (not `withastro/action`) so the DDF fetch can run
+  between install and build. Action majors were last bumped 2026-09-17 (checkout@v7, setup-node@v7,
+  pnpm/action-setup@v6, upload-pages-artifact@v5, deploy-pages@v5) to clear the Node 20 runtime
+  deprecation; `pnpm/action-setup` takes its version from package.json `packageManager`, not a
+  `with: version:` input. There is no `.github/dependabot.yml`, so the **github-actions ecosystem
+  gets no update PRs** — that is why five actions drifted 1-3 majors. Worth adding.
 - **`@astrojs/sitemap` is on `^3.7.4`** — the old `3.2.1` pin is gone (it existed only because
   3.7.x needs Astro 5's `routes:resolved` hook, and this repo was on Astro 4). Note the package
   declares NO astro peerDependency at any version, so nothing in the package manager guards this
   pairing — a wrong one installs cleanly and fails at build time or silently truncates the sitemap.
   Assert `dist/sitemap-index.xml` and the `<loc>` count after any Astro version change.
 - **`sharp` is an explicit dependency** — Astro's image optimization can't resolve it through
-  pnpm's strict linking otherwise.
+  pnpm's strict linking otherwise. Pinned at `^0.35.4` (GHSA-rgj7-g3m4-5g8c floor, which is also
+  the current latest — there is no patch headroom, so the next sharp CVE needs a same-day bump).
+  Astro 7 declares `sharp ^0.35.4` itself, so the temporary pnpm override used during the
+  2026-09-17 uplift is gone; it only has to come back if a future floor exceeds astro's declaration.
 - `pnpm check` (`astro check`) was added for the type-check; not in the original plan.
