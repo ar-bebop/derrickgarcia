@@ -3,3 +3,10 @@
 allowBuilds:
   esbuild: true
   sharp: true
+
+# TEMPORARY: astro 4/5/6 declare optionalDependencies.sharp ^0.34.0, which sits below the
+# GHSA-rgj7-g3m4-5g8c floor (>= 0.35.4). Forcing a single sharp lets the 4 sharp alerts be
+# banked before the Astro majors. REMOVE this block once astro >= 7 lands — astro 7 declares
+# sharp ^0.35.4 itself, and a stale override would then silently pin us below a future fix.
+overrides:
+  sharp: ^0.35.4
