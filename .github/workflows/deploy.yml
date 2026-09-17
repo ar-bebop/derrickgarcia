@@ -33,11 +33,9 @@ jobs:
     outputs:
       listings_count: ${{ steps.fetch.outputs.count }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11.3.0
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6 # version comes from package.json "packageManager": pnpm@11.3.0
+      - uses: actions/setup-node@v7
         with:
           node-version: 22 # >=22.13 required by pnpm 11.3.0 (uses node:sqlite); Node 20 is also EOL on runners
           cache: pnpm
@@ -52,7 +50,7 @@ jobs:
           CREA_DDF_TOKEN_URL: ${{ secrets.CREA_DDF_TOKEN_URL }}
           CREA_DDF_API_BASE: ${{ secrets.CREA_DDF_API_BASE }}
       - run: pnpm build
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: ./dist
   deploy:
@@ -63,7 +61,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   # The fetch step NEVER fails the build (an outage must not take the whole site down),
   # so an empty feed used to deploy silently behind a green check — that is how the
