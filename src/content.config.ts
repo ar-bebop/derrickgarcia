@@ -1,5 +1,8 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
+// Astro 6 deprecates the `z` re-export from 'astro:content' (ts(6385) on every use).
+// astro/zod is the supported path and is the same zod instance astro validates with.
+import { z } from 'astro/zod';
 
 // Content Layer API (Astro 5+). `base` keeps the markdown where it already lives, so entry
 // ids — and therefore every /guides/* and /areas/* URL — are unchanged from the legacy
