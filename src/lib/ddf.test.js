@@ -12,6 +12,7 @@ import {
   primaryPhoto,
   sortedPhotoUrls,
   isDerrickListing,
+  isActiveListing,
   normalizeListing,
   getToken,
   fetchJsonWithRetry,
@@ -49,16 +50,42 @@ describe('constants', () => {
 });
 
 describe('activeFilter / derrickFilter', () => {
-  it('activeFilter returns the Active OData clause', () => {
-    expect(activeFilter()).toBe("StandardStatus eq 'Active'");
+  // REGRESSION GUARD (broke live ~2026-07): CREA removed StandardStatus from the
+  // filterable property set. `$filter=StandardStatus eq 'Active'` now 400s the WHOLE
+  // query -> 0 listings. The DDF member feed only distributes Active listings, so the
+  // status restriction moved server-side-off / in-memory (see isActiveListing).
+  it('activeFilter returns null — StandardStatus is NOT filterable on the DDF API', () => {
+    expect(activeFilter()).toBeNull();
   });
-  it('derrickFilter restricts to active AND any of the four agent-key fields', () => {
+  it('no filter helper ever puts StandardStatus in $filter', () => {
+    expect(String(activeFilter())).not.toContain('StandardStatus');
+    expect(derrickFilter()).not.toContain('StandardStatus');
+  });
+  it('derrickFilter restricts to any of the four agent-key fields', () => {
     const f = derrickFilter();
-    expect(f).toContain("StandardStatus eq 'Active'");
     expect(f).toContain("ListAgentKey eq '2088980'");
     expect(f).toContain("CoListAgentKey eq '2088980'");
     expect(f).toContain("CoListAgentKey2 eq '2088980'");
     expect(f).toContain("CoListAgentKey3 eq '2088980'");
+  });
+});
+
+describe('isActiveListing', () => {
+  it('accepts an explicitly Active record', () => {
+    expect(isActiveListing({ StandardStatus: 'Active' })).toBe(true);
+  });
+  it('rejects an explicitly non-Active record', () => {
+    expect(isActiveListing({ StandardStatus: 'Sold' })).toBe(false);
+    expect(isActiveListing({ StandardStatus: 'Expired' })).toBe(false);
+  });
+  // Fail OPEN, not closed: the feed only distributes Active listings, so a missing
+  // status must not silently empty the whole site (that is the failure we just had).
+  it('accepts a record with no StandardStatus at all', () => {
+    expect(isActiveListing({})).toBe(true);
+    expect(isActiveListing({ StandardStatus: null })).toBe(true);
+  });
+  it('is case-insensitive', () => {
+    expect(isActiveListing({ StandardStatus: 'active' })).toBe(true);
   });
 });
 
@@ -214,9 +241,24 @@ describe('normalizeListing', () => {
 describe('buildListingsUrl', () => {
   const url = buildListingsUrl({
     apiBase: API_BASE,
+    filter: derrickFilter(),
+    select: SELECT_FIELDS,
+    top: 100,
+  });
+  // The production listings pass sends NO $filter (activeFilter() === null).
+  const unfiltered = buildListingsUrl({
+    apiBase: API_BASE,
     filter: activeFilter(),
     select: SELECT_FIELDS,
     top: 100,
+  });
+  it('omits $filter entirely when the filter is null', () => {
+    expect(unfiltered).not.toContain('$filter');
+    expect(unfiltered).not.toContain('filter=');
+    expect(unfiltered.startsWith(`${API_BASE}/Property?$select=`)).toBe(true);
+    expect(unfiltered).toContain('$top=100');
+    expect(unfiltered).toContain('$count=true');
+    expect(unfiltered).not.toContain('%24');
   });
   it('targets the Property endpoint', () => {
     expect(url.startsWith(`${API_BASE}/Property?`)).toBe(true);
@@ -233,14 +275,14 @@ describe('buildListingsUrl', () => {
   // The value side must still be percent-encoded: the filter has spaces (encodeURIComponent
   // leaves "'" literal, which is valid in a query value). The '$' before 'filter' stays literal.
   it('percent-encodes the $filter VALUE (literal $, encoded spaces)', () => {
-    expect(decodeURIComponent(url)).toContain("StandardStatus eq 'Active'");
-    expect(url).toContain("$filter=StandardStatus%20eq%20'Active'");
+    expect(decodeURIComponent(url)).toContain("ListAgentKey eq '2088980'");
+    expect(url).toContain("$filter=");
     // the filter value must not contain raw spaces
     expect(url).not.toMatch(/\$filter=[^&]*\s/);
   });
   it('includes the filter, $top and $count=true (decoded)', () => {
     const decoded = decodeURIComponent(url);
-    expect(decoded).toContain("StandardStatus eq 'Active'");
+    expect(decoded).toContain("ListAgentKey eq '2088980'");
     expect(decoded).toContain('$top=100');
     expect(decoded).toContain('$count=true');
   });
@@ -560,5 +602,56 @@ describe('buildDatasets', () => {
     // all entries are normalized (render contract), not raw
     expect(all[0]).toHaveProperty('priceFormatted');
     expect(all[0]).toHaveProperty('mlsNumber');
+  });
+
+  // Status is no longer enforceable in $filter (CREA made StandardStatus non-filterable),
+  // so buildDatasets must drop non-Active records in memory instead.
+  it('excludes explicitly non-Active records in memory', async () => {
+    const sold = { ...sample.otherAgent, ListingKey: '28705777', StandardStatus: 'Sold' };
+    const fetchImpl = async (url) => {
+      if (url.includes('connect/token')) {
+        return { ok: true, json: async () => ({ access_token: 'tok', expires_in: 3600 }) };
+      }
+      if (url.includes('/Office')) {
+        return { ok: true, json: async () => ({ '@odata.count': 0, value: [] }) };
+      }
+      return {
+        ok: true,
+        json: async () => ({
+          '@odata.count': 3,
+          value: [sample.derrickListing, sold, sample.otherAgent],
+        }),
+      };
+    };
+    const { all } = await buildDatasets({
+      tokenUrl: 'https://identity.crea.ca/connect/token',
+      clientId: 'c', clientSecret: 's', scope: 'DDFApi_Read',
+      apiBase: API_BASE, fetchImpl, sleep: noSleep,
+    });
+    expect(all.map((l) => l.id)).not.toContain('28705777');
+    expect(all).toHaveLength(2);
+  });
+
+  // The listings pass must send NO $filter — a StandardStatus clause 400s the feed.
+  it('requests the Property feed without a $filter', async () => {
+    const propertyUrls = [];
+    const fetchImpl = async (url) => {
+      if (url.includes('connect/token')) {
+        return { ok: true, json: async () => ({ access_token: 'tok', expires_in: 3600 }) };
+      }
+      if (url.includes('/Office')) {
+        return { ok: true, json: async () => ({ '@odata.count': 0, value: [] }) };
+      }
+      propertyUrls.push(url);
+      return { ok: true, json: async () => ({ '@odata.count': 1, value: [sample.derrickListing] }) };
+    };
+    await buildDatasets({
+      tokenUrl: 'https://identity.crea.ca/connect/token',
+      clientId: 'c', clientSecret: 's', scope: 'DDFApi_Read',
+      apiBase: API_BASE, fetchImpl, sleep: noSleep,
+    });
+    expect(propertyUrls).toHaveLength(1);
+    expect(propertyUrls[0]).not.toContain('filter');
+    expect(propertyUrls[0]).not.toContain('StandardStatus%20eq');
   });
 });

@@ -33,28 +33,55 @@ const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
 // Pure functions
 // ---------------------------------------------------------------------------
 
-// Only "Active" MLS listings should ever be published on the site.
+// Server-side status filter for the listings pass — deliberately NONE.
+//
+// BREAKING CHANGE, CREA DDF Web API, observed live 2026-07-24 (site's listings went
+// empty that night; last good fetch 2026-07-23): StandardStatus was removed from the
+// API's filterable property set. `$filter=StandardStatus eq 'Active'` now returns
+//   400 {"details":"The property 'StandardStatus' cannot be used in the $filter query option."}
+// which fails the WHOLE query -> 0 listings -> the site's "feed temporarily unavailable"
+// empty state. StandardStatus is still fine in $select and still returned on every record.
+//
+// The DDF member feed only distributes Active listings (verified 2026-09-17: all 775
+// records carry StandardStatus "Active"), so the restriction moves in-memory — see
+// isActiveListing, applied in buildDatasets. Returning null (not '') makes "no filter"
+// an explicit, testable contract that buildListingsUrl honours.
 export function activeFilter() {
-  return "StandardStatus eq 'Active'";
+  return null;
 }
 
-// Active listings where any of the four agent-key fields is Derrick's. Included for
-// completeness; buildDatasets derives Derrick's set in memory instead (one feed pass).
+// Listings where any of the four agent-key fields is Derrick's. Agent keys ARE
+// filterable (probed live 2026-09-17). Included for completeness; buildDatasets derives
+// Derrick's set in memory instead (one feed pass). Carries NO status clause — see above.
 export function derrickFilter() {
   const agentClause = AGENT_KEY_FIELDS
     .map((f) => `${f} eq '${DERRICK_AGENT_KEY}'`)
     .join(' or ');
-  return `${activeFilter()} and (${agentClause})`;
+  return `(${agentClause})`;
 }
 
-// Full Property URL with $filter, $select, $top and $count=true. OData system query
-// options must keep their LITERAL '$' prefix — URLSearchParams would percent-encode it
-// ('$filter' -> '%24filter') and CREA's endpoint rejects that. So build the key=value
-// pairs by hand with literal '$' and encode only the VALUES.
+// In-memory replacement for the removed server-side status filter: never publish a
+// record the feed marks as anything but Active. Fails OPEN on a missing/blank status —
+// the feed distributes Active listings only, so treating "absent" as inactive would let
+// one upstream schema change silently empty the entire site (exactly the 2026-07-24
+// failure mode). An explicit non-Active value is still excluded.
+export function isActiveListing(raw) {
+  const status = raw && raw.StandardStatus;
+  if (status === null || status === undefined || status === '') return true;
+  return String(status).toLowerCase() === 'active';
+}
+
+// Full Property URL with $select, $top, $count=true and an OPTIONAL $filter. OData
+// system query options must keep their LITERAL '$' prefix — URLSearchParams would
+// percent-encode it ('$filter' -> '%24filter') and CREA's endpoint rejects that. So
+// build the key=value pairs by hand with literal '$' and encode only the VALUES.
+// A null/empty filter emits NO $filter param at all (see activeFilter): sending an
+// empty or invalid $filter 400s the whole query.
 export function buildListingsUrl({ apiBase, filter, select, top }) {
+  const filterParam = filter ? `$filter=${encodeURIComponent(filter)}&` : '';
   return `${apiBase}/Property`
-    + `?$filter=${encodeURIComponent(filter)}`
-    + `&$select=${encodeURIComponent(select.join(','))}`
+    + `?${filterParam}`
+    + `$select=${encodeURIComponent(select.join(','))}`
     + `&$top=${encodeURIComponent(String(top))}`
     + '&$count=true';
 }
@@ -288,7 +315,12 @@ export async function buildDatasets({
     token, fetchImpl, refreshToken, sleep,
   });
 
-  const all = records.filter(Boolean).map((r) => normalizeListing(r, officeNameByKey));
+  // Status is enforced HERE, not in $filter (CREA made StandardStatus non-filterable —
+  // see activeFilter). `count` remains the feed's reported total, pre-status-filter.
+  const all = records
+    .filter(Boolean)
+    .filter(isActiveListing)
+    .map((r) => normalizeListing(r, officeNameByKey));
   const derrick = all.filter((l) => l.isDerrick);
   return { all, derrick, count };
 }

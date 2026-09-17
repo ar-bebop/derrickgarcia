@@ -8,7 +8,7 @@
 //   CREA_DDF_TOKEN_URL, CREA_DDF_CLIENT_ID, CREA_DDF_CLIENT_SECRET,
 //   CREA_DDF_SCOPE, CREA_DDF_API_BASE
 
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, appendFile } from 'node:fs/promises';
 import { buildDatasets } from '../src/lib/ddf.js';
 
 const OUT_DIR = 'src/data/generated';
@@ -22,6 +22,21 @@ const OUT_DERRICK = `${OUT_DIR}/listings-derrick.json`;
 function normalizeApiBase(raw) {
   const trimmed = String(raw || '').replace(/\/+$/, '');
   return trimmed.endsWith('/odata/v1') ? trimmed : `${trimmed}/odata/v1`;
+}
+
+// Publish the active-listing count as a GitHub Actions step output so the workflow can
+// alert on an EMPTY feed (see .github/workflows/deploy.yml). This script deliberately
+// never fails the build, which means an empty feed otherwise deploys behind a green
+// check — that is how the 2026-07-24 CREA breaking change hid for eight weeks.
+// Best-effort and swallowed: reporting must never itself break the build.
+async function reportCount(count) {
+  const out = process.env.GITHUB_OUTPUT;
+  if (!out) return;
+  try {
+    await appendFile(out, `count=${count}\n`);
+  } catch {
+    // ignore — the ::warning::/::error:: annotations still carry the signal
+  }
 }
 
 async function writeDataset(path, listings) {
@@ -64,16 +79,19 @@ async function main() {
   if (all.length === 0) {
     console.log('::warning::DDF fetch returned 0 active listings — wrote empty datasets.');
     await writeEmpty();
+    await reportCount(0);
     process.exit(0);
   }
 
   await writeDataset(OUT_ALL, all);
   await writeDataset(OUT_DERRICK, derrick);
+  await reportCount(all.length);
   console.log(`Wrote ${all.length} active listings (${derrick.length} Derrick) to ${OUT_DIR}/`);
 }
 
 main().catch(async (err) => {
   console.log(`::warning::DDF fetch failed: ${err && err.message ? err.message : err}`);
+  await reportCount(0);
   try {
     await writeEmpty();
   } catch (writeErr) {

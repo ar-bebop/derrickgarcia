@@ -30,6 +30,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      listings_count: ${{ steps.fetch.outputs.count }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -41,6 +43,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Fetch listings
+        id: fetch
         run: pnpm fetch:listings:ci
         env:
           CREA_DDF_CLIENT_ID: ${{ secrets.CREA_DDF_CLIENT_ID }}
@@ -61,3 +64,18 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # The fetch step NEVER fails the build (an outage must not take the whole site down),
+  # so an empty feed used to deploy silently behind a green check — that is how the
+  # 2026-07-24 CREA breaking change went unnoticed for eight weeks. This job runs AFTER
+  # the deploy and fails the run when 0 listings shipped, so the scheduled-workflow
+  # failure notification actually reaches the repo owner.
+  alert-on-empty-listings:
+    needs: [build, deploy]
+    if: needs.build.outputs.listings_count == '0'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Empty listings feed
+        run: |
+          echo "::error::DDF fetch produced 0 listings — the site deployed with an EMPTY listings feed. Check the 'Fetch listings' step log in the build job for the ::warning:: detail (credentials, or another CREA API contract change)."
+          exit 1
