@@ -1,0 +1,49 @@
+# Dependabot VERSION updates.
+#
+# Security updates (advisory-driven) already ran without this file — that is what opened the
+# npm PRs. What was missing is version updates, and the `github-actions` ecosystem got NOTHING
+# at all: that is why checkout/setup-node/upload-pages-artifact/deploy-pages/action-setup each
+# drifted 1-3 majors until the Node 20 runtime deprecation surfaced it in a build log
+# (2026-09-20), and why astro sat on 4.x until it was three majors and 18 advisories behind.
+#
+# Noise budget: monthly, grouped. Routine churn arrives as one PR per ecosystem; MAJOR npm
+# bumps deliberately stay ungrouped so a jump like astro 7 -> 8 shows up as its own reviewable
+# PR instead of hiding inside a batch.
+version: 2
+updates:
+  # Workflow actions. Grouped including majors: a runtime deprecation (Node 20 -> 24 -> ...)
+  # invalidates several actions at once, and one PR is the right shape for that — exactly how
+  # the 2026-09-20 bump was actually done.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+
+  # npm. Minor/patch batched into one PR; majors come individually.
+  # NOTE the toolchain constraints a major PR must be checked against (see CLAUDE.md):
+  #   - astro majors can require source changes (Content Layer in 5, `astro/zod` in 6,
+  #     compressHTML default in 7) — `pnpm check` and rendered output, not just a green build
+  #   - vitest majors are coupled to astro's vite: vitest 4 needs vite >= 6
+  #   - sharp has no patch headroom above its advisory floor
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps(dev)"

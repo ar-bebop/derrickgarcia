@@ -139,8 +139,10 @@ agent links, and GBP `sameAs` now render.
   between install and build. Action majors were last bumped 2026-09-17 (checkout@v7, setup-node@v7,
   pnpm/action-setup@v6, upload-pages-artifact@v5, deploy-pages@v5) to clear the Node 20 runtime
   deprecation; `pnpm/action-setup` takes its version from package.json `packageManager`, not a
-  `with: version:` input. There is no `.github/dependabot.yml`, so the **github-actions ecosystem
-  gets no update PRs** — that is why five actions drifted 1-3 majors. Worth adding.
+  `with: version:` input. `.github/dependabot.yml` now enables **version** updates for both
+  `github-actions` and `npm` (monthly, grouped) — without it only advisory-driven security
+  updates ran, which is why five actions drifted 1-3 majors unnoticed. npm MAJORS stay ungrouped
+  on purpose so an astro 7 -> 8 arrives as its own reviewable PR.
 - **`@astrojs/sitemap` is on `^3.7.4`** — the old `3.2.1` pin is gone (it existed only because
   3.7.x needs Astro 5's `routes:resolved` hook, and this repo was on Astro 4). Note the package
   declares NO astro peerDependency at any version, so nothing in the package manager guards this
