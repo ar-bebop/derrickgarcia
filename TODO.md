@@ -154,3 +154,29 @@ agent links, and GBP `sameAs` now render.
   Astro 7 declares `sharp ^0.35.4` itself, so the temporary pnpm override used during the
   2026-09-17 uplift is gone; it only has to come back if a future floor exceeds astro's declaration.
 - `pnpm check` (`astro check`) was added for the type-check; not in the original plan.
+
+## 5. Dated cleanup — delete the Ubuntu 26 canary (do this after 2026-11-19)
+
+`.github/workflows/ubuntu-26-canary.yml` is **temporary scaffolding with an expiry date**, added
+2026-09-20. It exists only because `ubuntu-latest` migrates from Ubuntu 24.04 to Ubuntu 26.04 in a
+gradual rollout starting **2026-10-19** and completing **2026-11-19**
+([actions/runner-images#14748](https://github.com/actions/runner-images/issues/14748)), and every
+job in `deploy.yml` runs on `ubuntu-latest`.
+
+- **What it does:** builds the site nightly on the explicit `ubuntu-26.04` label — install +
+  `pnpm build` only, no secrets, no deploy — so a break on the new image surfaces as its own red
+  run *weeks before* it can hit a production deploy. It is a separate workflow precisely so it can
+  never gate `deploy` or join the `pages` concurrency group.
+- **Why it is not a pin:** `runs-on: ubuntu-24.04` would also work, but Dependabot's
+  `github-actions` ecosystem only bumps `uses:` action versions — it does **not** touch `runs-on:`
+  labels. A pin would therefore be exactly the invisible, nothing-surfaces-it drift that §4
+  documents as the root cause of the 1–3 major action lag. The canary drifts nowhere and expires.
+- **The cleanup (after the migration completes, i.e. after 2026-11-19):**
+  1. Confirm a recent nightly `Deploy to GitHub Pages` run is green *and* shipped a non-zero
+     listings count (the `alert-on-empty-listings` job is the guard, but read the count anyway —
+     see the CREA note in CLAUDE.md).
+  2. `git rm .github/workflows/ubuntu-26-canary.yml`
+  3. Delete this §5.
+- **Self-enforcing:** the canary's last step fails on purpose from **2026-12-01**, printing a
+  `::error::` that says to delete it. If this section is ever forgotten, the scheduled-failure
+  email is the backstop — the reminder is in CI, not only in this file.

@@ -1,0 +1,100 @@
+# TEMPORARY — Ubuntu 26 readiness canary. DELETE THIS FILE once the migration completes.
+#
+# Why this exists
+# ---------------
+# `ubuntu-latest` moves from Ubuntu 24.04 to Ubuntu 26.04 in a gradual rollout that STARTS
+# 2026-10-19 and is expected to finish 2026-11-19 (actions/runner-images#14748; GitHub
+# changelog "Ubuntu 26 generally available and latest migration", 2026-09-17). Every job in
+# deploy.yml runs on `ubuntu-latest`, so the production deploy will move on its own, part-way
+# through that window, on a date nobody here picks.
+#
+# The assessed risk is LOW, and the assessment is specific rather than hopeful:
+#   - Node is pinned by actions/setup-node (`node-version: 22`), and 22.23.2 sits in the tool
+#     cache of BOTH images, so the resolved Node is byte-identical either side of the move.
+#   - pnpm comes from package.json `packageManager`, not from the image.
+#   - `sharp` does NOT link the runner's system libraries: it installs a prebuilt binary that
+#     bundles its own libvips (@img/sharp-linux-x64 + @img/sharp-libvips-linux-x64, libvips
+#     8.18.6). Its only platform floor is glibc >= 2.28 — Ubuntu 24.04 ships 2.39 and 26.04
+#     ships 2.43, both comfortably above it, and glibc is backward compatible.
+#   - Nothing this build uses appears in the 24.04 -> 26.04 removals (Miniconda, Julia, Swift,
+#     Lerna, Mercurial, MediaInfo, Newman, Parcel, Pulumi).
+#
+# But all of that is ANALYSIS, not evidence — and this repo has already paid once for trusting
+# a green check instead of an observation (the 2026-07-24 DDF incident: 57 green nightly
+# deploys shipping an empty site). This job buys the evidence for free: it is the only thing in
+# the repo that actually executes on `ubuntu-26.04`, roughly 30 nights of signal before the
+# rollout begins. The repo is public, so the Actions minutes cost $0.
+#
+# Why it is NOT a job inside deploy.yml
+# -------------------------------------
+# A separate workflow physically cannot gate `deploy`, cannot join deploy.yml's
+# `concurrency: group: pages` (where `cancel-in-progress: true` would make a canary job an
+# active hazard), and needs none of Pages' `pages: write` / `id-token: write` permissions.
+# It also leaves deploy.yml's build -> deploy -> alert-on-empty-listings wiring untouched, and
+# removing it later is `git rm` of one file rather than surgery on the deploy path.
+#
+# Why it runs WITHOUT the CREA secrets
+# ------------------------------------
+# So it never adds a second nightly hit on the DDF API. The `prebuild` hook
+# (scripts/ensure-listings.mjs) stubs empty datasets, so the build still runs. This costs NO
+# sharp coverage: MLS photos are hotlinked from ddfcdn.realtor.ca under the DDF licence and
+# never pass through sharp, so the ~22 local image transforms exercised here are exactly the
+# ones the production build performs. It does mean the canary builds ~33 pages instead of ~806
+# — it is testing the runner image, not the listings pipeline (deploy.yml already alerts on that).
+#
+# If this job goes red
+# --------------------
+# Investigate BEFORE 2026-10-19. The documented stopgap (runner-images#14748) is to pin
+# `runs-on: ubuntu-24.04` in deploy.yml, which opts out of the rollout and buys time.
+name: Ubuntu 26 canary (temporary)
+on:
+  schedule:
+    - cron: '40 7 * * *' # ~02:40 ET — 30 min BEFORE the nightly deploy, so the canary result is already visible when deploy.yml runs
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: # only re-run on a push that could actually change the answer
+      - '.github/workflows/ubuntu-26-canary.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+permissions:
+  contents: read # least privilege — this workflow never deploys, so no `pages:` / `id-token:`
+concurrency:
+  group: ubuntu-26-canary # its OWN group; must never contend with deploy.yml's `pages` group
+  cancel-in-progress: true
+jobs:
+  build-on-ubuntu-26:
+    # The explicit label. GA since 2026-09-17 and listed (no preview badge) in the
+    # actions/runner-images README's Available Images table.
+    runs-on: ubuntu-26.04
+    steps:
+      # Mirror deploy.yml's toolchain exactly, minus the DDF fetch and the artifact upload.
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6 # version comes from package.json "packageManager"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Report image and native toolchain
+        # Makes a red run readable. If sharp is what broke, this prints the reason (missing
+        # prebuilt binary / glibc floor) before `pnpm build` fails with a longer stack.
+        run: |
+          echo "runner image: ${ImageOS:-unknown} / ${ImageVersion:-unknown}"
+          . /etc/os-release && echo "os: $PRETTY_NAME"
+          echo "glibc: $(ldd --version | head -1)"
+          echo "node: $(node -v) | pnpm: $(pnpm -v)"
+          node -e "const s=require('sharp'); console.log('sharp', s.versions.sharp, '| bundled libvips', s.versions.vips);"
+      - run: pnpm build
+      - name: Expiry check
+        if: always() # report even when the build above failed
+        # The forcing function. Without it this file quietly becomes permanent furniture, which
+        # is the same silent-drift failure the repo just spent a cleanup on. Once the migration
+        # window has closed the canary has served its purpose and starts failing ON PURPOSE, so
+        # the scheduled-failure email tells the owner to delete it.
+        run: |
+          if [ "$(date -u +%Y%m%d)" -ge 20261201 ]; then
+            echo "::error::Ubuntu 26 canary has EXPIRED. The ubuntu-latest -> Ubuntu 26 migration was due to complete 2026-11-19, so deploy.yml's ubuntu-latest is now Ubuntu 26 and this canary is redundant. Delete .github/workflows/ubuntu-26-canary.yml and drop the TODO.md entry."
+            exit 1
+          fi
+          echo "Canary active; expires 2026-12-01 (migration window closes 2026-11-19)."

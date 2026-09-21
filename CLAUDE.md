@@ -122,6 +122,14 @@ per task, recommended) or **superpowers:executing-plans** (inline with checkpoin
   above). Any 400 on the Property query yields **zero** listings, not a partial result. So: filter
   server-side only on fields probed live, prefer in-memory filtering for anything optional, and never
   trust a green CI run as evidence listings shipped — check the listings count.
+- **CI has TWO workflows; only one deploys.** `deploy.yml` is the production path (build → deploy →
+  `alert-on-empty-listings`, all on `ubuntu-latest`). `ubuntu-26-canary.yml` is **temporary** — it
+  builds on the explicit `ubuntu-26.04` label with no secrets and never deploys, because
+  `ubuntu-latest` becomes Ubuntu 26.04 in a rollout running 2026-10-19 → 2026-11-19
+  (actions/runner-images#14748). It is deliberately a separate file so it cannot gate `deploy` or
+  join the `pages` concurrency group. **Delete it after the migration** — it self-expires (fails on
+  purpose) from 2026-12-01; see `TODO.md` §5. Note sharp needs no system libvips (it bundles its
+  own, glibc floor 2.28), which is why the exposure was low enough to observe rather than pin.
 - **Assets:** only the 3 headshots + Real Broker logos are real/reusable. The old site's hero/banner images
   are generic **stock** — do not reuse. MLS listing photos are licensed — do not host/copy; under the DDF
   license we **display** them by hotlinking the **unmodified, watermarked** `ddfcdn.realtor.ca` URLs
