@@ -59,9 +59,13 @@ compliance furniture). Spec:
 
 **Toolchain note:** this environment has **pnpm, not npm** (`pnpm install|build|test|check`).
 Stack as of 2026-09-17: **Astro 7.3.2**, vitest 4.1.11, sharp 0.35.4, @astrojs/sitemap 3.7.4,
-@astrojs/check 0.9.10, TypeScript 5.9.3, Node 22 (`.nvmrc` + CI). `astro.config.mjs` sets
-**`compressHTML: true`** — Astro 7's `'jsx'` default strips whitespace between inline elements and
-this site's CSS relies on that spacing (see the config comment before changing it). Content
+@astrojs/check 0.9.10, TypeScript 5.9.3, Node 22 (`.nvmrc` + CI). `astro.config.mjs` runs Astro 7's
+**default `compressHTML: 'jsx'`** — the earlier `compressHTML: true` pin is GONE. That pin existed
+because inline spacing was carried by HTML source whitespace; spacing is now explicit (`.btn-row`
+in `src/styles/global.css`, plus `{' '}` where prose meets a link). **Never rely on source
+whitespace for layout or for a word space** — `'jsx'` strips whitespace-only text nodes between
+inline elements, and neither `pnpm build` nor `test` nor `check` can see the damage: it shows up
+only as moved boxes or joined words in rendered HTML. Content
 collections use the **Content Layer API** (`src/content.config.ts`, `loader: glob()`), and `z` is
 imported from `astro/zod`, not `astro:content` (deprecated since Astro 6).
 `@astrojs/sitemap` tracks `^3.7.4` (the old `3.2.1` pin is gone); `sharp` is an explicit dep (pnpm
