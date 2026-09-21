@@ -31,6 +31,13 @@ a:hover { color: #c8a76e; }
 .btn:hover { background: #c8a76e; color: var(--color-accent-ink); }
 .btn--ghost { background: transparent; border: 1px solid rgba(243, 239, 231, .45); color: var(--color-ink); }
 .btn--ghost:hover { background: transparent; border-color: var(--color-accent); color: var(--color-accent); }
+/* A row of side-by-side .btn elements. The gap is declared here on purpose: these rows
+   used to get it from the collapsed whitespace between the inline-block buttons in the
+   HTML source, which the build is free to strip. .2em is that former text space — the
+   space glyph of the row's own font, so it tracks the container's font-size the way the
+   real space did — and align-items: baseline / row-gap: 0 keep the inline-block
+   line-box behaviour when the buttons differ in height or wrap onto separate lines. */
+.btn-row { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: .2em; row-gap: 0; }
 
 .card { border: 1px solid var(--color-line); border-radius: var(--radius);
   padding: 1.5rem; background: transparent; transition: border-color .2s ease; }

@@ -26,7 +26,7 @@ const gbp = SITE.social.googleBusiness;
         ? 'Our reviews live on Google — read what past clients say, straight from the source.'
         : 'Client reviews are coming soon — reach out and we’ll gladly provide references.'}</p>
     )}
-    <p class="ctas">
+    <p class="ctas btn-row">
       {gbp && <a class="btn" href={gbp} target="_blank" rel="noopener noreferrer">Read our Google reviews ↗</a>}
       {gbp && <a class="btn btn--ghost" href={gbp} target="_blank" rel="noopener noreferrer">Leave a review ↗</a>}
       {!gbp && <a class="btn" href={SITE.phoneHref}>Call {SITE.phoneDisplay}</a>}
